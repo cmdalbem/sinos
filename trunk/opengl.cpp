@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "glm.h"
+#include "lib/glm.h"
 
 #include <time.h>
 
@@ -43,7 +43,7 @@ void drawTable(void)
     {
 
         // this is the call that actualy reads the OBJ and creates the model object
-        tableModel = glmReadOBJ("pooltable.obj");
+        tableModel = glmReadOBJ("obj/pooltable.obj");
         if (!tableModel) exit(0);
         // This will rescale the object to fit into the unity matrix
         // Depending on your project you might want to keep the original size and positions you had in 3DS Max or GMAX so you may have to comment this.
