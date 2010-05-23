@@ -1,0 +1,22 @@
+===GLMs===
+GLM enhanced (link do Márcio)
+     - http://www.3dcodingtutorial.com/Working-with-3D-models/Details-about-GLM.html
+
+Improved GLM (do Eden, que a gente vai usar)
+     - http://www.eden.net.nz/7/20031008glm.html
+
+===Tutorials===
+Nehe OpenGL tutorial:
+     - http://nehe.gamedev.net/
+
+VideoTutorialsRock:
+     - http://www.videotutorialsrock.com/opengl_tutorial/basics/home.php
+
+OpenGL Shading Language tutorial (Clockworkcoders)
+     - http://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/index.php
+
+OpenGL Tutorial (falloutsoftware):
+     - http://www.falloutsoftware.com/3D-OpenGL-Tutorials.htm
+
+Lighthouse3D:
+     - http://www.lighthouse3d.com/opengl/tutorials.shtml
