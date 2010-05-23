@@ -2,18 +2,18 @@
 #include <GL/glut.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 #include "lib/glm.h"
 
-#include <time.h>
 
-#define NCUBES 1000
+
+#define NSTARS 1000
 #define VFACTOR 150
 #define DFACTOR 10
 
 
 
-//angle of rotation
 float 	xpos = 0, 
 		ypos = 0,
 		zpos = 0, 
@@ -21,22 +21,21 @@ float 	xpos = 0,
 		yrot = 0, 
 		angle= 0.0;
 		
-GLfloat posit=0;
+GLfloat posit=0; //iterational position for the SUN
 
-//positions of the cubes
-float positionz[NCUBES];
-float positionx[NCUBES];
-float positiony[NCUBES];
+struct point
+{
+	float x,y,z;
+};
 
-
-
+// Objects
+point star[NSTARS];
 GLMmodel* tableModel = NULL;
 
 
 
 void drawTable(void)
 {
-
     // Load the model only if it hasn't been loaded before
     // If it's been loaded then pmodel1 should be a pointer to the model geometry data...otherwise it's null
     if (!tableModel)
@@ -63,56 +62,61 @@ void drawTable(void)
 } 
 
 
-void starspositions (void) { //set the positions of the cubes
+void initStars (void) { //set the positions of the cubes
 
-    for (int i=0;i<NCUBES;i++)
+    for (int i=0;i<NSTARS;i++)
     {
-    	positionz[i] = rand()%100 - 50;
-    	positionx[i] = rand()%100 - 50;
-    	positiony[i] = rand()%100 - 50;
+    	star[i].x = rand()%100 - 50;
+    	star[i].y = rand()%100 - 50;
+    	star[i].z = rand()%100 - 50;
     }
 }
 
-//draw the cube
-void cube (void) {
-    for (int i=0;i<NCUBES;i++)
+void drawObjects (void) {
+    // stars
+    for (int i=0;i<NSTARS;i++)
     {
     	glPushMatrix();
-    	glTranslated(positionx[i]*20, positiony[i]*20 , positionz[i]*20);
+    	glTranslated(star[i].x *20, star[i].y *20 , star[i].z *20);
 	    glutSolidSphere(0.5,10,10);
     	glPopMatrix();
     }
     
+    // table
 	glPushMatrix();
 	glTranslated(0,0,0);
 	glScaled(5,5,5);
     drawTable();
 	glPopMatrix();
 	
+	// ball
 	glPushMatrix();
 	glTranslated(0,0.46,0);
 	//glutSolidTeapot(0.5);
 	glutSolidSphere(0.07,100,100);
 	glPopMatrix();
+	
+	// sun
+	//glPushMatrix();
+    //glTranslated(cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2);
+	//glutSolidSphere(2,10,10);
+    //glPopMatrix();  
 }
 
 void init (void) {
-	starspositions();
+	initStars();
 	
     // Especifica que a cor de fundo da janela sera branca
 	glClearColor(0, 0, 0, 1.0f);
     // Limpa a janela e habilita o teste para eliminar faces ocultas por outras
 	glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT);
 	
-	
 	GLfloat ambientLight[] = { 0, 0, 0, 1.0f };
 	GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-
 
 	glEnable (GL_DEPTH_TEST);
     glEnable (GL_LIGHTING);
@@ -125,8 +129,8 @@ void camera (void) {
 	
 	gluLookAt(cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, 0, 0, 0, 0, 1, 0);
     
-//    glRotatef(xrot,1.0,0.0,0.0);  //rotate our camera on the x-axis (left and right)
-  //  glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
+	//glRotatef(xrot,1.0,0.0,0.0);  //rotate our camera on the x-axis (left and right)
+	//glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
     //glTranslated(-xpos,-ypos,-zpos); //translate the screen to the position of our camera
 }
 
@@ -134,20 +138,15 @@ void display (void) {
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear the color buffer and the depth buffer
     
     
-    //SUN
+    // SUN
 	posit++;
-	
-    //glPushMatrix();
-    //glTranslated(cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2);
-	//glutSolidSphere(2,10,10);
-    //glPopMatrix();  
-    
-    GLfloat position[] = { cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, 1.0f };
+	GLfloat position[] = { cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, position);
     
     
+    // AXIS
     glBegin(GL_LINES);
-       // eixos coordanados x = vermelho, y = verde  z = azul
+       // x = read, y = green, z = blue
        glColor3f(1.0f, 0.0f, 0.0f);
        glVertex3i(-100,0,0);
        glVertex3i(100,0,0);
@@ -162,18 +161,17 @@ void display (void) {
     glEnd();
     
 
-    glColor3f(1.0f, 1.0f, 1.0f);
+    glColor3f(1.0f, 1.0f, 1.0f); //white
     
 	glLoadIdentity();  
     
     camera();
    
-    cube(); //call the cube drawing function
+    drawObjects();
+    
     
     
     glutSwapBuffers(); //swap the buffers
-    
-    
     angle++; //increase the angle
 }
 
@@ -264,7 +262,7 @@ int main (int argc, char **argv) {
     glutInitDisplayMode (GLUT_DOUBLE | GLUT_DEPTH); //set the display to Double buffer, with depth
     glutInitWindowSize (1000, 1000);                  //set the window size
     glutInitWindowPosition (400, 0);              //set the position of the window
-    glutCreateWindow ("A basic OpenGL Window");     //the caption of the window
+    glutCreateWindow ("SiNoS");     //the caption of the window
     init();
     glutDisplayFunc (display); 						//use the display function to draw everything
     
