@@ -10,11 +10,12 @@
 #include <iostream>
 #include <string>
 #include "lib/glm.h"
+#include "Object.h"
 
-class ObjectModel: public Object
+class ObjectModel: public object
 {
 private:
-	GLMmodel* modelPointer = NULL;
+	GLMmodel* modelPointer;
 public:
 	//---------------------------- CONSTRUCTORS
 	ObjectModel();

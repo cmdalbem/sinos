@@ -6,18 +6,18 @@
 #pragma once
 
 #include <iostream>
-#include "lib/glm.h"
+#include "ObjectModel.h"
 
 //------------------------------------------------------------ CONSTRUCTORS
 
 ObjectModel::ObjectModel()
-:	Object();
+:	object()
 {
 	modelPointer = NULL;	// keeping the consistency
 }
 
 ObjectModel::ObjectModel(GLMmodel* model)
-:	Object();
+:	object()
 {
 	modelPointer = model;
 }
@@ -26,7 +26,7 @@ ObjectModel::ObjectModel(GLMmodel* model)
 
 //------------------------------------------------------------ DESTRUCTORS
 
-ObjectModel::~ObjectModel();
+ObjectModel::~ObjectModel()
 {
 	if(modelPointer != NULL)	// free the memory from the pointer before
 		glmDelete(modelPointer);// destroy the object
@@ -49,4 +49,6 @@ void ObjectModel::loadFromFile(string file)
 	setModelPointer(glmReadOBJ(file));
 }
 
-void ObjectModel::Draw();
+void ObjectModel::Draw()
+{
+}

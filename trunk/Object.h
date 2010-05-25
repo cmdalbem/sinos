@@ -1,15 +1,16 @@
-// Object.h
+// object.h
 //
-// Object is everything that is drawn on the scene, since spheres until
+// object is everything that is drawn on the scene, since spheres until
 // entire images loaded from .obj files, like a pooltable.
 //
 
 #pragma once
 
 #include <iostream>
+#include "lib/glm.h"
 #include <GL/glut.h>
 
-class Object
+class object
 {
 private:
 	GLfloat pos[3],		// position x, y and z of the object
@@ -18,14 +19,14 @@ private:
 public:
 
 	//---------------------------- CONSTRUCTORS
-	Object();
-	Object(GLfloat pos[], GLfloat rot[], GLfloat size[]);
-	Object( GLfloat xpos,  GLfloat ypos,  GLfloat zpos,
+	object();
+	object(GLfloat pos[], GLfloat rot[], GLfloat size[]);
+	object( GLfloat xpos,  GLfloat ypos,  GLfloat zpos,
 			GLfloat xrot,  GLfloat yrot,  GLfloat zrot,
 			GLfloat xsize, GLfloat ysize, GLfloat zsize);
 	
 	//---------------------------- DESTRUCTORS
-	~Object();
+	~object();
 	
 	//---------------------------- GETTERS & SETTERS
 	GLfloat getPos (int coord);
