@@ -159,7 +159,7 @@ duplicate:
 
 /* glmFindGroup: Find a group in the model */
 GLMgroup*
-glmFindGroup(GLMmodel* model, char* name)
+glmFindGroup(GLMmodel* model, string name)
 {
     GLMgroup* group;
     
@@ -167,7 +167,7 @@ glmFindGroup(GLMmodel* model, char* name)
     
     group = model->groups;
     while(group) {
-        if (!strcmp(name, group->name))
+        if (!strcmp(name.c_str(), group->name))
             break;
         group = group->next;
     }
@@ -177,14 +177,14 @@ glmFindGroup(GLMmodel* model, char* name)
 
 /* glmAddGroup: Add a group to the model */
 GLMgroup*
-glmAddGroup(GLMmodel* model, char* name)
+glmAddGroup(GLMmodel* model, string name)
 {
     GLMgroup* group;
     
-    group = glmFindGroup(model, name);
+    group = glmFindGroup(model, name.c_str());
     if (!group) {
         group = (GLMgroup*)malloc(sizeof(GLMgroup));
-        group->name = strdup(name);
+        group->name = strdup(name.c_str());
         group->material = 0;
         group->numtriangles = 0;
         group->triangles = NULL;
@@ -226,12 +226,12 @@ found:
  * NOTE: the return value should be free'd.
  */
 static char*
-glmDirName(char* path)
+glmDirName(string path)
 {
     char* dir;
     char* s;
     
-    dir = strdup(path);
+    dir = strdup(path.c_str());
     
     s = strrchr(dir, '/');
     if (s)
@@ -376,7 +376,7 @@ glmReadMTL(GLMmodel* model, char* name)
  * mtllibname - name of the material library to be written
  */
 static GLvoid
-glmWriteMTL(GLMmodel* model, char* modelpath, char* mtllibname)
+glmWriteMTL(GLMmodel* model, string modelpath, char* mtllibname)
 {
     FILE* file;
     char* dir;
@@ -1299,22 +1299,22 @@ glmDelete(GLMmodel* model)
  * filename - name of the file containing the Wavefront .OBJ format data.  
  */
 GLMmodel* 
-glmReadOBJ(char* filename)
+glmReadOBJ(string filename)
 {
     GLMmodel* model;
     FILE*   file;
     
     /* open the file */
-    file = fopen(filename, "r");
+    file = fopen(filename.c_str(), "r");
     if (!file) {
         fprintf(stderr, "glmReadOBJ() failed: can't open data file \"%s\".\n",
-            filename);
+            filename.c_str());
         exit(1);
     }
     
     /* allocate a new model */
     model = (GLMmodel*)malloc(sizeof(GLMmodel));
-    model->pathname    = strdup(filename);
+    model->pathname    = strdup(filename.c_str());
     model->mtllibname    = NULL;
     model->numvertices   = 0;
     model->vertices    = NULL;
@@ -1379,7 +1379,7 @@ glmReadOBJ(char* filename)
  *             GLM_FLAT and GLM_SMOOTH should not both be specified.  
  */
 GLvoid
-glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
+glmWriteOBJ(GLMmodel* model, string filename, GLuint mode)
 {
     GLuint  i;
     FILE*   file;
@@ -1426,10 +1426,10 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
     
     
     /* open the file */
-    file = fopen(filename, "w");
+    file = fopen(filename.c_str(), "w");
     if (!file) {
         fprintf(stderr, "glmWriteOBJ() failed: can't open file \"%s\" to write.\n",
-            filename);
+            filename.c_str());
         exit(1);
     }
     
@@ -1482,7 +1482,7 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
     /* spit out the texture coordinates */
     if (mode & GLM_TEXTURE) {
         fprintf(file, "\n");
-        fprintf(file, "# %d texcoords\n", model->texcoords);
+        fprintf(file, "# %d texcoords\n", model->numtexcoords);
         for (i = 1; i <= model->numtexcoords; i++) {
             fprintf(file, "vt %f %f\n", 
                 model->texcoords[2 * i + 0],
@@ -1781,16 +1781,16 @@ glmWeld(GLMmodel* model, GLfloat epsilon)
  *
  */
 GLubyte* 
-glmReadPPM(char* filename, int* width, int* height)
+glmReadPPM(string filename, int* width, int* height)
 {
     FILE* fp;
     int i, w, h, d;
     unsigned char* image;
     char head[70];          /* max line <= 70 in PPM (per spec). */
     
-    fp = fopen(filename, "rb");
+    fp = fopen(filename.c_str(), "rb");
     if (!fp) {
-        perror(filename);
+        perror(filename.c_str());
         return NULL;
     }
     
@@ -1798,7 +1798,7 @@ glmReadPPM(char* filename, int* width, int* height)
        correct magic cookie for a raw PPM file. */
     fgets(head, 70, fp);
     if (strncmp(head, "P6", 2)) {
-        fprintf(stderr, "%s: Not a raw PPM file\n", filename);
+        fprintf(stderr, "%s: Not a raw PPM file\n", filename.c_str());
         return NULL;
     }
     

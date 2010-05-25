@@ -13,6 +13,9 @@
 
 
 #include <GL/glut.h>
+#include <string>
+
+using namespace std;
 
 
 #ifndef M_PI
@@ -190,7 +193,7 @@ glmDelete(GLMmodel* model);
  * filename - name of the file containing the Wavefront .OBJ format data.  
  */
 GLMmodel* 
-glmReadOBJ(char* filename);
+glmReadOBJ(string filename);
 
 /* glmWriteOBJ: Writes a model description in Wavefront .OBJ format to
  * a file.
@@ -205,7 +208,7 @@ glmReadOBJ(char* filename);
  *            GLM_FLAT and GLM_SMOOTH should not both be specified.
  */
 GLvoid
-glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode);
+glmWriteOBJ(GLMmodel* model, string filename, GLuint mode);
 
 /* glmDraw: Renders the model to the current OpenGL context using the
  * mode specified.
