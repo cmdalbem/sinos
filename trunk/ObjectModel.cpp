@@ -11,14 +11,18 @@
 //------------------------------------------------------------ CONSTRUCTORS
 
 ObjectModel::ObjectModel()
+:	Object();
 {
 	modelPointer = NULL;	// keeping the consistency
 }
 
 ObjectModel::ObjectModel(GLMmodel* model)
+:	Object();
 {
 	modelPointer = model;
 }
+
+// TODO: create the others constructors, based on the mother class
 
 //------------------------------------------------------------ DESTRUCTORS
 
@@ -35,12 +39,14 @@ GLMmodel* ObjectModel::getModelPointer()
 	return this->modelPointer;
 }
 
-ObjectModel::setModelPointer(GLMmodel* model)
+void ObjectModel::setModelPointer(GLMmodel* model)
 {
 	this->modelPointer = model;
 }
 
-ObjectModel::loadFromFile(string file)
+void ObjectModel::loadFromFile(string file)
 {
 	setModelPointer(glmReadOBJ(file));
 }
+
+void ObjectModel::Draw();

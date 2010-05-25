@@ -16,13 +16,18 @@ class ObjectModel: public Object
 private:
 	GLMmodel* modelPointer = NULL;
 public:
+	//---------------------------- CONSTRUCTORS
 	ObjectModel();
 	ObjectModel(GLMmodel* model);
 
+	//---------------------------- DESTRUCTORS
 	~ObjectModel();
 	
+	//---------------------------- GETTERS & SETTERS
 	GLMmodel* 	getModelPointer();
 	void		setModelPointer(GLMmodel* model);
 	
+	//---------------------------- OTHER METHODS
 	void		loadFromFile(string file);
+	void		Draw();
 };
