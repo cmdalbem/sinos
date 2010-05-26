@@ -1,6 +1,6 @@
-// object.h
+// Object.h
 //
-// object is everything that is drawn on the scene, since spheres until
+// Object is everything that is drawn on the scene, since spheres until
 // entire images loaded from .obj files, like a pooltable.
 //
 
@@ -10,23 +10,23 @@
 #include "lib/glm.h"
 #include <GL/glut.h>
 
-class object
+class Object
 {
 private:
-	GLfloat pos[3],		// position x, y and z of the object
+	GLfloat pos[3],		// position x, y and z of the Object
 			rot[3],		// rotation arguments on Rotatefs functions called on Draw
 			size[3];	// scale arguments on Scalefs functions called on Draw
 public:
 
 	//---------------------------- CONSTRUCTORS
-	object();
-	object(GLfloat pos[], GLfloat rot[], GLfloat size[]);
-	object( GLfloat xpos,  GLfloat ypos,  GLfloat zpos,
+	Object();
+	Object(GLfloat pos[], GLfloat rot[], GLfloat size[]);
+	Object( GLfloat xpos,  GLfloat ypos,  GLfloat zpos,
 			GLfloat xrot,  GLfloat yrot,  GLfloat zrot,
 			GLfloat xsize, GLfloat ysize, GLfloat zsize);
 	
 	//---------------------------- DESTRUCTORS
-	~object();
+	~Object();
 	
 	//---------------------------- GETTERS & SETTERS
 	GLfloat getPos (int coord);
@@ -60,5 +60,15 @@ public:
 	void setSizeZ(GLfloat sizez);
 	
 	//---------------------------- OTHER METHODS
+	
+	/*  Draw()
+	*  The unique informations that all objects do have are their position,
+	*  rotational argument and scaling argument. So, this generic function
+	*  just move the object to the place where it has to be drawn.
+	*
+	*  If you want to presenve the matrix, push it before calling this fun-
+	*  tion: the function doesn't do that because it's supposed to be call-
+	*  ed inner other child's Draw function.
+	*/
 	void Draw();		// TODO: function return 1 if succesfully drawn the object
 };

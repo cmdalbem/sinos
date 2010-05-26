@@ -46,7 +46,7 @@ void drawTable(void)
         if (!tableModel) exit(0);
         // This will rescale the object to fit into the unity matrix
         // Depending on your project you might want to keep the original size and positions you had in 3DS Max or GMAX so you may have to comment this.
-        glmUnitize(tableModel);
+        //glmUnitize(tableModel);
         // These 2 functions calculate triangle and vertex normals from the geometry data.
         // To be honest I had some problem with very complex models that didn't look to good because of how vertex normals were calculated
         // So if you can export these directly from you modeling tool do it and comment these line
@@ -127,8 +127,8 @@ void init (void) {
 
 void camera (void) {
 	
-	//gluLookAt(cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, 0, 0, 0, 0, 1, 0);
-    gluLookAt(0, 8, -8, 0, 0, 0, 0, 1, 0);
+	gluLookAt(cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, 0, 0, 0, 0, 1, 0);
+    //gluLookAt(0, 0, -1, 0, 0, 0, 0, 1, 0);
 	//glRotatef(xrot,1.0,0.0,0.0);  //rotate our camera on the x-axis (left and right)
 	//glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
     //glTranslated(-xpos,-ypos,-zpos); //translate the screen to the position of our camera

@@ -1,16 +1,16 @@
-// object.cpp
+// Object.cpp
 //      
-// Functions that implements declarations in object.h.
+// Functions that implements declarations in Object.h.
 //
 
 #pragma once
 
 #include <iostream>
-#include "object.h"
+#include "Object.h"
 
 //------------------------------------------------------------ CONSTRUCTORS
 
-object::object()// keeping the consistency
+Object::Object()// keeping the consistency
 {
 	pos[0] = 0;		// inicialize every variable with 0
 	pos[1] = 0;
@@ -25,7 +25,7 @@ object::object()// keeping the consistency
 	size[2] = 0;
 }
 
-object::object(GLfloat position[], GLfloat rotation[], GLfloat scale[])
+Object::Object(GLfloat position[], GLfloat rotation[], GLfloat scale[])
 {
 	pos[0] = position[0];
 	pos[1] = position[1];
@@ -40,7 +40,7 @@ object::object(GLfloat position[], GLfloat rotation[], GLfloat scale[])
 	size[2] = scale[2];
 }
 
-object::object( GLfloat posx,  GLfloat posy,  GLfloat posz,
+Object::Object( GLfloat posx,  GLfloat posy,  GLfloat posz,
 				GLfloat rotx,  GLfloat roty,  GLfloat rotz,
 				GLfloat sizex, GLfloat sizey, GLfloat sizez)
 {
@@ -59,14 +59,14 @@ object::object( GLfloat posx,  GLfloat posy,  GLfloat posz,
 
 //------------------------------------------------------------ DESTRUCTORS
 
-object::~object()
+Object::~Object()
 {
 	// This method is purposely blank
 }
 
 //------------------------------------------------------------ GETTERS & SETTERS
 
-GLfloat	object::getPos (int coord)
+GLfloat	Object::getPos (int coord)
 {
 	if(coord == 0)
 		return pos[0];
@@ -77,14 +77,14 @@ GLfloat	object::getPos (int coord)
 	else
 		return 0;
 }
-GLfloat object::getPosX()
+GLfloat Object::getPosX()
 {	return pos[0];	}
-GLfloat object::getPosY()
+GLfloat Object::getPosY()
 {	return pos[1];	}
-GLfloat object::getPosZ()
+GLfloat Object::getPosZ()
 {	return pos[2];	}
 	
-GLfloat	object::getRot (int coord)
+GLfloat	Object::getRot (int coord)
 {
 	if(coord == 0)
 		return rot[0];
@@ -95,14 +95,14 @@ GLfloat	object::getRot (int coord)
 	else
 		return 0;
 }
-GLfloat object::getRotX()
+GLfloat Object::getRotX()
 {	return rot[0];	}
-GLfloat object::getRotY()
+GLfloat Object::getRotY()
 {	return rot[1];	}
-GLfloat object::getRotZ()
+GLfloat Object::getRotZ()
 {	return rot[2];	}
 	
-GLfloat	object::getSize (int coord)
+GLfloat	Object::getSize (int coord)
 {
 	if(coord == 0)
 		return size[0];
@@ -113,56 +113,61 @@ GLfloat	object::getSize (int coord)
 	else
 		return 0;
 }
-GLfloat object::getSizeX()
+GLfloat Object::getSizeX()
 {	return size[0];	}
-GLfloat object::getSizeY()
+GLfloat Object::getSizeY()
 {	return size[1];	}
-GLfloat object::getSizeZ()
+GLfloat Object::getSizeZ()
 {	return size[2];	}
 
 
 
-void object::setPos (GLfloat position[])
+void Object::setPos (GLfloat position[])
 {
 	pos[0] = position[0];
 	pos[1] = position[1];
 	pos[2] = position[2];
 }
-void object::setPosX(GLfloat posx)
+void Object::setPosX(GLfloat posx)
 {	pos[0] = posx;	}
-void object::setPosY(GLfloat posy)
+void Object::setPosY(GLfloat posy)
 {	pos[1] = posy;	}
-void object::setPosZ(GLfloat posz)
+void Object::setPosZ(GLfloat posz)
 {	pos[2] = posz;	}
 	
-void object::setRot (GLfloat rotation[])
+void Object::setRot (GLfloat rotation[])
 {
 	rot[0] = rotation[0];
 	rot[1] = rotation[1];
 	rot[2] = rotation[2];
 }
-void object::setRotX(GLfloat rotx)
+void Object::setRotX(GLfloat rotx)
 {	rot[0] = rotx;	}
-void object::setRotY(GLfloat roty)
+void Object::setRotY(GLfloat roty)
 {	rot[1] = roty;	}
-void object::setRotZ(GLfloat rotz)
+void Object::setRotZ(GLfloat rotz)
 {	rot[2] = rotz;	}
 	
-void object::setSize (GLfloat scale[])
+void Object::setSize (GLfloat scale[])
 {
 	size[0] = scale[0];
 	size[1] = scale[1];
 	size[2] = scale[2];
 }
-void object::setSizeX(GLfloat sizex)
+void Object::setSizeX(GLfloat sizex)
 {	size[0] = sizex;	}
-void object::setSizeY(GLfloat sizey)
+void Object::setSizeY(GLfloat sizey)
 {	size[1] = sizey;	}
-void object::setSizeZ(GLfloat sizez)
+void Object::setSizeZ(GLfloat sizez)
 {	size[2] = sizez;	}
 
-void object::Draw()
+void Object::Draw()
 {
-	// The specialized classes will have informations here to really draw
-	// something on the screen =D
+	glRotatef(rot[0],1.0,0.0,0.0);
+	glRotatef(rot[1],0.0,1.0,0.0);
+	glRotatef(rot[2],0.0,0.0,1.0);
+	
+	glTranslated(-pos[0],-pos[1],-pos[2]);
+	
+	glScalef(size[0], size[1], size[2]);
 }

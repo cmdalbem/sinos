@@ -12,7 +12,7 @@
 #include "lib/glm.h"
 #include "Object.h"
 
-class ObjectModel: public object
+class ObjectModel: public Object
 {
 private:
 	GLMmodel* modelPointer;

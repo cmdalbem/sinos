@@ -11,13 +11,13 @@
 //------------------------------------------------------------ CONSTRUCTORS
 
 ObjectModel::ObjectModel()
-:	object()
+:	Object()
 {
 	modelPointer = NULL;	// keeping the consistency
 }
 
 ObjectModel::ObjectModel(GLMmodel* model)
-:	object()
+:	Object()
 {
 	modelPointer = model;
 }
@@ -46,9 +46,15 @@ void ObjectModel::setModelPointer(GLMmodel* model)
 
 void ObjectModel::loadFromFile(string file)
 {
-	setModelPointer(glmReadOBJ(file));
+	if(!getModelPointer())
+		setModelPointer(glmReadOBJ(file));
+	else
+		cout << "ModelPointer has already been loaded" << endl;
 }
 
 void ObjectModel::Draw()
 {
+	Object::Draw();		// Move, scale and rotate the object to the right place
+	
+	glmDraw(modelPointer, GLM_SMOOTH);
 }
