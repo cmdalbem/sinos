@@ -5,7 +5,7 @@
 #include <time.h>
 
 #include "lib/glm.h"
-#include "imageloader.h"
+#include "lib/imageloader.h"
 #include "Object.h"
 #include "ObjectModel.h"
 
@@ -142,20 +142,17 @@ void drawObjects (void) {
 	
 	glPushMatrix();
 	
-	table.translate(0, 0, 0);
-	table.scale(1.01, 1.01, 1.01);
-	table.rotate(0, 1, 0);
-	table.draw();
-	/*
+	//table.translate(0, 0, 0);
+	//table.draw();
+	
 	glScaled(5,5,5);
     drawTable();
-    */
+    
 	glPopMatrix();
 	
 	// ball
 	glPushMatrix();
-	glTranslated(0,1.475,0);
-	glTranslated(0, 0.48, 0);
+	glTranslated(0,1.475,0);;
 	//glutSolidTeapot(0.5);
 	glutSolidSphere(0.05,100,100);
 	glPopMatrix(); 
@@ -182,8 +179,6 @@ void init (void) {
 	// position light (sun)
 	GLfloat ambientLight[] = { 0.0, 0.0, 0.0, 1.0f };
 	GLfloat diffuseLight[] = { 1.0f, 0.6f, 0.6f, 1.0f };
-	GLfloat ambientLight[] = { 0.2, 0.2, 0.2, 1.0f };
-	GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);

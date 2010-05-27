@@ -3,8 +3,6 @@
 // Functions that implements declarations in Object.h.
 //
 
-#pragma once
-
 #include <iostream>
 #include "Object.h"
 

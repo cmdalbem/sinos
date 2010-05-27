@@ -3,8 +3,6 @@
 // Function implementation of ObjectModel.h
 //
 
-#pragma once
-
 #include <iostream>
 #include "ObjectModel.h"
 
