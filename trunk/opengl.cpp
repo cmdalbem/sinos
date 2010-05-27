@@ -31,36 +31,42 @@ struct point
 
 // Objects
 point star[NSTARS];
-GLMmodel* tableModel = NULL;
+GLMmodel* tableStructModel = NULL;
+GLMmodel* tableTopModel = NULL;
 ObjectModel table("obj/pooltable_blender.obj");
 
 
 
 void drawTable(void)
 {
-    // Load the model only if it hasn't been loaded before
-    // If it's been loaded then pmodel1 should be a pointer to the model geometry data...otherwise it's null
-    if (!tableModel)
+    if (!tableStructModel || !tableTopModel)
     {
 
         // this is the call that actualy reads the OBJ and creates the model object
-        tableModel = glmReadOBJ("obj/pooltable_blender.obj");
-        if (!tableModel) exit(0);
-        // This will rescale the object to fit into the unity matrix
-        // Depending on your project you might want to keep the original size and positions you had in 3DS Max or GMAX so you may have to comment this.
+        tableStructModel = glmReadOBJ("obj/pooltable_struct.obj");
+        tableTopModel = glmReadOBJ("obj/pooltable_table.obj");
+        if (!tableStructModel) exit(0);
+        if (!tableTopModel) exit(0);
         //glmUnitize(tableModel);
-        // These 2 functions calculate triangle and vertex normals from the geometry data.
-        // To be honest I had some problem with very complex models that didn't look to good because of how vertex normals were calculated
-        // So if you can export these directly from you modeling tool do it and comment these line
-        // 3DS Max can calculate these for you and GLM is perfectly capable of loading them
+       
         //glmFacetNormals(tableModel);
         //glmVertexNormals(tableModel, 90.0);
 
     }
     // This is the call that will actually draw the model
     // Don't forget to tell it if you want textures or not :))
-    glmDraw(tableModel, GLM_SMOOTH); 
-
+    float c1[] = { 0.25, 0.09, 0.07, 1.0f };
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, c1);
+    glmDraw(tableStructModel, GLM_SMOOTH); 
+    
+	float c2[] = { 0.078, 0.66, 0.078, 1.0f };
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, c2);
+    glmDraw(tableTopModel, GLM_SMOOTH); 
+    
+    float default_amb[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    float default_dif[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+    glMaterialfv(GL_FRONT, GL_AMBIENT, default_amb);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, default_dif);
 } 
 
 
@@ -75,10 +81,15 @@ void initStars (void) { //set the positions of the cubes
 }
 
 void drawObjects (void) {
+    float mcolor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	float nocolor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	
     
     //Object ball(0, 0, 0, 0, 0, 0, 1, 1, 1);
     
     // stars
+	glMaterialfv(GL_FRONT, GL_EMISSION, mcolor);
+    
     for (int i=0;i<NSTARS;i++)
     {
     	glPushMatrix();
@@ -86,6 +97,15 @@ void drawObjects (void) {
 	    glutSolidSphere(0.5,10,10);
     	glPopMatrix();
     }
+    
+    // sun
+	glPushMatrix();
+    glTranslated(cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2);
+	glutSolidSphere(0.5,10,10);
+    glPopMatrix(); 
+    
+    glMaterialfv(GL_FRONT, GL_EMISSION, nocolor);
+    
     
     
     // FLOOR
@@ -134,16 +154,11 @@ void drawObjects (void) {
 	
 	// ball
 	glPushMatrix();
+	glTranslated(0,1.475,0);
 	glTranslated(0, 0.48, 0);
 	//glutSolidTeapot(0.5);
-	glutSolidSphere(0.07,100,100);
-	glPopMatrix();
-	
-	// sun
-	//glPushMatrix();
-    //glTranslated(cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2);
-	//glutSolidSphere(2,10,10);
-    //glPopMatrix();  
+	glutSolidSphere(0.05,100,100);
+	glPopMatrix(); 
 }
 
 void init (void) {
@@ -154,6 +169,19 @@ void init (void) {
     // Limpa a janela e habilita o teste para eliminar faces ocultas por outras
 	glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT);
 	
+	// ambient light
+	GLfloat ambientColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor);
+	
+	// lamp
+	GLfloat lightColor1[] = {0.3f, 0.3f, 0.3f, 1.0f};
+	GLfloat lightPos1[] = {0.0f, 2.0f, 0.0f, 0.0f};
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, lightColor1);
+	glLightfv(GL_LIGHT1, GL_POSITION, lightPos1);
+	
+	// position light (sun)
+	GLfloat ambientLight[] = { 0.0, 0.0, 0.0, 1.0f };
+	GLfloat diffuseLight[] = { 1.0f, 0.6f, 0.6f, 1.0f };
 	GLfloat ambientLight[] = { 0.2, 0.2, 0.2, 1.0f };
 	GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -166,7 +194,9 @@ void init (void) {
 	glEnable (GL_DEPTH_TEST);
     glEnable (GL_LIGHTING);
     glEnable (GL_LIGHT0);
+    glEnable (GL_LIGHT1);
     glShadeModel (GL_SMOOTH);
+    glEnable (GL_NORMALIZE);
     
     
     Image* image = loadBMP("tiger.bmp");
@@ -176,11 +206,14 @@ void init (void) {
 
 void camera (void) {
 	
-	gluLookAt(cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, 0, 0, 0, 0, 1, 0);
+	//gluLookAt(cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, 0, 0, 0, 0, 1, 0);
+    
     //gluLookAt(0, 3, -8, 0, 0, 0, 0, 1, 0);
-	//glRotatef(xrot,1.0,0.0,0.0);  //rotate our camera on the x-axis (left and right)
-	//glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
-    //glTranslated(-xpos,-ypos,-zpos); //translate the screen to the position of our camera
+	
+	glRotatef(xrot,1.0,0.0,0.0);  //rotate our camera on the x-axis (left and right)
+    glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
+    glTranslated(-xpos,-ypos,-zpos); //translate the screen to the position of our camera
+
 }
 
 void display (void) {
@@ -228,7 +261,7 @@ void reshape (int w, int h) {
     glMatrixMode (GL_PROJECTION);				//set the matrix to projection
     
     glLoadIdentity ();
-    gluPerspective (45, (GLfloat)w / (GLfloat)h, 1.0, 1000.0); 	//set the perspective
+    gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.1, 2000.0); 	//set the perspective
     															//(angle of sight, width, height, depth)
     
     //glOrtho(-5, 5, -5, 5, 0.1f, 200);		//test to check if it works =D

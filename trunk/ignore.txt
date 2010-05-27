@@ -1,0 +1,3 @@
+opengl
+*.o
+*_local.*
