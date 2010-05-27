@@ -61,7 +61,7 @@ public:
 	
 	//---------------------------- OTHER METHODS
 	
-	/*  Draw()
+	/* Draw()
 	*  The unique informations that all objects do have are their position,
 	*  rotational argument and scaling argument. So, this generic function
 	*  just move the object to the place where it has to be drawn.
@@ -70,5 +70,15 @@ public:
 	*  tion: the function doesn't do that because it's supposed to be call-
 	*  ed inner other child's Draw function.
 	*/
-	void Draw();		// TODO: function return 1 if succesfully drawn the object
+	void draw();		// TODO: function return 1 if succesfully drawn the object
+	
+	/* Translate() */
+	void translate(GLfloat* offset);
+	void translate(GLfloat x, GLfloat y, GLfloat z);
+	
+	/* Scale() */
+	void scale(GLfloat x, GLfloat y, GLfloat z);
+	
+	/* Rotate() */
+	void rotate(GLfloat x, GLfloat y, GLfloat z);
 };

@@ -20,6 +20,7 @@ public:
 	//---------------------------- CONSTRUCTORS
 	ObjectModel();
 	ObjectModel(GLMmodel* model);
+	ObjectModel(string filename);
 
 	//---------------------------- DESTRUCTORS
 	~ObjectModel();
@@ -30,5 +31,5 @@ public:
 	
 	//---------------------------- OTHER METHODS
 	void		loadFromFile(string file);
-	void		Draw();
+	void		draw();
 };

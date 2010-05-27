@@ -5,14 +5,13 @@
 #include <time.h>
 
 #include "lib/glm.h"
-
-
+#include "imageloader.h"
+#include "Object.h"
+#include "ObjectModel.h"
 
 #define NSTARS 1000
 #define VFACTOR 150
 #define DFACTOR 10
-
-
 
 float 	xpos = 0, 
 		ypos = 0,
@@ -20,6 +19,8 @@ float 	xpos = 0,
 		xrot = 0, 
 		yrot = 0, 
 		angle= 0.0;
+		
+GLuint	_textureId;
 		
 GLfloat posit=0; //iterational position for the SUN
 
@@ -31,6 +32,7 @@ struct point
 // Objects
 point star[NSTARS];
 GLMmodel* tableModel = NULL;
+ObjectModel table("obj/pooltable_blender.obj");
 
 
 
@@ -73,6 +75,9 @@ void initStars (void) { //set the positions of the cubes
 }
 
 void drawObjects (void) {
+    
+    //Object ball(0, 0, 0, 0, 0, 0, 1, 1, 1);
+    
     // stars
     for (int i=0;i<NSTARS;i++)
     {
@@ -82,16 +87,54 @@ void drawObjects (void) {
     	glPopMatrix();
     }
     
+    
+    // FLOOR
+    glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, _textureId);
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glColor3f(1.0f, 1.0f, 1.0f);
+	
+    glBegin(GL_POLYGON);
+		glColor3f(1.0f, 1.0f, 1.0f);
+		glTexCoord2f(1.0f, 0.5f);
+		glVertex3i(6,  0, 0);
+		glTexCoord2f(0.66666666, 1.0f);
+		glVertex3i(2,  0, 3);
+		glTexCoord2f(0.33333333, 1.0f);
+		glVertex3i(-2, 0, 3);
+		glTexCoord2f(0.0f, 0.5f);
+		glVertex3i(-6, 0, 0);
+		glTexCoord2f(0.33333333, 0.0f);
+		glVertex3i(-2, 0, -3);
+		glTexCoord2f(0.66666666, 0.0f);
+		glVertex3i(2,  0, -3);
+	glEnd();
+	
+	glDisable(GL_TEXTURE_2D);
+    
+    
+    
     // table
+	
 	glPushMatrix();
-	glTranslated(0,0,0);
+	
+	table.translate(0, 0, 0);
+	table.scale(1.01, 1.01, 1.01);
+	table.rotate(0, 1, 0);
+	table.draw();
+	/*
 	glScaled(5,5,5);
     drawTable();
+    */
 	glPopMatrix();
 	
 	// ball
 	glPushMatrix();
-	glTranslated(0,0.46,0);
+	glTranslated(0, 0.48, 0);
 	//glutSolidTeapot(0.5);
 	glutSolidSphere(0.07,100,100);
 	glPopMatrix();
@@ -111,24 +154,30 @@ void init (void) {
     // Limpa a janela e habilita o teste para eliminar faces ocultas por outras
 	glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT);
 	
-	GLfloat ambientLight[] = { 0, 0, 0, 1.0f };
+	GLfloat ambientLight[] = { 0.2, 0.2, 0.2, 1.0f };
 	GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
 
+	glEnable(GL_NORMALIZE);
+
 	glEnable (GL_DEPTH_TEST);
     glEnable (GL_LIGHTING);
     glEnable (GL_LIGHT0);
     glShadeModel (GL_SMOOTH);
     
+    
+    Image* image = loadBMP("tiger.bmp");
+	_textureId = loadTexture(image);
+	delete image;
 }
 
 void camera (void) {
 	
 	gluLookAt(cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, 0, 0, 0, 0, 1, 0);
-    //gluLookAt(0, 0, -1, 0, 0, 0, 0, 1, 0);
+    //gluLookAt(0, 3, -8, 0, 0, 0, 0, 1, 0);
 	//glRotatef(xrot,1.0,0.0,0.0);  //rotate our camera on the x-axis (left and right)
 	//glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
     //glTranslated(-xpos,-ypos,-zpos); //translate the screen to the position of our camera
@@ -141,8 +190,7 @@ void display (void) {
     // SUN
 	posit++;
 	GLfloat position[] = { cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, 1.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, position);
-    
+	glLightfv(GL_LIGHT0, GL_POSITION, position);    
     
     // AXIS
     glBegin(GL_LINES);
@@ -180,8 +228,10 @@ void reshape (int w, int h) {
     glMatrixMode (GL_PROJECTION);				//set the matrix to projection
     
     glLoadIdentity ();
-    gluPerspective (60, (GLfloat)w / (GLfloat)h, 1.0, 1000.0); 	//set the perspective
+    gluPerspective (45, (GLfloat)w / (GLfloat)h, 1.0, 1000.0); 	//set the perspective
     															//(angle of sight, width, height, depth)
+    
+    //glOrtho(-5, 5, -5, 5, 0.1f, 200);		//test to check if it works =D
     glMatrixMode (GL_MODELVIEW); //set the matrix back to model
 
 }

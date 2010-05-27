@@ -22,6 +22,13 @@ ObjectModel::ObjectModel(GLMmodel* model)
 	modelPointer = model;
 }
 
+ObjectModel::ObjectModel(string filename)
+:	Object()
+{
+	modelPointer = NULL;
+	loadFromFile(filename);
+}
+
 // TODO: create the others constructors, based on the mother class
 
 //------------------------------------------------------------ DESTRUCTORS
@@ -52,9 +59,14 @@ void ObjectModel::loadFromFile(string file)
 		cout << "ModelPointer has already been loaded" << endl;
 }
 
-void ObjectModel::Draw()
+void ObjectModel::draw()
 {
-	Object::Draw();		// Move, scale and rotate the object to the right place
-	
-	glmDraw(modelPointer, GLM_SMOOTH);
+	if(modelPointer)	// Test if there is anything to draw
+	{
+		Object::draw();		// Move, scale and rotate the object to the right place
+		glmDraw(modelPointer, GLM_SMOOTH);
+	}
+	else
+		cout << "There is nothing to draw D= D=" << endl;
+		//exit(0);
 }
