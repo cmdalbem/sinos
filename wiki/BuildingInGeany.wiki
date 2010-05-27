@@ -5,3 +5,6 @@ g++ -Wall -c "%f" lib/glm.cpp lib/imageloader.cpp  ObjectModel.cpp Object.cpp
 
 ===Build===
 g++ -Wall -o "%e" "%f" -lglut glm.o imageloader.o ObjectModel.o Object.o
+
+
+(maldita wiki! cuidado com pontos de interrogação no meio do texto)
