@@ -6,6 +6,9 @@ Improved GLM (by Eden)
      - http://www.eden.net.nz/7/20031008glm.html
 
 ===Tutorials===
+OpenGL documentation on MSDN (very good!)
+     - http://msdn.microsoft.com/en-us/library/dd374278%28v=VS.85%29.aspx
+
 Nehe OpenGL tutorial:
      - http://nehe.gamedev.net/
 
