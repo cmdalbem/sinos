@@ -8,10 +8,8 @@
 #include "lib/imageloader.h"
 #include "Object.h"
 #include "ObjectModel.h"
+#include "constants.h"
 
-#define NSTARS 1000
-#define VFACTOR 150
-#define DFACTOR 10
 
 float 	xpos = 0, 
 		ypos = 0,
@@ -19,6 +17,7 @@ float 	xpos = 0,
 		xrot = 0, 
 		yrot = 0, 
 		angle= 0.0;
+		
 		
 GLuint	_textureId;
 		
@@ -29,48 +28,30 @@ struct point
 	float x,y,z;
 };
 
+
+
 // Objects
 point star[NSTARS];
-GLMmodel* tableStructModel = NULL;
-GLMmodel* tableTopModel = NULL;
-ObjectModel table("obj/pooltable_blender.obj");
+ObjectModel tableTop("obj/pooltable_table.obj");
+ObjectModel tableStruct("obj/pooltable_struct.obj");
+ObjectModel stick("obj/taco.obj");
 
 
-
-void drawTable(void)
+void initObjects (void)
 {
-    if (!tableStructModel || !tableTopModel)
-    {
-
-        // this is the call that actualy reads the OBJ and creates the model object
-        tableStructModel = glmReadOBJ("obj/pooltable_struct.obj");
-        tableTopModel = glmReadOBJ("obj/pooltable_table.obj");
-        if (!tableStructModel) exit(0);
-        if (!tableTopModel) exit(0);
-        //glmUnitize(tableModel);
-       
-        //glmFacetNormals(tableModel);
-        //glmVertexNormals(tableModel, 90.0);
-
-    }
-    // This is the call that will actually draw the model
-    // Don't forget to tell it if you want textures or not :))
-    float c1[] = { 0.25, 0.09, 0.07, 1.0f };
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, c1);
-    glmDraw(tableStructModel, GLM_SMOOTH); 
-    
-	float c2[] = { 0.078, 0.66, 0.078, 1.0f };
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, c2);
-    glmDraw(tableTopModel, GLM_SMOOTH); 
-    
-    float default_amb[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    float default_dif[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-    glMaterialfv(GL_FRONT, GL_AMBIENT, default_amb);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, default_dif);
-} 
-
-
-void initStars (void) { //set the positions of the cubes
+	tableStruct.setMaterialDiffuse(0.25,0.09,0.07);
+	tableStruct.setMaterialSpecular(0.1,0.1,0.1);
+	tableStruct.setSize(5,5,5);
+	
+	tableTop.setMaterialDiffuse(0.078, 0.66, 0.078);
+	tableTop.setSize(5,5,5);
+	
+	stick.setMaterialDiffuse(RGB(238),RGB(221),RGB(195));
+	stick.setMaterialSpecular(0.1,0.1,0.1);
+	stick.setPos(0,1.675,0);
+	stick.setRot(0,90,0);
+	stick.setSize(0.5,0.5,0.5);
+	
 
     for (int i=0;i<NSTARS;i++)
     {
@@ -82,10 +63,9 @@ void initStars (void) { //set the positions of the cubes
 
 void drawObjects (void) {
     float mcolor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	float nocolor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	
     
-    //Object ball(0, 0, 0, 0, 0, 0, 1, 1, 1);
+    //Object ball(0,0,0, 0,0,0, 1,1,1);
     
     // stars
 	glMaterialfv(GL_FRONT, GL_EMISSION, mcolor);
@@ -104,7 +84,7 @@ void drawObjects (void) {
 	glutSolidSphere(0.5,10,10);
     glPopMatrix(); 
     
-    glMaterialfv(GL_FRONT, GL_EMISSION, nocolor);
+    glMaterialfv(GL_FRONT, GL_EMISSION, default_emission);
     
     
     
@@ -138,31 +118,31 @@ void drawObjects (void) {
     
     
     
-    // table
+	tableStruct.draw();
+	tableTop.draw();
 	
-	glPushMatrix();
+	stick.draw();
+
 	
-	//table.translate(0, 0, 0);
-	//table.draw();
-	
-	glScaled(5,5,5);
-    drawTable();
-    
-	glPopMatrix();
-	
+
 	// ball
 	glPushMatrix();
-	glTranslated(0,1.475,0);;
+	glTranslated(0,1.475,0);
 	//glutSolidTeapot(0.5);
+	GLfloat spec[] = {0.3, 0.3, 0.3, 1.0};
+	GLfloat dif[] = {0.6, 0.6, 0.6, 1.0};
+	glMaterialfv(GL_FRONT, GL_SPECULAR, spec);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, dif);
 	glutSolidSphere(0.05,100,100);
 	glPopMatrix(); 
+	glMaterialfv(GL_FRONT, GL_SPECULAR, default_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, default_diffuse);
 }
 
 void init (void) {
-	initStars();
+	initObjects();
 	
-    // Especifica que a cor de fundo da janela sera branca
-	glClearColor(0, 0, 0, 1.0f);
+    glClearColor(0, 0, 0, 1.0f); //background color
     // Limpa a janela e habilita o teste para eliminar faces ocultas por outras
 	glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT);
 	
@@ -179,7 +159,7 @@ void init (void) {
 	// position light (sun)
 	GLfloat ambientLight[] = { 0.0, 0.0, 0.0, 1.0f };
 	GLfloat diffuseLight[] = { 1.0f, 0.6f, 0.6f, 1.0f };
-	GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat specularLight[] = { 0.4f, 0.4f, 0.4f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
@@ -322,6 +302,16 @@ void keyboard (unsigned char key, int x, int y) {
     	if (yrot < -360)
     		yrot += 360;
     }
+    
+    if (key=='l')
+    {
+		static bool off=false;
+		if(off)
+			glEnable(GL_LIGHT1);
+		else
+			glDisable(GL_LIGHT1);
+		off=!off;
+	}
     
     if (key==27)
     {

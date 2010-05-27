@@ -52,7 +52,11 @@ void ObjectModel::setModelPointer(GLMmodel* model)
 void ObjectModel::loadFromFile(string file)
 {
 	if(!getModelPointer())
+	{
 		setModelPointer(glmReadOBJ(file));
+		if ( !getModelPointer() )
+			cout << "Could not open " << file << endl;
+	}
 	else
 		cout << "ModelPointer has already been loaded" << endl;
 }
@@ -61,8 +65,10 @@ void ObjectModel::draw()
 {
 	if(modelPointer)	// Test if there is anything to draw
 	{
-		Object::draw();		// Move, scale and rotate the object to the right place
+		Object::drawBegin();		// Move, scale and rotate the object to the right place
 		glmDraw(modelPointer, GLM_SMOOTH);
+		Object::drawEnd();
+		
 	}
 	else
 		cout << "There is nothing to draw D= D=" << endl;

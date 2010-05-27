@@ -1,14 +1,17 @@
+#pragma once
+
+
 // Object.h
 //
 // Object is everything that is drawn on the scene, since spheres until
 // entire images loaded from .obj files, like a pooltable.
 //
 
-#pragma once
-
 #include <iostream>
 #include "lib/glm.h"
 #include <GL/glut.h>
+
+
 
 class Object
 {
@@ -16,6 +19,13 @@ private:
 	GLfloat pos[3],		// position x, y and z of the Object
 			rot[3],		// rotation arguments on Rotatefs functions called on Draw
 			size[3];	// scale arguments on Scalefs functions called on Draw
+			
+	GLfloat mat_ambient[3],
+			mat_diffuse[3],
+			mat_specular[3],
+			mat_emission[3];
+			
+			
 public:
 
 	//---------------------------- CONSTRUCTORS
@@ -44,24 +54,29 @@ public:
 	GLfloat getSizeY();
 	GLfloat getSizeZ();
 	
-	void setPos (GLfloat position[]);
+	void setPos (GLfloat x, GLfloat y, GLfloat z);
 	void setPosX(GLfloat posx);
 	void setPosY(GLfloat posy);
 	void setPosZ(GLfloat posz);
 	
-	void setRot (GLfloat rotation[]);
+	void setRot (GLfloat x, GLfloat y, GLfloat z);
 	void setRotX(GLfloat rotx);
 	void setRotY(GLfloat roty);
 	void setRotZ(GLfloat rotz);
 	
-	void setSize (GLfloat scale[]);
+	void setSize (GLfloat x, GLfloat y, GLfloat z);
 	void setSizeX(GLfloat sizex);
 	void setSizeY(GLfloat sizey);
 	void setSizeZ(GLfloat sizez);
 	
+	void setMaterialAmbient(GLfloat r, GLfloat g, GLfloat b);
+	void setMaterialDiffuse(GLfloat r, GLfloat g, GLfloat b);
+	void setMaterialSpecular(GLfloat r, GLfloat g, GLfloat b);
+	void setMaterialEmission(GLfloat r, GLfloat g, GLfloat b);
+	
 	//---------------------------- OTHER METHODS
 	
-	/* Draw()
+	/* drawBegin()
 	*  The unique informations that all objects do have are their position,
 	*  rotational argument and scaling argument. So, this generic function
 	*  just move the object to the place where it has to be drawn.
@@ -70,7 +85,9 @@ public:
 	*  tion: the function doesn't do that because it's supposed to be call-
 	*  ed inner other child's Draw function.
 	*/
-	void draw();		// TODO: function return 1 if succesfully drawn the object
+	void drawBegin();		// TODO: function return 1 if succesfully drawn the object
+	
+	void drawEnd();
 	
 	/* Translate() */
 	void translate(GLfloat* offset);
@@ -81,4 +98,8 @@ public:
 	
 	/* Rotate() */
 	void rotate(GLfloat x, GLfloat y, GLfloat z);
+	
+	
+	/* Materials */
+	void resetMaterial();
 };

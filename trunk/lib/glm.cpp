@@ -200,20 +200,24 @@ glmAddGroup(GLMmodel* model, string name)
 GLuint
 glmFindMaterial(GLMmodel* model, char* name)
 {
-    GLuint i;
-    
-    /* XXX doing a linear search on a string key'd list is pretty lame,
-    but it works and is fast enough for now. */
-    for (i = 0; i < model->nummaterials; i++) {
-        if (!strcmp(model->materials[i].name, name))
-            goto found;
+	GLuint i;
+
+	if( !strcmp(name,"(null)") )
+		i=0;
+	else
+	{
+		/* XXX doing a linear search on a string key'd list is pretty lame,
+		but it works and is fast enough for now. */
+		for (i = 0; i < model->nummaterials; i++) {
+			if (!strcmp(model->materials[i].name, name))
+				goto found;
+		}
+		
+		/* didn't find the name, so print a warning and return the default
+		material (0). */
+		printf("glmFindMaterial():  can't find material \"%s\".\n", name);
+		i = 0;
     }
-    
-    /* didn't find the name, so print a warning and return the default
-    material (0). */
-    printf("glmFindMaterial():  can't find material \"%s\".\n", name);
-    i = 0;
-    
 found:
     return i;
 }
