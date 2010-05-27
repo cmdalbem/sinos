@@ -20,3 +20,7 @@ OpenGL Tutorial (falloutsoftware):
 
 Lighthouse3D:
      - http://www.lighthouse3d.com/opengl/tutorials.shtml
+
+===Inspirations===
+
+     - [image http://play89.files.wordpress.com/2008/07/snooker10.jpg]
