@@ -2,7 +2,7 @@
 GLM enhanced (link do Márcio)
      - http://www.3dcodingtutorial.com/Working-with-3D-models/Details-about-GLM.html
 
-Improved GLM (do Eden, que a gente vai usar)
+Improved GLM (by Eden)
      - http://www.eden.net.nz/7/20031008glm.html
 
 ===Tutorials===
