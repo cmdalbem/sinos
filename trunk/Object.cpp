@@ -193,6 +193,11 @@ void Object::setMaterialEmission(GLfloat r, GLfloat g, GLfloat b)
 	mat_emission[2] = b;
 }
 
+void Object::setMaterialShininess(GLfloat rgba)
+{
+	mat_shininess = rgba;
+}
+
 //------------------------------------------------------------ OTHER METHODS
 
 
@@ -204,6 +209,7 @@ void Object::drawBegin()
 	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
 	glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
 	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SHININESS, &mat_shininess);
 	
 	
 	glTranslated(pos[0], pos[1], pos[2]);
@@ -223,6 +229,7 @@ void Object::drawEnd()
 	glMaterialfv(GL_FRONT, GL_SPECULAR, default_specular);
 	glMaterialfv(GL_FRONT, GL_EMISSION, default_emission);
 	glMaterialfv(GL_FRONT, GL_AMBIENT, default_ambient);
+	glMaterialfv(GL_FRONT, GL_SHININESS, &default_shininess);
 	
 	glPopMatrix();
 }
@@ -272,4 +279,6 @@ void Object::resetMaterial()
 	mat_emission[0] = default_emission[0];
 	mat_emission[1] = default_emission[1];
 	mat_emission[2] = default_emission[2];
+	
+	mat_shininess = default_shininess;
 }

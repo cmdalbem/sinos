@@ -23,8 +23,9 @@ private:
 	GLfloat mat_ambient[3],
 			mat_diffuse[3],
 			mat_specular[3],
-			mat_emission[3];
-			
+			mat_emission[3],
+			mat_shininess;
+					
 			
 public:
 
@@ -73,20 +74,22 @@ public:
 	void setMaterialDiffuse(GLfloat r, GLfloat g, GLfloat b);
 	void setMaterialSpecular(GLfloat r, GLfloat g, GLfloat b);
 	void setMaterialEmission(GLfloat r, GLfloat g, GLfloat b);
+	void setMaterialShininess(GLfloat rgba);
 	
 	//---------------------------- OTHER METHODS
 	
 	/* drawBegin()
+	*  Call this before all other drawing calls.
 	*  The unique informations that all objects do have are their position,
-	*  rotational argument and scaling argument. So, this generic function
-	*  just move the object to the place where it has to be drawn.
-	*
-	*  If you want to presenve the matrix, push it before calling this fun-
-	*  tion: the function doesn't do that because it's supposed to be call-
-	*  ed inner other child's Draw function.
+	*  rotational argument and scaling argument. This function will initialize
+	*  the matrix, materials and do the scaling, rotation and translation.
 	*/
 	void drawBegin();		// TODO: function return 1 if succesfully drawn the object
 	
+	/* drawEnd()
+	*  Call this one after all other drawing calls. This will recover default
+	*  values of materials and pop this object matrix.
+	*/
 	void drawEnd();
 	
 	/* Translate() */

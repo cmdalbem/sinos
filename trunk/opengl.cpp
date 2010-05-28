@@ -8,14 +8,15 @@
 #include "lib/imageloader.h"
 #include "Object.h"
 #include "ObjectModel.h"
+#include "ObjectBall.h"
 #include "constants.h"
 
 
-float 	xpos = 0, 
-		ypos = 0,
-		zpos = 0, 
-		xrot = 0, 
-		yrot = 0, 
+float 	xpos = 5, 
+		ypos = 7,
+		zpos = 5, 
+		xrot = 45, 
+		yrot = -45, 
 		angle= 0.0;
 		
 		
@@ -35,13 +36,15 @@ point star[NSTARS];
 ObjectModel tableTop("obj/pooltable_table.obj");
 ObjectModel tableStruct("obj/pooltable_struct.obj");
 ObjectModel stick("obj/taco.obj");
+ObjectBall ball(0.05,100,100);
 
 
 void initObjects (void)
 {
 	tableStruct.setMaterialDiffuse(0.25,0.09,0.07);
-	tableStruct.setMaterialSpecular(0.1,0.1,0.1);
 	tableStruct.setSize(5,5,5);
+	tableStruct.setMaterialShininess(120);
+	tableStruct.setMaterialSpecular(0.3,0.3,0.3);
 	
 	tableTop.setMaterialDiffuse(0.078, 0.66, 0.078);
 	tableTop.setSize(5,5,5);
@@ -49,9 +52,15 @@ void initObjects (void)
 	stick.setMaterialDiffuse(RGB(238),RGB(221),RGB(195));
 	stick.setMaterialSpecular(0.1,0.1,0.1);
 	stick.setPos(0,1.675,0);
-	stick.setRot(0,90,0);
+	stick.setRot(10,45,0);
 	stick.setSize(0.5,0.5,0.5);
 	
+	ball.setPos(0,1.475,0);
+	ball.setMaterialShininess(120);
+	ball.setMaterialDiffuse(0.6, 0.6, 0.6);
+	ball.setMaterialSpecular(0.9, 0.9, 0.9);
+	
+
 
     for (int i=0;i<NSTARS;i++)
     {
@@ -69,7 +78,6 @@ void drawObjects (void) {
     
     // stars
 	glMaterialfv(GL_FRONT, GL_EMISSION, mcolor);
-    
     for (int i=0;i<NSTARS;i++)
     {
     	glPushMatrix();
@@ -77,15 +85,13 @@ void drawObjects (void) {
 	    glutSolidSphere(0.5,10,10);
     	glPopMatrix();
     }
-    
+   
     // sun
 	glPushMatrix();
     glTranslated(cos(posit/VFACTOR)*DFACTOR -DFACTOR/2, sin(posit/VFACTOR)*DFACTOR -DFACTOR/2, cos(posit/VFACTOR)*DFACTOR -DFACTOR/2);
 	glutSolidSphere(0.5,10,10);
     glPopMatrix(); 
-    
     glMaterialfv(GL_FRONT, GL_EMISSION, default_emission);
-    
     
     
     // FLOOR
@@ -97,7 +103,6 @@ void drawObjects (void) {
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glColor3f(1.0f, 1.0f, 1.0f);
-	
     glBegin(GL_POLYGON);
 		glColor3f(1.0f, 1.0f, 1.0f);
 		glTexCoord2f(1.0f, 0.5f);
@@ -113,30 +118,38 @@ void drawObjects (void) {
 		glTexCoord2f(0.66666666, 0.0f);
 		glVertex3i(2,  0, -3);
 	glEnd();
-	
 	glDisable(GL_TEXTURE_2D);
+	
+	glColor3f(0.6f, 0.6f, 0.6f);
+	glBegin(GL_POLYGON); //ceiling
+		glVertex3i(-10,10,10);
+		glVertex3i(10,10,10);
+		glVertex3i(10,0,10);
+		glVertex3i(-10,0,10);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glVertex3i(10,0,-10);
+		glVertex3i(10,10,-10);
+		glVertex3i(-10,10,-10);
+		glVertex3i(-10,0,-10);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glVertex3i(-10,10,-10);
+		glVertex3i(10,10,-10);
+		glVertex3i(10,10,10);
+		glVertex3i(-10,10,10);
+	glEnd();
     
-    
-    
+        
 	tableStruct.draw();
 	tableTop.draw();
 	
 	stick.draw();
 
-	
+	ball.draw();
 
-	// ball
-	glPushMatrix();
-	glTranslated(0,1.475,0);
 	//glutSolidTeapot(0.5);
-	GLfloat spec[] = {0.3, 0.3, 0.3, 1.0};
-	GLfloat dif[] = {0.6, 0.6, 0.6, 1.0};
-	glMaterialfv(GL_FRONT, GL_SPECULAR, spec);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dif);
-	glutSolidSphere(0.05,100,100);
-	glPopMatrix(); 
-	glMaterialfv(GL_FRONT, GL_SPECULAR, default_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, default_diffuse);
+	
 }
 
 void init (void) {
@@ -151,10 +164,30 @@ void init (void) {
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor);
 	
 	// lamp
-	GLfloat lightColor1[] = {0.3f, 0.3f, 0.3f, 1.0f};
-	GLfloat lightPos1[] = {0.0f, 2.0f, 0.0f, 0.0f};
+	GLfloat lightColor1[] = {0.4f, 0.4f, 0.4f, 1.0f};
+	GLfloat direction[] = {0.0f, 1.0f, 0.0f, 0.0f};
+	//glLightfv(GL_LIGHT1, GL_SPECULAR, lightColor1);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, lightColor1);
-	glLightfv(GL_LIGHT1, GL_POSITION, lightPos1);
+	glLightfv(GL_LIGHT1, GL_POSITION, direction);
+	
+	
+	// spotlight
+	//GLfloat light1_ambient[] = { 0.2, 0.2, 0.2, 1.0 };
+	//GLfloat light1_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+	//GLfloat light1_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	//GLfloat light1_position[] = { 0.0, -5.0, 0.0, 1.0 };
+	//GLfloat spot_direction[] = { 0.0, 1.0, 0.0 };
+	////glLightfv(GL_LIGHT1, GL_AMBIENT, light1_ambient);
+	//glLightfv(GL_LIGHT1, GL_DIFFUSE, light1_diffuse);
+	//glLightfv(GL_LIGHT1, GL_SPECULAR, light1_specular);
+	//glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
+	////glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.5);
+	////glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.5);
+	////glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.2);
+	//glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 90);
+	//glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
+	//glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
+
 	
 	// position light (sun)
 	GLfloat ambientLight[] = { 0.0, 0.0, 0.0, 1.0f };
@@ -174,7 +207,7 @@ void init (void) {
     glEnable (GL_NORMALIZE);
     
     
-    Image* image = loadBMP("tiger.bmp");
+    Image* image = loadBMP("textures/tiger.bmp");
 	_textureId = loadTexture(image);
 	delete image;
 }
@@ -313,7 +346,7 @@ void keyboard (unsigned char key, int x, int y) {
 		off=!off;
 	}
     
-    if (key==27)
+    if (key==K_ESC)
     {
 	    exit(0);
     }

@@ -31,5 +31,6 @@ public:
 	
 	//---------------------------- OTHER METHODS
 	void		loadFromFile(string file);
+	void		calculateNormals();
 	void		draw();
 };

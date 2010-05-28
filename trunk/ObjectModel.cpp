@@ -56,9 +56,16 @@ void ObjectModel::loadFromFile(string file)
 		setModelPointer(glmReadOBJ(file));
 		if ( !getModelPointer() )
 			cout << "Could not open " << file << endl;
+
 	}
 	else
 		cout << "ModelPointer has already been loaded" << endl;
+}
+
+void ObjectModel::calculateNormals()
+{
+	glmFacetNormals(getModelPointer());
+    glmVertexNormals(getModelPointer(), 90.0);
 }
 
 void ObjectModel::draw()
