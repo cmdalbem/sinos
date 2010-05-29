@@ -6,8 +6,6 @@
 #include <iostream>
 #include "Object.h"
 
-#include "constants.h"
-
 
 //------------------------------------------------------------ CONSTRUCTORS
 
@@ -24,8 +22,6 @@ Object::Object()// keeping the consistency
 	size[0] = 1;
 	size[1] = 1;
 	size[2] = 1;
-	
-	resetMaterial();
 }
 
 Object::Object(GLfloat position[], GLfloat rotation[], GLfloat scale[])
@@ -41,8 +37,6 @@ Object::Object(GLfloat position[], GLfloat rotation[], GLfloat scale[])
 	size[0] = scale[0];
 	size[1] = scale[1];
 	size[2] = scale[2];
-	
-	resetMaterial();
 }
 
 Object::Object( GLfloat posx,  GLfloat posy,  GLfloat posz,
@@ -60,8 +54,6 @@ Object::Object( GLfloat posx,  GLfloat posy,  GLfloat posz,
 	size[0] = sizex;
 	size[1] = sizey;
 	size[2] = sizez;
-	
-	resetMaterial();
 }
 
 //------------------------------------------------------------ DESTRUCTORS
@@ -168,35 +160,6 @@ void Object::setSizeY(GLfloat sizey)
 void Object::setSizeZ(GLfloat sizez)
 {	size[2] = sizez;	}
 
-void Object::setMaterialAmbient(GLfloat r, GLfloat g, GLfloat b)
-{
-	mat_ambient[0] = r;
-	mat_ambient[1] = g;
-	mat_ambient[2] = b;
-}
-void Object::setMaterialDiffuse(GLfloat r, GLfloat g, GLfloat b)
-{
-	mat_diffuse[0] = r;
-	mat_diffuse[1] = g;
-	mat_diffuse[2] = b;
-}
-void Object::setMaterialSpecular(GLfloat r, GLfloat g, GLfloat b)
-{
-	mat_specular[0] = r;
-	mat_specular[1] = g;
-	mat_specular[2] = b;
-}
-void Object::setMaterialEmission(GLfloat r, GLfloat g, GLfloat b)
-{
-	mat_emission[0] = r;
-	mat_emission[1] = g;
-	mat_emission[2] = b;
-}
-
-void Object::setMaterialShininess(GLfloat rgba)
-{
-	mat_shininess = rgba;
-}
 
 //------------------------------------------------------------ OTHER METHODS
 
@@ -205,31 +168,20 @@ void Object::drawBegin()
 {
 	glPushMatrix();
 	
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-	glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
-	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-	glMaterialfv(GL_FRONT, GL_SHININESS, &mat_shininess);
+	material.apply();
 	
-	
+	// basic transformations using object's attributes
 	glTranslated(pos[0], pos[1], pos[2]);
-	
 	glRotatef(rot[0],1.0,0.0,0.0);
 	glRotatef(rot[1],0.0,1.0,0.0);
 	glRotatef(rot[2],0.0,0.0,1.0);
-	
 	glScalef(size[0], size[1], size[2]);
-	
 	glTranslated(0,0,0);
 }
 
 void Object::drawEnd()
 {
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, default_diffuse);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, default_specular);
-	glMaterialfv(GL_FRONT, GL_EMISSION, default_emission);
-	glMaterialfv(GL_FRONT, GL_AMBIENT, default_ambient);
-	glMaterialfv(GL_FRONT, GL_SHININESS, &default_shininess);
+	material.unapply();
 	
 	glPopMatrix();
 }
@@ -260,25 +212,4 @@ void Object::rotate(GLfloat x, GLfloat y, GLfloat z)
 	rot[0] = rot[0] + x;
 	rot[1] = rot[1] + y;
 	rot[2] = rot[2] + z;
-}
-
-void Object::resetMaterial()
-{
-	mat_ambient[0] = default_ambient[0];
-	mat_ambient[1] = default_ambient[1];
-	mat_ambient[2] = default_ambient[2];
-	
-	mat_diffuse[0] = default_diffuse[0];
-	mat_diffuse[1] = default_diffuse[1];
-	mat_diffuse[2] = default_diffuse[2];
-	
-	mat_specular[0] = default_specular[0];
-	mat_specular[1] = default_specular[1];
-	mat_specular[2] = default_specular[2];
-	
-	mat_emission[0] = default_emission[0];
-	mat_emission[1] = default_emission[1];
-	mat_emission[2] = default_emission[2];
-	
-	mat_shininess = default_shininess;
 }

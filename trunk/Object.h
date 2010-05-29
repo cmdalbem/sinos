@@ -1,15 +1,16 @@
-#pragma once
-
-
 // Object.h
 //
 // Object is everything that is drawn on the scene, since spheres until
 // entire images loaded from .obj files, like a pooltable.
 //
 
+#pragma once
+
 #include <iostream>
 #include "lib/glm.h"
 #include <GL/glut.h>
+
+#include "Material.h"
 
 
 
@@ -19,15 +20,10 @@ private:
 	GLfloat pos[3],		// position x, y and z of the Object
 			rot[3],		// rotation arguments on Rotatefs functions called on Draw
 			size[3];	// scale arguments on Scalefs functions called on Draw
-			
-	GLfloat mat_ambient[3],
-			mat_diffuse[3],
-			mat_specular[3],
-			mat_emission[3],
-			mat_shininess;
 					
-			
 public:
+	//---------------------------- ATTRIBUTES
+	Material material;
 
 	//---------------------------- CONSTRUCTORS
 	Object();
@@ -70,12 +66,6 @@ public:
 	void setSizeY(GLfloat sizey);
 	void setSizeZ(GLfloat sizez);
 	
-	void setMaterialAmbient(GLfloat r, GLfloat g, GLfloat b);
-	void setMaterialDiffuse(GLfloat r, GLfloat g, GLfloat b);
-	void setMaterialSpecular(GLfloat r, GLfloat g, GLfloat b);
-	void setMaterialEmission(GLfloat r, GLfloat g, GLfloat b);
-	void setMaterialShininess(GLfloat rgba);
-	
 	//---------------------------- OTHER METHODS
 	
 	/* drawBegin()
@@ -101,8 +91,4 @@ public:
 	
 	/* Rotate() */
 	void rotate(GLfloat x, GLfloat y, GLfloat z);
-	
-	
-	/* Materials */
-	void resetMaterial();
 };

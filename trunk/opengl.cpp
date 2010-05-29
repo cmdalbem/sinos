@@ -12,13 +12,18 @@
 #include "constants.h"
 
 
+//camera
 float 	xpos = 5, 
 		ypos = 7,
 		zpos = 5, 
 		xrot = 45, 
 		yrot = -45, 
 		angle= 0.0;
-		
+
+//mouse
+static int	xold, yold;		
+static int	left_click = GLUT_UP;
+static int	right_click = GLUT_UP;
 		
 GLuint	_textureId;
 		
@@ -36,30 +41,55 @@ point star[NSTARS];
 ObjectModel tableTop("obj/pooltable_table.obj");
 ObjectModel tableStruct("obj/pooltable_struct.obj");
 ObjectModel stick("obj/taco.obj");
-ObjectBall ball(0.05,100,100);
+ObjectModel wall("obj/wall.obj");
+ObjectBall  ball(0.05,100,100);
+
+void drawWall(int d, int parts, int nx, int ny, int nz)
+{
+	for( int i=0; i<parts; i++ )
+	{
+		glNormal3f(nx, ny, nz);
+		glBegin(GL_QUADS);
+			glVertex3i(-d,d,d);
+			glNormal3f(nx, ny, nz);
+			glVertex3i(d,d,d);
+			glNormal3f(nx, ny, nz);
+			glVertex3i(d,0,d);
+			glNormal3f(nx, ny, nz);
+			glVertex3i(-d,0,d);
+		glEnd();
+	}
+}
 
 
 void initObjects (void)
 {
-	tableStruct.setMaterialDiffuse(0.25,0.09,0.07);
+	tableStruct.material.setDiffuse(0.25,0.09,0.07);
 	tableStruct.setSize(5,5,5);
-	tableStruct.setMaterialShininess(120);
-	tableStruct.setMaterialSpecular(0.3,0.3,0.3);
+	tableStruct.material.setShininess(120);
+	tableStruct.material.setSpecular(0.3,0.3,0.3);
 	
-	tableTop.setMaterialDiffuse(0.078, 0.66, 0.078);
+	tableTop.material.setDiffuse(0.078, 0.66, 0.078);
 	tableTop.setSize(5,5,5);
 	
-	stick.setMaterialDiffuse(RGB(238),RGB(221),RGB(195));
-	stick.setMaterialSpecular(0.1,0.1,0.1);
+	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
+	stick.material.setSpecular(0.3,0.3,0.3);
+	stick.material.setShininess(80);
 	stick.setPos(0,1.675,0);
-	stick.setRot(10,45,0);
+	//stick.setRot(30,330,0); // aehoo não consigo fazer isso aqui funcionar!!
 	stick.setSize(0.5,0.5,0.5);
 	
 	ball.setPos(0,1.475,0);
-	ball.setMaterialShininess(120);
-	ball.setMaterialDiffuse(0.6, 0.6, 0.6);
-	ball.setMaterialSpecular(0.9, 0.9, 0.9);
+	ball.material.setShininess(120);
+	ball.material.setDiffuse(0.6, 0.6, 0.6);
+	ball.material.setSpecular(0.9, 0.9, 0.9);
 	
+	wall.material.setDiffuse(0.8,0.8,0.8);
+	wall.material.setSpecular(0.7,0.7,0.7);
+	wall.material.setShininess(120);
+	wall.setPos(0,20,0);
+	wall.setSize(20,20,20);
+	wall.setRot(60,0,0);
 
 
     for (int i=0;i<NSTARS;i++)
@@ -120,36 +150,64 @@ void drawObjects (void) {
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
 	
-	glColor3f(0.6f, 0.6f, 0.6f);
-	glBegin(GL_POLYGON); //ceiling
-		glVertex3i(-10,10,10);
-		glVertex3i(10,10,10);
-		glVertex3i(10,0,10);
-		glVertex3i(-10,0,10);
+	
+	// Walls
+	glPushMatrix();
+	Material wallsMaterial;
+	wallsMaterial.setDiffuse(0.8,0.8,0.8);
+	wallsMaterial.setSpecular(0.7,0.7,0.7);
+	wallsMaterial.setShininess(100);
+	wallsMaterial.apply();
+	int d=25;
+	//tentativa fracassada de função pra criar parede iterativamente, com "parts" partições
+	/*int parts=4;
+	int f = d/parts;
+	for(int i=0; i<parts; i++)
+	{
+		glNormal3f(0.0, -1.0f, 0.0f);
+		glBegin(GL_QUADS); //ceiling
+			glVertex3i(-f,d,-f);
+			glVertex3i(f,d,-f);
+			glVertex3i(f,d,f);
+			glVertex3i(-f,d,f);
+		glEnd();
+		glTranslated(f,0,f);
+	}*/
+	
+	glBegin(GL_QUADS);
+		glNormal3f(0.0, 0.0f, -1.0f);
+		glVertex3i(-d,d,d);
+		glNormal3f(0.0, 0.0f, -1.0f);
+		glVertex3i(d,d,d);
+		glNormal3f(0.0, 0.0f, -1.0f);
+		glVertex3i(d,0,d);
+		glNormal3f(0.0, 0.0f, -1.0f);
+		glVertex3i(-d,0,d);
 	glEnd();
-	glBegin(GL_POLYGON);
-		glVertex3i(10,0,-10);
-		glVertex3i(10,10,-10);
-		glVertex3i(-10,10,-10);
-		glVertex3i(-10,0,-10);
+	glNormal3f(0.0, 0.0f, 1.0f);
+	glBegin(GL_QUADS);
+		glVertex3i(d,0,-d);
+		glVertex3i(d,d,-d);
+		glVertex3i(-d,d,-d);
+		glVertex3i(-d,0,-d);
 	glEnd();
-	glBegin(GL_POLYGON);
-		glVertex3i(-10,10,-10);
-		glVertex3i(10,10,-10);
-		glVertex3i(10,10,10);
-		glVertex3i(-10,10,10);
+	glNormal3f(1.0, 0.0f, 0.0f);
+	glBegin(GL_QUADS);
+		glVertex3i(-d,d,-d);
+		glVertex3i(-d,d,d);
+		glVertex3i(-d,0,d);
+		glVertex3i(-d,0,-d);
 	glEnd();
-    
+	wallsMaterial.unapply();
+    glPopMatrix();
         
+	// objects
 	tableStruct.draw();
 	tableTop.draw();
-	
 	stick.draw();
-
 	ball.draw();
-
-	//glutSolidTeapot(0.5);
-	
+	wall.draw();
+	wall.rotate(1,0,0);
 }
 
 void init (void) {
@@ -250,8 +308,6 @@ void display (void) {
     glEnd();
     
 
-    glColor3f(1.0f, 1.0f, 1.0f); //white
-    
 	glLoadIdentity();  
     
     camera();
@@ -259,82 +315,32 @@ void display (void) {
     drawObjects();
     
     
-    
     glutSwapBuffers(); //swap the buffers
-    angle++; //increase the angle
+    angle++; //increase the angle  /* wtf is this for??? (cristiano)*/
 }
 
 void reshape (int w, int h) {
-    glViewport (0, 0, (GLsizei)w, (GLsizei)h); 	//set the viewport to the current window specifications
     glMatrixMode (GL_PROJECTION);				//set the matrix to projection
     
-    glLoadIdentity ();
-    gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.1, 2000.0); 	//set the perspective
-    															//(angle of sight, width, height, depth)
-    
-    //glOrtho(-5, 5, -5, 5, 0.1f, 200);		//test to check if it works =D
+	glLoadIdentity ();
+	
+    glViewport (0, 0, (GLsizei)w, (GLfloat)h);
+    gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.1, 2000.0);
+    					
     glMatrixMode (GL_MODELVIEW); //set the matrix back to model
-
 }
 
-void keyboard (unsigned char key, int x, int y) {
-    if (key=='z')
-    {
-	    xrot += 3;
-	    if (xrot >360)
-	    	xrot -= 360;
-    }
-
-    if (key=='q')
-    {
-	    xrot -= 3;
-    	if (xrot < -360)
-    		xrot += 360;
-    }
-
-    if (key=='w')
-    {
-	    float xrotrad, yrotrad;
-    	yrotrad = (yrot / 180 * 3.141592654f);
-	    xrotrad = (xrot / 180 * 3.141592654f);
-	    xpos += float(sin(yrotrad)) ;
-	    zpos -= float(cos(yrotrad)) ;
-	    ypos -= float(sin(xrotrad)) ;
-    }
-
-    if (key=='s')
-    {
-	    float xrotrad, yrotrad;
-	    yrotrad = (yrot / 180 * 3.141592654f);
-	    xrotrad = (xrot / 180 * 3.141592654f);
-	    xpos -= float(sin(yrotrad));
-	    zpos += float(cos(yrotrad)) ;
-	    ypos += float(sin(xrotrad));
-    }
-    
+void keyboardFunc (unsigned char key, int x, int y) {
+   
     if( key=='e')
     {
-		ypos += 2;
+		ypos += 0.2;
 	}
 	
 	if( key=='c')
     {
-		ypos -= 2;
+		ypos -= 0.2;
 	}
-
-    if (key=='d')
-    {
-	    yrot += 3;
-	    if (yrot >360)
-	    	yrot -= 360;
-    }
-
-    if (key=='a')
-    {
-	    yrot -= 3;
-    	if (yrot < -360)
-    		yrot += 360;
-    }
     
     if (key=='l')
     {
@@ -352,6 +358,41 @@ void keyboard (unsigned char key, int x, int y) {
     }
 }
 
+
+
+void mouseFunc(int button, int state, int x, int y)
+{
+  if (GLUT_LEFT_BUTTON == button)
+    left_click = state;
+  if (GLUT_RIGHT_BUTTON == button)
+    right_click = state;
+  xold = x;
+  yold = y;
+}
+
+void mouseMotionFunc(int x, int y)
+{
+	if (GLUT_DOWN == left_click)
+    {
+		xrot = xrot + (y - yold) / 5.f;
+		yrot = yrot + (x - xold) / 5.f;
+		glutPostRedisplay();
+    }
+	
+	if (GLUT_DOWN == right_click)
+	{
+		float xrotrad, yrotrad;
+		yrotrad = (yrot / 180 * 3.141592654f);
+		xrotrad = (xrot / 180 * 3.141592654f);
+		xpos += (yold - y)/10.0 * float(sin(yrotrad)) ;
+		zpos -= (yold - y)/10.0 * float(cos(yrotrad)) ;
+		ypos -= (yold - y)/10.0 * float(sin(xrotrad)) ;
+		glutPostRedisplay();
+	}
+
+	xold = x;
+	yold = y;
+}
 
 
 
@@ -372,8 +413,10 @@ int main (int argc, char **argv) {
                             						// as long as you move the variables to be updated, in this case, angle++;
     glutReshapeFunc (reshape);
     
-    glutKeyboardFunc( keyboard );
-    
+    glutKeyboardFunc(keyboardFunc);
+    glutMouseFunc(mouseFunc);
+	glutMotionFunc(mouseMotionFunc);
+  
     glutMainLoop(); 
     
     
