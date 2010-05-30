@@ -1,7 +1,10 @@
 ==Set Includes and Arguments==
 
 ===Compile===
-{{{g++ -Wall -c "%f" lib/glm.cpp lib/imageloader.cpp  ObjectModel.cpp Object.cpp ObjectBall.cpp}}}
+{{{g++ -Wall -c "%f"}}}
 
 ===Build===
-{{{g++ -Wall -o "%e" "%f" -lglut glm.o imageloader.o ObjectModel.o Object.o ObjectBall.o}}}
+{{{make}}}
+
+===Execute===
+{{{./sinos}}}
