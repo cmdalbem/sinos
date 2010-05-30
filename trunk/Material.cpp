@@ -58,7 +58,7 @@ void Material::setShininess(GLfloat rgba)
 
 //-------------------------------------------------------- OTHER METHODS
 
-void Material::apply()
+void Material::apply() const
 {
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
@@ -67,7 +67,7 @@ void Material::apply()
 	glMaterialfv(GL_FRONT, GL_SHININESS, &mat_shininess);
 }
 
-void Material::unapply()
+void Material::unapply() const
 {
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, default_diffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, default_specular);

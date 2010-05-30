@@ -35,7 +35,7 @@ public:
 	void setShininess(GLfloat rgba);
 	
 	//---------------------------- OTHER METHODS
-	void		apply();
-	void		unapply();
+	void		apply()		const;
+	void		unapply()	const;
 	void 		resetMaterial();
 };

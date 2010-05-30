@@ -74,21 +74,26 @@ public:
 	*  rotational argument and scaling argument. This function will initialize
 	*  the matrix, materials and do the scaling, rotation and translation.
 	*/
-	void drawBegin();		// TODO: function return 1 if succesfully drawn the object
+	void drawBegin() const;		// TODO: function return 1 if succesfully drawn the object
 	
 	/* drawEnd()
 	*  Call this one after all other drawing calls. This will recover default
 	*  values of materials and pop this object matrix.
 	*/
-	void drawEnd();
+	void drawEnd() const;
 	
-	/* Translate() */
+	/* virtual draw()
+	*  This virtual declaration specifies that every kind of subobject must
+	*  have an implementation of a drawing function. This will allow to group
+	*  multiple kinds of object on vectors and call .draw() for each of them.
+	*/
+	virtual void draw() const =0;
+	
+	/* Transformations */
 	void translate(GLfloat* offset);
 	void translate(GLfloat x, GLfloat y, GLfloat z);
-	
-	/* Scale() */
 	void scale(GLfloat x, GLfloat y, GLfloat z);
-	
-	/* Rotate() */
 	void rotate(GLfloat x, GLfloat y, GLfloat z);
+	
+	void loadMaterial(Material const newmaterial);
 };

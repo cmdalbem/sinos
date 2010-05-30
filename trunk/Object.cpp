@@ -164,7 +164,7 @@ void Object::setSizeZ(GLfloat sizez)
 //------------------------------------------------------------ OTHER METHODS
 
 
-void Object::drawBegin()
+void Object::drawBegin() const
 {
 	glPushMatrix();
 	
@@ -172,14 +172,14 @@ void Object::drawBegin()
 	
 	// basic transformations using object's attributes
 	glTranslated(pos[0], pos[1], pos[2]);
-	glRotatef(rot[0],1.0,0.0,0.0);
-	glRotatef(rot[1],0.0,1.0,0.0);
-	glRotatef(rot[2],0.0,0.0,1.0);
+	glRotatef(rot[0],1,0,0);
+	glRotatef(rot[1],0,1,0);
+	glRotatef(rot[2],0,0,1);
 	glScalef(size[0], size[1], size[2]);
 	glTranslated(0,0,0);
 }
 
-void Object::drawEnd()
+void Object::drawEnd() const
 {
 	material.unapply();
 	
@@ -212,4 +212,9 @@ void Object::rotate(GLfloat x, GLfloat y, GLfloat z)
 	rot[0] = rot[0] + x;
 	rot[1] = rot[1] + y;
 	rot[2] = rot[2] + z;
+}
+
+void Object::loadMaterial(Material const newmaterial)
+{
+	material = newmaterial;
 }

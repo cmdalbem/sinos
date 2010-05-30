@@ -26,11 +26,11 @@ public:
 	~ObjectModel();
 	
 	//---------------------------- GETTERS & SETTERS
-	GLMmodel* 	getModelPointer();
+	GLMmodel* 	getModelPointer() const;
 	void		setModelPointer(GLMmodel* model);
 	
 	//---------------------------- OTHER METHODS
-	void		loadFromFile(string file);
-	void		calculateNormals();
-	void		draw();
+	void			loadFromFile(string file);
+	void			calculateNormals();
+	virtual void	draw() const;
 };

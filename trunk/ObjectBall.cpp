@@ -31,7 +31,7 @@ ObjectBall::~ObjectBall() { }
 
 //------------------------------------------------------------ GETTERS & SETTERS
 
-void ObjectBall::draw()
+void ObjectBall::draw() const
 {
 	Object::drawBegin();
 	

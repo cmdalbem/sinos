@@ -39,7 +39,7 @@ ObjectModel::~ObjectModel()
 
 //------------------------------------------------------------ GETTERS & SETTERS
 
-GLMmodel* ObjectModel::getModelPointer()
+GLMmodel* ObjectModel::getModelPointer() const
 {
 	return this->modelPointer;
 }
@@ -68,7 +68,7 @@ void ObjectModel::calculateNormals()
     glmVertexNormals(getModelPointer(), 90.0);
 }
 
-void ObjectModel::draw()
+void ObjectModel::draw() const
 {
 	if(modelPointer)	// Test if there is anything to draw
 	{

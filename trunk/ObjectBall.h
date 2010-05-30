@@ -29,5 +29,5 @@ public:
 
 	
 	//---------------------------- OTHER METHODS
-	void		draw();
+	virtual void 		draw() const;
 };
