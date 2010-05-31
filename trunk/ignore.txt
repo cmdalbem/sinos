@@ -1,3 +1,4 @@
 opengl
+sinos
 *.o
 *_local.*
