@@ -16,11 +16,12 @@ Material::Material()
 	resetMaterial();
 }
 
-
-
 //------------------------------------------------------------ DESTRUCTORS
 
-Material::~Material() { }
+Material::~Material()
+{
+	// This method is purposely blank
+}
 
 //------------------------------------------------------------ GETTERS & SETTERS
 
@@ -78,21 +79,21 @@ void Material::unapply() const
 
 void Material::resetMaterial()
 {
-	mat_ambient[0] = default_ambient[0];
-	mat_ambient[1] = default_ambient[1];
-	mat_ambient[2] = default_ambient[2];
+	setAmbient( default_ambient[0], 
+				default_ambient[1],
+				default_ambient[2]);
 	
-	mat_diffuse[0] = default_diffuse[0];
-	mat_diffuse[1] = default_diffuse[1];
-	mat_diffuse[2] = default_diffuse[2];
+	setDiffuse( default_diffuse[0],
+				default_diffuse[1],
+				default_diffuse[2]);
 	
-	mat_specular[0] = default_specular[0];
-	mat_specular[1] = default_specular[1];
-	mat_specular[2] = default_specular[2];
+	setSpecular(default_specular[0],
+				default_specular[1],
+				default_specular[2]);
 	
-	mat_emission[0] = default_emission[0];
-	mat_emission[1] = default_emission[1];
-	mat_emission[2] = default_emission[2];
-	
-	mat_shininess = default_shininess;
+	setEmission(default_emission[0],
+				default_emission[1],
+				default_emission[2]);
+				
+	setShininess(default_shininess);
 }

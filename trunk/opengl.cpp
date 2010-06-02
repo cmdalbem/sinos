@@ -1,11 +1,11 @@
 #include <GL/gl.h>
 #include <GL/glut.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 #include <time.h>
 #include <vector>
 #include <string.h>
-#include <stdio.h>
 
 #include "lib/glm.h"
 #include "lib/imageloader.h"
@@ -49,8 +49,8 @@ bool l1=true, l2=false, l3=true;
 
 float posit=0; //iterational position for the SUN
 
-long int frameCounter, fps=0; //frames per second counter and register
-char osd[1024]; //text buffer for on-screen output
+long int 	frameCounter, fps = 0;	//frames per second counter and register
+char 		osd[1024]; 				//text buffer for on-screen output
 
 /* TODO: create Camera Class */
 #define NCAMERAS 3
@@ -62,7 +62,7 @@ char cameraModes[][30] = { "Cinematic",
 
 
 
-
+// OSD means On-Screen Display
 void drawOsd()
 /* Adapted from http://www.opengl.org/resources/code/samples/glut_examples/examples/bitfont.c */
 {
@@ -267,7 +267,7 @@ void camera () {
 	switch( cameraMode )
 	{
 		case 0:
-			// dramatic camera
+			// cinematic dramatic camera
 			gluLookAt( SPIRAL_MOVEMENT_EQUATION,
 					   objects[3]->getPosX(), objects[3]->getPosY(), objects[3]->getPosZ(), /*ball position*/
 					   0,1,0);
@@ -340,8 +340,7 @@ void display () {
 		drawOsd();
 		camera();
 		drawObjects();
-		lights();
-		   
+		lights();    	   
     
     glutSwapBuffers();
     frameCounter++;
@@ -450,15 +449,15 @@ void mouseMotionFunc(int x, int y) {
 	if (GLUT_DOWN == right_click)
 	{
 		float xrotrad, yrotrad;
-		yrotrad = (yrot / 180 * 3.141592654f);
-		xrotrad = (xrot / 180 * 3.141592654f);
+		yrotrad = (yrot / 180 * M_PI);
+		xrotrad = (xrot / 180 * M_PI);
 		xpos += (yold - y)/10.0 * float(sin(yrotrad)) ;
 		zpos -= (yold - y)/10.0 * float(cos(yrotrad)) ;
 		ypos -= (yold - y)/10.0 * float(sin(xrotrad)) ;
 		glutPostRedisplay();
 		
 		zoom += (y - yold) / 5.f;
-		if(zoom<1) zoom=1;
+		if(zoom<1) zoom=1;		// do not let reverse the camera
 	}
 
 	xold = x;

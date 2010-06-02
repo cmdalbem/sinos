@@ -176,6 +176,9 @@ void Object::drawBegin() const
 	glRotatef(rot[1],0,1,0);
 	glRotatef(rot[2],0,0,1);
 	glScalef(size[0], size[1], size[2]);
+	
+	// TODO: transform the next function in
+	// glTranslated(-pos[0], -pos[1], -pos[2]); and test if it's right
 	glTranslated(0,0,0);
 }
 
