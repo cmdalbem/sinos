@@ -27,7 +27,8 @@ point star[NSTARS];
 vector<Object*> objects; /* The ideal is that, in the end, there 
 						  * will be no drawable object that isn't in this vector.
 						  */
-Camera camera;
+Camera camera,
+	   camera2(0, 5, 0, 0, 90, 1);
 						  
 						  
 // !! The following globals aren't in their proper place. !!
@@ -39,7 +40,7 @@ static int	right_click = GLUT_UP;
 		
 GLuint tigerTexture;
 		
-bool light1=true, light2=true, light3=true;
+bool light1=true, light2=true, light3=true, light4=true;
 
 float posit=0; //iterational position for the SUN
 
@@ -90,13 +91,13 @@ void initObjects () {
 
 	// TODO: organize resolution constants so that the game may
 	//       have configuration of graphics performance.
-	static ObjectModel tableTop("obj/pooltable_table16x.obj");
-	static ObjectModel tableStruct("obj/pooltable_struct2x.obj");
-	static ObjectModel stick("obj/taco4x.obj");
-	static ObjectModel wall("obj/wall.obj");
-	static ObjectBall  ball(0.1,100,100);	
-	static ObjectModel light("obj/light1.obj");
 	static ObjectModel crypt("obj/crypt.obj");
+	static ObjectModel tableStruct("obj/pooltable_struct2x.obj");
+	static ObjectModel tableTop("obj/pooltable_table16x.obj");
+	static ObjectModel light("obj/light1.obj");
+	static ObjectModel stick("obj/taco4x.obj");
+	static ObjectBall  ball(0.1,100,100);
+	static ObjectModel wall("obj/wall.obj");	
 	
 	// crypt scenario
 	crypt.setPos(0,-2,0);
@@ -104,7 +105,7 @@ void initObjects () {
 	crypt.material.setDiffuse(0.4,0.4,0.4);
 	//crypt.material.setSpecular(0.2,0.2,0.2);
 	crypt.material.setShininess(80);
-	objects.push_back(&crypt);
+	objects.push_back(&crypt);					// objects[0]
 	
 
 	// table
@@ -116,8 +117,8 @@ void initObjects () {
 	tableTop.material.setShininess(40);
 	tableStruct.setSize(10,10,10);
 	tableTop.setSize(10,10,10);
-	objects.push_back(&tableStruct);
-	objects.push_back(&tableTop);
+	objects.push_back(&tableStruct);			// objects[1]
+	objects.push_back(&tableTop);				// objects[2]
 	
 	// ceiling lamp
 	light.setPos(0,10,0);
@@ -126,7 +127,7 @@ void initObjects () {
 	light.material.setSpecular(1,1,1);
 	light.material.setShininess(120);
 	//light.material.setEmission(RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4);
-	objects.push_back(&light);
+	objects.push_back(&light);					// objects[3]
 	
 	// the stick
 	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
@@ -135,14 +136,14 @@ void initObjects () {
 	stick.setPos(0.2,3,0);
 	stick.setRot(30,330,0); // aehoo não consigo fazer isso aqui funcionar!!
 	stick.setSize(0.5,0.5,0.5);
-	objects.push_back(&stick);
+	objects.push_back(&stick);					// objects[4]
 	
 	// the ball
 	ball.setPos(0,2.95,0);
 	ball.material.setShininess(120);
 	ball.material.setDiffuse(0.6, 0.6, 0.6);
 	ball.material.setSpecular(0.9, 0.9, 0.9);
-	objects.push_back(&ball);
+	objects.push_back(&ball);					// objects[5]
 	
 	// walls
 	wall.material.setDiffuse(0.4,0.4,0.4);
@@ -198,9 +199,9 @@ void drawObjects () {
     glPopMatrix(); 
 
     
-    //drawAxis();  
-    
-    glEnable(GL_LIGHTING); //ends drawing of not-lighted objects
+    //drawAxis();
+
+	glEnable(GL_LIGHTING); //ends drawing of not-lighted objects
     
     
     
@@ -248,6 +249,7 @@ void drawObjects () {
 	vector<Object*>::iterator ob_it;
 	for( ob_it=objects.begin(); ob_it<objects.end(); ob_it++ )
 		(*ob_it)->draw();
+	glDisable(GL_LIGHTING);
 }
 
 
@@ -287,7 +289,7 @@ void lights () {
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, lampColor2);
 	glLightfv(GL_LIGHT2, GL_POSITION, direction);
 	
-	// spotlight 2
+	////spotlight 2
 	//GLfloat light2_position[] = { 0.0, 4.0, 0.0, 1.0 };
 	//GLfloat spot2_direction[] = { 0.0, 1.0, 0.0 };
 	//GLfloat shin = 120;
@@ -297,7 +299,19 @@ void lights () {
 	//glLightfv(GL_LIGHT3, GL_POSITION, light2_position);
 	//glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 13);
 	//glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, spot2_direction);
-	//glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 10.0);	
+	//glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 10.0);
+	
+	//// spotlight camera2
+	//GLfloat light2_position[] = { 0.0, 4.0, 0.0, 1.0 };
+	//GLfloat spot2_direction[] = { 0.0, 1.0, 0.0 };
+	//GLfloat shin = 120;
+	//glLightfv(GL_LIGHT4, GL_DIFFUSE, lampColor2);
+	//glLightfv(GL_LIGHT4, GL_SPECULAR, lampColor2);
+	//glLightfv(GL_LIGHT4, GL_SHININESS, &shin);
+	//glLightfv(GL_LIGHT4, GL_POSITION, light2_position);
+	//glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 13);
+	//glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot2_direction);
+	//glLightf(GL_LIGHT4, GL_SPOT_EXPONENT, 10.0);
 }
 
 
@@ -306,15 +320,18 @@ void display () {
 	int width = glutGet(GLUT_WINDOW_WIDTH);
     int height = glutGet(GLUT_WINDOW_HEIGHT);
 
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_SCISSOR_TEST);
+
+	// FIRST VIEWPORT
 	glMatrixMode (GL_PROJECTION); //set the matrix to projection
 	glLoadIdentity ();
 	
     glViewport (0, 0, (GLsizei)width, (GLfloat)height);
+    glScissor(0, 0, width, height);
     gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 2000.0);
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
-
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     // SUN
 	posit++;
@@ -323,19 +340,42 @@ void display () {
     
 	glLoadIdentity();  
     // IMPORTANT: these calls aren't in arbitrary order.
-		drawOsd();
+		//drawOsd();
 		camera.apply(objects[5]);
 		drawObjects();
 		lights();
-
+		
+	glPushMatrix();
+	//SECOND VIEWPORT
+	glViewport ((3*width)/4, (3*height)/4, (GLsizei)width/4, (GLfloat)height/4);
+	glScissor((3*width)/4, (3*height)/4, width/4, height/4);
 	
+	glMatrixMode (GL_PROJECTION); //set the matrix to projection
+	glLoadIdentity ();
+    
+    glOrtho(-7, 7, -3.5, 3.5, 0.1, 2000);
+    					
+    glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
+    glLoadIdentity();	//-----------> CHAMADA PROBLEMÁTICA. DESCOBRIR COMO RESOLVER
+						// (resolvido temporariamente com um push e pop)
+    
+	// IMPORTANT: these calls aren't in arbitrary order.
+		//drawOsd();
+		camera2.apply(NULL);
+		drawObjects();
+		//lights();
 
+	glDisable(GL_SCISSOR_TEST);
+
+	glPopMatrix();
+	
 		
     glutSwapBuffers();
     frameCounter++;
 }
 
-void init () {
+void init ()
+{
 	
 	initObjects();
 	
@@ -343,7 +383,7 @@ void init () {
     // Limpa a janela e habilita o teste para eliminar faces ocultas por outras
 	glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT);
 	
-	glEnable(GL_NORMALIZE); //normalizes all normals
+	glEnable(GL_NORMALIZE);		//normalizes all normals
 	glEnable (GL_DEPTH_TEST);
     glEnable (GL_LIGHTING);
     if(light1)
@@ -352,6 +392,8 @@ void init () {
 		glEnable (GL_LIGHT1);   // spotlight
     if(light3)
 		glEnable (GL_LIGHT2); 	// directional
+	//if(light4)
+	//	glEnable (GL_LIGHT4);
 	glEnable (GL_LIGHT3);
     glShadeModel (GL_SMOOTH);
     
@@ -410,6 +452,14 @@ void keyboardFunc (unsigned char key, int x, int y) {
 			glDisable(GL_LIGHT2);
 		light3 = !light3;
 	}
+	
+	//if (key == '4') {
+		//if(!light4)
+			//glEnable(GL_LIGHT4);
+		//else
+			//glDisable(GL_LIGHT4);
+		//light4 = !light4;
+	//}
     
     if (key==K_ESC)
     {

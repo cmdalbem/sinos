@@ -20,17 +20,25 @@ private:
 	int ncameras;
 	int cameraMode;
 	int posit;
-	float xpos, ypos, zpos, xrot, yrot;
-	float xrot2, yrot2, zoom;
+	GLfloat xpos, ypos, zpos, xrot, yrot;
+	GLfloat xrot2, yrot2, zoom;
 
 public:
 	//---------------------------- CONSTRUCTORS
 	Camera();
-
+	Camera( GLfloat newXPos, GLfloat newYPos, GLfloat newZPos,
+			GLfloat newXRot, GLfloat newYRot, int newCameraMode);
 	//---------------------------- DESTRUCTORS
 	~Camera();
 	
 	//---------------------------- GETTERS & SETTERS
+	void	setXPos(GLfloat newValue);
+	void	setYPos(GLfloat newValue);
+	void	setZPos(GLfloat newValue);
+	
+	void	setXRot(GLfloat newValue);
+	void	setYRot(GLfloat newValue);
+	
 	void	setCameraMode (int mode);
 	
 	char* 	getMode() const; //name of the current camera mode

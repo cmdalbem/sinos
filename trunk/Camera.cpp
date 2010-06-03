@@ -32,12 +32,46 @@ Camera::Camera()
 	zoom = 5;
 }
 
+Camera::Camera( GLfloat newXPos, GLfloat newYPos, GLfloat newZPos,
+				GLfloat newXRot, GLfloat newYRot, int newCameraMode)
+{
+	setXPos(newXPos);
+	setYPos(newYPos);
+	setZPos(newZPos);
+	
+	setXRot(newXRot);
+	setYRot(newYRot);
+	
+	cameraMode = newCameraMode;
+	
+	xrot2 = 45;		//
+	yrot2 = 20;		//
+	zoom = 5;		// Default values to these elements
+	posit=0;		//
+	ncameras=3;		//
+}
+
 
 //------------------------------------------------------------ DESTRUCTORS
 
 Camera::~Camera() { }
 
 //------------------------------------------------------------ GETTERS & SETTERS
+
+void Camera::setXPos(GLfloat newValue)
+{	xpos = newValue;	}
+void Camera::setYPos(GLfloat newValue)
+{	ypos = newValue;	}
+void Camera::setZPos(GLfloat newValue)
+{	zpos = newValue;	}
+	
+void Camera::setXRot(GLfloat newValue)
+{	xrot = newValue;	}	// if newValue is greater than 360, then we take
+							// the rest of the division (the module)
+void Camera::setYRot(GLfloat newValue)
+{	yrot = newValue;	}
+
+
 
 char* Camera::getMode () const
 {
