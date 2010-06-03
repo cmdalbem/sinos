@@ -328,6 +328,17 @@ void lights () {
 
 void display () {
 
+	int width = glutGet(GLUT_WINDOW_WIDTH);
+    int height = glutGet(GLUT_WINDOW_HEIGHT);
+
+	glMatrixMode (GL_PROJECTION); //set the matrix to projection
+	glLoadIdentity ();
+	
+    glViewport (0, 0, (GLsizei)width, (GLfloat)height);
+    gluPerspective (60, (GLfloat)width / (GLfloat)height, 0.1, 2000.0);
+    					
+    glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
+
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     // SUN
@@ -340,7 +351,35 @@ void display () {
 		drawOsd();
 		camera();
 		drawObjects();
-		lights();    	   
+		lights();
+
+
+
+
+
+	// SECOND VIEWPORT
+	glMatrixMode (GL_PROJECTION); //set the matrix to projection
+	glLoadIdentity ();
+	
+    glViewport ((3*width)/4, 0, (GLsizei)width/4, (GLfloat)height/4);
+    //gluPerspective (60, (GLfloat)width / (GLfloat)height, 0.1, 2000.0);
+    glOrtho(-10, 10, -5, 5, 0.1, 2000);
+    					
+    glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
+    
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+    
+	glLoadIdentity();  
+    // IMPORTANT: these calls aren't in arbitrary order.
+		drawOsd();
+		
+		//camera();
+		glRotatef(90,1.0,0.0,0.0);  //rotate our camera on the x-axis (left and right)
+		glRotatef(0 ,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
+		glTranslated(-1, -10, -1); //translate the screen to the position of our camera
+
+		drawObjects();
+		lights();
     
     glutSwapBuffers();
     frameCounter++;
@@ -369,6 +408,7 @@ void init () {
 }
 
 void reshape (int w, int h) {
+    /*
     glMatrixMode (GL_PROJECTION); //set the matrix to projection
     
 	glLoadIdentity ();
@@ -377,6 +417,7 @@ void reshape (int w, int h) {
     gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.1, 2000.0);
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
+    */
 }
 
 void keyboardFunc (unsigned char key, int x, int y) {
