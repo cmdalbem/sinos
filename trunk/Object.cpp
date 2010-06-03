@@ -217,7 +217,7 @@ void Object::rotate(GLfloat x, GLfloat y, GLfloat z)
 	rot[2] = rot[2] + z;
 }
 
-void Object::loadMaterial(Material const newmaterial)
+void Object::setMaterial(Material const newmaterial)
 {
 	material = newmaterial;
 }

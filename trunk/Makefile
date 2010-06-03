@@ -2,7 +2,7 @@ CC = gcc
 
 CFLAGS = -Wall
 
-OBJS = glm.o imageloader.o ObjectModel.o Object.o ObjectBall.o Material.o
+OBJS = glm.o imageloader.o ObjectModel.o Object.o ObjectBall.o Material.o Camera.o
 
 LIBS = -lglut
 
@@ -31,6 +31,9 @@ ObjectBall.o: ObjectBall.cpp
 	$(CC) $(FLAGS) $< -c $(FLAGS) $(LIBS) 
 
 Material.o: Material.cpp Material.h
+	$(CC) $(FLAGS) $< -c $(FLAGS) $(LIBS) 
+
+Camera.o: Camera.cpp Camera.h
 	$(CC) $(FLAGS) $< -c $(FLAGS) $(LIBS) 
 
 

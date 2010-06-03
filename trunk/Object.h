@@ -95,5 +95,5 @@ public:
 	void scale(GLfloat x, GLfloat y, GLfloat z);
 	void rotate(GLfloat x, GLfloat y, GLfloat z);
 	
-	void loadMaterial(Material const newmaterial);
+	void setMaterial(Material const newmaterial);
 };

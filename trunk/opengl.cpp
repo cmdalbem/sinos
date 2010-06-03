@@ -12,31 +12,25 @@
 #include "Object.h"
 #include "ObjectModel.h"
 #include "ObjectBall.h"
+#include "Camera.h"
 #include "constants.h"
+
+						 
 
 #define VFACTOR 100
 #define DFACTOR 5
 #define SUN_MOVEMENT_EQUATION sin(posit/VFACTOR)*DFACTOR, 7 , cos(posit/VFACTOR)*DFACTOR
-#define SPIRAL_MOVEMENT_EQUATION cos(posit/VFACTOR)*(100000/posit), 10 , sin(posit/VFACTOR)*(100000/posit)
-								 
+
 
 // Objects
 point star[NSTARS];
 vector<Object*> objects; /* The ideal is that, in the end, there 
 						  * will be no drawable object that isn't in this vector.
 						  */
+Camera camera;
 						  
 						  
-
 // !! The following globals aren't in their proper place. !!
-
-//camera attributes
-float 	xpos = 5, 
-		ypos = 7,
-		zpos = 5, 
-		xrot = 45, 
-		yrot = -45,
-		zoom = 5;
 
 //mouse
 static int	xold, yold;		
@@ -45,30 +39,23 @@ static int	right_click = GLUT_UP;
 		
 GLuint tigerTexture;
 		
-bool l1=true, l2=false, l3=true;
+bool light1=true, light2=true, light3=true;
 
 float posit=0; //iterational position for the SUN
 
 long int 	frameCounter, fps = 0;	//frames per second counter and register
 char 		osd[1024]; 				//text buffer for on-screen output
 
-/* TODO: create Camera Class */
-#define NCAMERAS 3
-int cameraMode=0;
-char cameraModes[][30] = { "Cinematic",
-						   "Manual",
-						   "Ball centered"
-						  };
 
 
 
-// OSD means On-Screen Display
 void drawOsd()
+/* Draws On-Screen Display */
 /* Adapted from http://www.opengl.org/resources/code/samples/glut_examples/examples/bitfont.c */
 {
   glDisable(GL_LIGHTING);
   
-  sprintf(osd,"FPS: %li   camera mode: %s   l1/l2/l3: %i %i %i",fps,cameraModes[cameraMode],l1,l2,l3);
+  sprintf(osd,"FPS: %li   camera mode: %s   l1/l2/l3: %i %i %i",fps,camera.getMode(),light1,light2,light3);
   
   glColor3f(1.0f, 1.0f, 1.0f);
   glRasterPos3f(-1, 0.5, -1);
@@ -102,13 +89,15 @@ void initObjects () {
 	// TODO: organize resolution constants so that the game may
 	//       have configuration of graphics performance.
 	static ObjectModel tableTop("obj/pooltable_table16x.obj");
-	static ObjectModel tableStruct("obj/pooltable_struct.obj");
+	static ObjectModel tableStruct("obj/pooltable_struct2x.obj");
 	static ObjectModel stick("obj/taco4x.obj");
 	static ObjectModel wall1("obj/wall.obj");
 	static ObjectModel wall2("obj/wall.obj");
 	static ObjectModel wall3("obj/wall.obj");
 	static ObjectModel wall4("obj/wall.obj");
 	static ObjectBall  ball(0.1,100,100);	
+	static ObjectModel light("obj/light1.obj");
+	
 
 	// table
 	tableStruct.material.setDiffuse(0.25,0.09,0.07);
@@ -143,10 +132,10 @@ void initObjects () {
 	wallMaterial.setDiffuse(0.4,0.4,0.4);
 	wallMaterial.setSpecular(0.7,0.7,0.7);
 	wallMaterial.setShininess(120);
-	wall1.loadMaterial(wallMaterial);
-	wall2.loadMaterial(wallMaterial);
-	wall3.loadMaterial(wallMaterial);
-	wall4.loadMaterial(wallMaterial);
+	wall1.setMaterial(wallMaterial);
+	wall2.setMaterial(wallMaterial);
+	wall3.setMaterial(wallMaterial);
+	wall4.setMaterial(wallMaterial);
 	int wallH = 20;
 	wall1.setPos(0,0,20);
 	wall1.setSize(20,wallH,20);
@@ -156,13 +145,27 @@ void initObjects () {
 	wall3.setPos(-20,0,0);
 	wall3.setSize(20,wallH,20);
 	wall3.rotate(0,-90,0);
-	wall4.setPos(0,-20,0);
+	wall4.setPos(0,20,0);
 	wall4.setSize(20,20,20);
 	wall4.rotate(90,0,0);
-	objects.push_back(&wall1);
-	objects.push_back(&wall2);
-	objects.push_back(&wall3);
-	objects.push_back(&wall4); //floor
+	//objects.push_back(&wall1);
+	//objects.push_back(&wall2);
+	//objects.push_back(&wall3);
+	//objects.push_back(&wall4); //floor
+	
+	
+	static ObjectModel crypt("obj/crypt.obj");
+	crypt.setSize(20,20,20);
+	crypt.setMaterial(wallMaterial);
+	crypt.material.setSpecular(0,0,0);
+	objects.push_back(&crypt);
+	
+	light.setPos(0,10,0);
+	light.setSize(5,5,5);
+	light.material.setDiffuse(0.3,0.3,0.3);
+	light.material.setSpecular(1,1,1);
+	light.material.setShininess(120);
+	objects.push_back(&light);
 	
 
     for (int i=0;i<NSTARS;i++)
@@ -171,6 +174,24 @@ void initObjects () {
     	star[i].y = rand()%100 - 50;
     	star[i].z = rand()%100 - 50;
     }
+}
+
+void drawAxis()
+{
+    glBegin(GL_LINES);
+       // x = read, y = green, z = blue
+       glColor3f(1.0f, 0.0f, 0.0f);
+       glVertex3i(-100,0,0);
+       glVertex3i(100,0,0);
+       
+       glColor3f(0.0f, 1.0f, 0.0f);
+       glVertex3i(0, -100,0);
+       glVertex3i(0, 100,0);
+       
+       glColor3f(0.0f, 0.0f, 1.0f);
+       glVertex3i(0,0,-100);
+       glVertex3i(0,0,100);
+    glEnd();     
 }
 
 void drawObjects () {
@@ -190,50 +211,36 @@ void drawObjects () {
 	glutSolidSphere(0.5,10,10);
     glPopMatrix(); 
 
-    // axis
-    glBegin(GL_LINES);
-       // x = read, y = green, z = blue
-       glColor3f(1.0f, 0.0f, 0.0f);
-       glVertex3i(-100,0,0);
-       glVertex3i(100,0,0);
-       
-       glColor3f(0.0f, 1.0f, 0.0f);
-       glVertex3i(0, -100,0);
-       glVertex3i(0, 100,0);
-       
-       glColor3f(0.0f, 0.0f, 1.0f);
-       glVertex3i(0,0,-100);
-       glVertex3i(0,0,100);
-    glEnd();       
+    
+    //drawAxis();  
     
     glEnable(GL_LIGHTING); //ends drawing of not-lighted objects
     
     
     
-    //// FLOOR
-    glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, tigerTexture);
-	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // tiger carpet
+    //glEnable(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, tigerTexture);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBegin(GL_POLYGON);
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glTexCoord2f(1.0f, 0.5f);
-		glVertex3i(6,  0, 0);
-		glTexCoord2f(0.66666666, 1.0f);
-		glVertex3i(2,  0, 3);
-		glTexCoord2f(0.33333333, 1.0f);
-		glVertex3i(-2, 0, 3);
-		glTexCoord2f(0.0f, 0.5f);
-		glVertex3i(-6, 0, 0);
-		glTexCoord2f(0.33333333, 0.0f);
-		glVertex3i(-2, 0, -3);
-		glTexCoord2f(0.66666666, 0.0f);
-		glVertex3i(2,  0, -3);
-	glEnd();
-	glDisable(GL_TEXTURE_2D);
+	////glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	////glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //glBegin(GL_POLYGON);
+		//glColor3f(1.0f, 1.0f, 1.0f);
+		//glTexCoord2f(1.0f, 0.5f);
+		//glVertex3i(6,  0, 0);
+		//glTexCoord2f(0.66666666, 1.0f);
+		//glVertex3i(2,  0, 3);
+		//glTexCoord2f(0.33333333, 1.0f);
+		//glVertex3i(-2, 0, 3);
+		//glTexCoord2f(0.0f, 0.5f);
+		//glVertex3i(-6, 0, 0);
+		//glTexCoord2f(0.33333333, 0.0f);
+		//glVertex3i(-2, 0, -3);
+		//glTexCoord2f(0.66666666, 0.0f);
+		//glVertex3i(2,  0, -3);
+	//glEnd();
+	//glDisable(GL_TEXTURE_2D);
 	
 	
 	// iterational plan drawing test (work in progress)
@@ -243,11 +250,11 @@ void drawObjects () {
 	wallMaterial.setShininess(120);
     wallMaterial.apply();
 	glPushMatrix();
-	glTranslated(-20, 20, -20);
+	glTranslated(-20, -1, -20);
 	glRotatef(90,1,0,0);
 	glScalef(40,40,40);
 	glTranslated(0,0,0);
-	drawPlane(50,50, 0,0,1);
+	drawPlane(50,50, 0,0,-1);
 	wallMaterial.unapply();
 	glPopMatrix();
 	
@@ -257,73 +264,53 @@ void drawObjects () {
 		(*ob_it)->draw();
 }
 
-void camera () {
-
-	//gluLookAt(0, 3, -8, 0, 0, 0, 0, 1, 0);
-	
-	// orbital movement (remember to disable drawing of the sun)
-	//gluLookAt( SUN_MOVEMENT_EQUATION, 0,0,0, 0,1,0);
-	
-	switch( cameraMode )
-	{
-		case 0:
-			// cinematic dramatic camera
-			gluLookAt( SPIRAL_MOVEMENT_EQUATION,
-					   objects[3]->getPosX(), objects[3]->getPosY(), objects[3]->getPosZ(), /*ball position*/
-					   0,1,0);
-			break;
-		case 1:
-			// controlled movement
-			glRotatef(xrot,1.0,0.0,0.0);  //rotate our camera on the x-axis (left and right)
-			glRotatef(yrot,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
-			glTranslated(-xpos,-ypos,-zpos); //translate the screen to the position of our camera
-			break;
-		
-		case 2:
-			// ball centered camera
-			float orig[3] = { objects[3]->getPosX(), objects[3]->getPosY(), objects[3]->getPosZ() }; //ball positions
-			
-			gluLookAt( orig[0] + sin(xrot*0.1)*sin(-yrot*0.1)*zoom, orig[1] + cos(xrot*0.1)*zoom, orig[2] + cos(-yrot*0.1)*sin(xrot*0.1)*zoom,
-					   orig[0], orig[1], orig[2], /*ball position*/
-					   //SUN_MOVEMENT_EQUATION, /*sun position*/					   
-					   0,1,0);
-			break;
-	}
-
-}
 
 void lights () {
 	
 	// ambient light
-	GLfloat ambientColor[] = {0, 0, 0, 1.0f};
+	GLfloat ambientColor[] = {0.0, 0.0, 0.0, 1.0f};
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor);
 	
 	// position light (sun)
 	GLfloat ambientLight[] = { 0.0, 0.0, 0.0, 1.0f };
-	GLfloat diffuseLight[] = { 1.0f, 0.6f, 0.6f, 1.0f };
+	GLfloat diffuseLight[] = { 0.9f, 0.5f, 0.5f, 1.0f };
 	GLfloat specularLight[] = { 1.0f, 0.6f, 0.6f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.03);
 	
-	// directional light
-	GLfloat lampColor[] = {RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4, 1.0f};
-	GLfloat direction[] = {0.0f, 1.0f, 0.0f, 0.0f};
-	glLightfv(GL_LIGHT2, GL_DIFFUSE, lampColor);
-	glLightfv(GL_LIGHT2, GL_SPECULAR, lampColor);
-	glLightfv(GL_LIGHT2, GL_POSITION, direction);
-	
+
 	// spotlight
+	GLfloat lampColor[] = {RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4, 1.0f};
 	GLfloat light1_position[] = { 0.0, 10.0, 0.0, 1.0 };
 	GLfloat spot_direction[] = { 0.0, -1.0, 0.0 };
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, lampColor);
 	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
-	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.7);
-	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.);
-	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.0);
+	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.3);
+	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.05);
+	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.);
 	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 90);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);	
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 10.0);
+	
+	// directional light
+	GLfloat lampColor2[] = {RGB(252), RGB(234), RGB(186), 1.0f};
+	GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, lampColor2);
+	glLightfv(GL_LIGHT2, GL_POSITION, direction);
+	
+	// spotlight2
+	//GLfloat lampColor2[] = {1,1,1 , 1.0f};
+	//GLfloat light2_position[] = { 0.0, 2.0, 0.0, 1.0 };
+	//GLfloat spot2_direction[] = { 0.0, 1.0, 0.0 };
+	//glLightfv(GL_LIGHT2, GL_DIFFUSE, lampColor2);
+	//glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
+	//glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 90);
+	//glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, spot2_direction);
+	//glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 80.0);	
 }
 
 void display () {
@@ -349,7 +336,7 @@ void display () {
 	glLoadIdentity();  
     // IMPORTANT: these calls aren't in arbitrary order.
 		drawOsd();
-		camera();
+		camera.apply(objects[3]);
 		drawObjects();
 		lights();
 
@@ -357,29 +344,29 @@ void display () {
 
 
 
-	// SECOND VIEWPORT
-	glMatrixMode (GL_PROJECTION); //set the matrix to projection
-	glLoadIdentity ();
+	//// SECOND VIEWPORT
+	//glMatrixMode (GL_PROJECTION); //set the matrix to projection
+	//glLoadIdentity ();
 	
-    glViewport ((3*width)/4, 0, (GLsizei)width/4, (GLfloat)height/4);
-    //gluPerspective (60, (GLfloat)width / (GLfloat)height, 0.1, 2000.0);
-    glOrtho(-10, 10, -5, 5, 0.1, 2000);
+    //glViewport ((3*width)/4, 0, (GLsizei)width/4, (GLfloat)height/4);
+    ////gluPerspective (60, (GLfloat)width / (GLfloat)height, 0.1, 2000.0);
+    //glOrtho(-10, 10, -5, 5, 0.1, 2000);
     					
-    glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
+    //glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
     
-    glLightfv(GL_LIGHT0, GL_POSITION, position);
+    //glLightfv(GL_LIGHT0, GL_POSITION, position);
     
-	glLoadIdentity();  
-    // IMPORTANT: these calls aren't in arbitrary order.
-		drawOsd();
+	//glLoadIdentity();  
+    //// IMPORTANT: these calls aren't in arbitrary order.
+		//drawOsd();
 		
-		//camera();
-		glRotatef(90,1.0,0.0,0.0);  //rotate our camera on the x-axis (left and right)
-		glRotatef(0 ,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
-		glTranslated(-1, -10, -1); //translate the screen to the position of our camera
+		////camera();
+		//glRotatef(90,1.0,0.0,0.0);  //rotate our camera on the x-axis (left and right)
+		//glRotatef(0 ,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
+		//glTranslated(-1, -10, -1); //translate the screen to the position of our camera
 
-		drawObjects();
-		lights();
+		//drawObjects();
+		//lights();
     
     glutSwapBuffers();
     frameCounter++;
@@ -398,7 +385,7 @@ void init () {
     glEnable (GL_LIGHTING);
     glEnable (GL_LIGHT0); 	// sun
     glEnable (GL_LIGHT1);   // spotlight
-    glEnable (GL_LIGHT2); 	// directional
+    //glEnable (GL_LIGHT2); 	// directional
     glShadeModel (GL_SMOOTH);
     
     // TODO: find better place for this
@@ -423,41 +410,33 @@ void reshape (int w, int h) {
 void keyboardFunc (unsigned char key, int x, int y) {
    
     if( key=='c' )
-		cameraMode = (cameraMode+1)%NCAMERAS;
-    
-    // move camera up
-    if( key=='w')
-		ypos += 0.2;
-	
-	// move camera down
-	if( key=='s')
-		ypos -= 0.2;
+		camera.nextCameraMode();
     
 	// turn on/off light0
 	if (key == '1') {
-		if(!l1)
+		if(!light1)
 			glEnable(GL_LIGHT0);
 		else
 			glDisable(GL_LIGHT0);
-		l1=!l1;
+		light1 = !light1;
 	}
 	
 	// turn on/off light1
 	if (key == '2') {
-		if(!l2)
+		if(!light2)
 			glEnable(GL_LIGHT1);
 		else
 			glDisable(GL_LIGHT1);
-		l2=!l2;
+		light2 = !light2;
 	}
 	
     // turn on/off light2
     if (key == '3') {
-		if(!l3)
+		if(!light3)
 			glEnable(GL_LIGHT2);
 		else
 			glDisable(GL_LIGHT2);
-		l3=!l3;
+		light3 = !light3;
 	}
     
     if (key==K_ESC)
@@ -469,6 +448,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
 
 
 void mouseFunc(int button, int state, int x, int y) {
+/* This funciont only updates click states and positions */
  
   if (GLUT_LEFT_BUTTON == button)
     left_click = state;
@@ -482,23 +462,12 @@ void mouseMotionFunc(int x, int y) {
 	
 	if (GLUT_DOWN == left_click)
     {
-		xrot = xrot + (y - yold) / 5.f;
-		yrot = yrot + (x - xold) / 5.f;
-		glutPostRedisplay();
+		camera.action1(x - xold, y - yold);
     }
 	
 	if (GLUT_DOWN == right_click)
 	{
-		float xrotrad, yrotrad;
-		yrotrad = (yrot / 180 * M_PI);
-		xrotrad = (xrot / 180 * M_PI);
-		xpos += (yold - y)/10.0 * float(sin(yrotrad)) ;
-		zpos -= (yold - y)/10.0 * float(cos(yrotrad)) ;
-		ypos -= (yold - y)/10.0 * float(sin(xrotrad)) ;
-		glutPostRedisplay();
-		
-		zoom += (y - yold) / 5.f;
-		if(zoom<1) zoom=1;		// do not let reverse the camera
+		camera.action2(x - xold, y - yold);
 	}
 
 	xold = x;
