@@ -124,8 +124,8 @@ void Camera::apply(Object* object)
 		
 		case 2:
 			// ball centered camera
-			float orig[3] = { object->getPosX(), object->getPosY(), object->getPosZ() }; //ball positions
-			
+			float orig[3] = { object->getPosX(), object->getPosY(), object->getPosZ() }; //ball position
+
 			gluLookAt( orig[0] + sin(yrot2*0.05)*sin(xrot2*0.05)*zoom, orig[1] + cos(yrot2*0.05)*zoom, orig[2] + cos(xrot2*0.05)*sin(yrot2*0.05)*zoom,
 					   orig[0], orig[1], orig[2],
 					   0,1,0);

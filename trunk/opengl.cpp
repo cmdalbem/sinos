@@ -46,6 +46,8 @@ float posit=0; //iterational position for the SUN
 long int 	frameCounter, fps = 0;	//frames per second counter and register
 char 		osd[1024]; 				//text buffer for on-screen output
 
+int lensAngle = 60;
+
 
 
 
@@ -91,12 +93,18 @@ void initObjects () {
 	static ObjectModel tableTop("obj/pooltable_table16x.obj");
 	static ObjectModel tableStruct("obj/pooltable_struct2x.obj");
 	static ObjectModel stick("obj/taco4x.obj");
-	static ObjectModel wall1("obj/wall.obj");
-	static ObjectModel wall2("obj/wall.obj");
-	static ObjectModel wall3("obj/wall.obj");
-	static ObjectModel wall4("obj/wall.obj");
+	static ObjectModel wall("obj/wall.obj");
 	static ObjectBall  ball(0.1,100,100);	
 	static ObjectModel light("obj/light1.obj");
+	static ObjectModel crypt("obj/crypt.obj");
+	
+	// crypt scenario
+	crypt.setPos(0,-2,0);
+	crypt.setSize(25,35,25);
+	crypt.material.setDiffuse(0.4,0.4,0.4);
+	//crypt.material.setSpecular(0.2,0.2,0.2);
+	crypt.material.setShininess(80);
+	objects.push_back(&crypt);
 	
 
 	// table
@@ -110,6 +118,15 @@ void initObjects () {
 	tableTop.setSize(10,10,10);
 	objects.push_back(&tableStruct);
 	objects.push_back(&tableTop);
+	
+	// ceiling lamp
+	light.setPos(0,10,0);
+	light.setSize(5,5,5);
+	light.material.setDiffuse(0.5,0.5,0.5);
+	light.material.setSpecular(1,1,1);
+	light.material.setShininess(120);
+	//light.material.setEmission(RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4);
+	objects.push_back(&light);
 	
 	// the stick
 	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
@@ -128,44 +145,13 @@ void initObjects () {
 	objects.push_back(&ball);
 	
 	// walls
-	Material wallMaterial;
-	wallMaterial.setDiffuse(0.4,0.4,0.4);
-	wallMaterial.setSpecular(0.7,0.7,0.7);
-	wallMaterial.setShininess(120);
-	wall1.setMaterial(wallMaterial);
-	wall2.setMaterial(wallMaterial);
-	wall3.setMaterial(wallMaterial);
-	wall4.setMaterial(wallMaterial);
-	int wallH = 20;
-	wall1.setPos(0,0,20);
-	wall1.setSize(20,wallH,20);
-	wall2.setPos(0,0,-20);
-	wall2.setSize(20,wallH,20);
-	wall2.rotate(0,180,0);
-	wall3.setPos(-20,0,0);
-	wall3.setSize(20,wallH,20);
-	wall3.rotate(0,-90,0);
-	wall4.setPos(0,20,0);
-	wall4.setSize(20,20,20);
-	wall4.rotate(90,0,0);
-	//objects.push_back(&wall1);
-	//objects.push_back(&wall2);
-	//objects.push_back(&wall3);
-	//objects.push_back(&wall4); //floor
-	
-	
-	static ObjectModel crypt("obj/crypt.obj");
-	crypt.setSize(20,20,20);
-	crypt.setMaterial(wallMaterial);
-	crypt.material.setSpecular(0,0,0);
-	objects.push_back(&crypt);
-	
-	light.setPos(0,10,0);
-	light.setSize(5,5,5);
-	light.material.setDiffuse(0.3,0.3,0.3);
-	light.material.setSpecular(1,1,1);
-	light.material.setShininess(120);
-	objects.push_back(&light);
+	wall.material.setDiffuse(0.4,0.4,0.4);
+	wall.material.setSpecular(0.7,0.7,0.7);
+	wall.material.setShininess(120);
+	wall.setPos(0,20,0);
+	wall.setSize(20,20,20);
+	wall.rotate(90,0,0);
+	//objects.push_back(&wall);
 	
 
     for (int i=0;i<NSTARS;i++)
@@ -244,19 +230,19 @@ void drawObjects () {
 	
 	
 	// iterational plan drawing test (work in progress)
-	Material wallMaterial;
-	wallMaterial.setDiffuse(0.4,0.4,0.4);
-	wallMaterial.setSpecular(0.7,0.7,0.7);
-	wallMaterial.setShininess(120);
-    wallMaterial.apply();
-	glPushMatrix();
-	glTranslated(-20, -1, -20);
-	glRotatef(90,1,0,0);
-	glScalef(40,40,40);
-	glTranslated(0,0,0);
-	drawPlane(50,50, 0,0,-1);
-	wallMaterial.unapply();
-	glPopMatrix();
+	//Material wallMaterial;
+	//wallMaterial.setDiffuse(0.4,0.4,0.4);
+	//wallMaterial.setSpecular(0.7,0.7,0.7);
+	//wallMaterial.setShininess(120);
+    //wallMaterial.apply();
+	//glPushMatrix();
+	//glTranslated(-15, 0, -15);
+	//glRotatef(90,1,0,0);
+	//glScalef(30,30,30);
+	////glTranslated(0,0,0);
+	//drawPlane(100,100, 0,0,-1);
+	//wallMaterial.unapply();
+	//glPopMatrix();
 	
 	// draw objects
 	vector<Object*>::iterator ob_it;
@@ -278,23 +264,22 @@ void lights () {
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.);
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.03);
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.5);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.002);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.004);
 	
-
 	// spotlight
 	GLfloat lampColor[] = {RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4, 1.0f};
 	GLfloat light1_position[] = { 0.0, 10.0, 0.0, 1.0 };
 	GLfloat spot_direction[] = { 0.0, -1.0, 0.0 };
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, lampColor);
 	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
-	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.3);
-	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.05);
+	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.2);
+	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.04);
 	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.);
 	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 90);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 10.0);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 12.0);
 	
 	// directional light
 	GLfloat lampColor2[] = {RGB(252), RGB(234), RGB(186), 1.0f};
@@ -302,16 +287,19 @@ void lights () {
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, lampColor2);
 	glLightfv(GL_LIGHT2, GL_POSITION, direction);
 	
-	// spotlight2
-	//GLfloat lampColor2[] = {1,1,1 , 1.0f};
-	//GLfloat light2_position[] = { 0.0, 2.0, 0.0, 1.0 };
+	// spotlight 2
+	//GLfloat light2_position[] = { 0.0, 4.0, 0.0, 1.0 };
 	//GLfloat spot2_direction[] = { 0.0, 1.0, 0.0 };
-	//glLightfv(GL_LIGHT2, GL_DIFFUSE, lampColor2);
-	//glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
-	//glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 90);
-	//glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, spot2_direction);
-	//glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 80.0);	
+	//GLfloat shin = 120;
+	//glLightfv(GL_LIGHT3, GL_DIFFUSE, lampColor2);
+	//glLightfv(GL_LIGHT3, GL_SPECULAR, lampColor2);
+	//glLightfv(GL_LIGHT3, GL_SHININESS, &shin);
+	//glLightfv(GL_LIGHT3, GL_POSITION, light2_position);
+	//glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 13);
+	//glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, spot2_direction);
+	//glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 10.0);	
 }
+
 
 void display () {
 
@@ -322,7 +310,7 @@ void display () {
 	glLoadIdentity ();
 	
     glViewport (0, 0, (GLsizei)width, (GLfloat)height);
-    gluPerspective (60, (GLfloat)width / (GLfloat)height, 0.1, 2000.0);
+    gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 2000.0);
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
 
@@ -336,38 +324,13 @@ void display () {
 	glLoadIdentity();  
     // IMPORTANT: these calls aren't in arbitrary order.
 		drawOsd();
-		camera.apply(objects[3]);
+		camera.apply(objects[5]);
 		drawObjects();
 		lights();
 
-
-
-
-
-	//// SECOND VIEWPORT
-	//glMatrixMode (GL_PROJECTION); //set the matrix to projection
-	//glLoadIdentity ();
 	
-    //glViewport ((3*width)/4, 0, (GLsizei)width/4, (GLfloat)height/4);
-    ////gluPerspective (60, (GLfloat)width / (GLfloat)height, 0.1, 2000.0);
-    //glOrtho(-10, 10, -5, 5, 0.1, 2000);
-    					
-    //glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
-    
-    //glLightfv(GL_LIGHT0, GL_POSITION, position);
-    
-	//glLoadIdentity();  
-    //// IMPORTANT: these calls aren't in arbitrary order.
-		//drawOsd();
-		
-		////camera();
-		//glRotatef(90,1.0,0.0,0.0);  //rotate our camera on the x-axis (left and right)
-		//glRotatef(0 ,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
-		//glTranslated(-1, -10, -1); //translate the screen to the position of our camera
 
-		//drawObjects();
-		//lights();
-    
+		
     glutSwapBuffers();
     frameCounter++;
 }
@@ -383,9 +346,13 @@ void init () {
 	glEnable(GL_NORMALIZE); //normalizes all normals
 	glEnable (GL_DEPTH_TEST);
     glEnable (GL_LIGHTING);
-    glEnable (GL_LIGHT0); 	// sun
-    glEnable (GL_LIGHT1);   // spotlight
-    //glEnable (GL_LIGHT2); 	// directional
+    if(light1)
+		glEnable (GL_LIGHT0); 	// sun
+    if(light2)
+		glEnable (GL_LIGHT1);   // spotlight
+    if(light3)
+		glEnable (GL_LIGHT2); 	// directional
+	glEnable (GL_LIGHT3);
     glShadeModel (GL_SMOOTH);
     
     // TODO: find better place for this
@@ -409,6 +376,11 @@ void reshape (int w, int h) {
 
 void keyboardFunc (unsigned char key, int x, int y) {
    
+    if ( key=='s' )
+		lensAngle+=2;
+	if ( key=='w' )
+		lensAngle-=2;
+    
     if( key=='c' )
 		camera.nextCameraMode();
     
