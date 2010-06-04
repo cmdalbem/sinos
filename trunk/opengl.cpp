@@ -259,10 +259,14 @@ void lights () {
 	GLfloat ambientColor[] = {0.0, 0.0, 0.0, 1.0f};
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor);
 	
+	
 	// position light (sun)
+	posit++;
+	GLfloat position[] = { SUN_MOVEMENT_EQUATION, 1.0f };
 	GLfloat ambientLight[] = { 0.0, 0.0, 0.0, 1.0f };
 	GLfloat diffuseLight[] = { 0.9f, 0.5f, 0.5f, 1.0f };
 	GLfloat specularLight[] = { 1.0f, 0.6f, 0.6f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, position);    
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
@@ -323,6 +327,7 @@ void display () {
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_SCISSOR_TEST);
 
+
 	// FIRST VIEWPORT
 	glMatrixMode (GL_PROJECTION); //set the matrix to projection
 	glLoadIdentity ();
@@ -332,20 +337,14 @@ void display () {
     gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 2000.0);
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
-    
-    // SUN
-	posit++;
-	GLfloat position[] = { SUN_MOVEMENT_EQUATION, 1.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, position);    
-    
 	glLoadIdentity();  
     // IMPORTANT: these calls aren't in arbitrary order.
-		//drawOsd();
+		drawOsd();
 		camera.apply(objects[5]);
-		drawObjects();
 		lights();
-		
-	glPushMatrix();
+		drawObjects();
+				
+
 	//SECOND VIEWPORT
 	glViewport ((3*width)/4, (3*height)/4, (GLsizei)width/4, (GLfloat)height/4);
 	glScissor((3*width)/4, (3*height)/4, width/4, height/4);
@@ -356,19 +355,14 @@ void display () {
     glOrtho(-7, 7, -3.5, 3.5, 0.1, 2000);
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
-    glLoadIdentity();	//-----------> CHAMADA PROBLEMÁTICA. DESCOBRIR COMO RESOLVER
-						// (resolvido temporariamente com um push e pop)
-    
+    glLoadIdentity();
 	// IMPORTANT: these calls aren't in arbitrary order.
-		//drawOsd();
 		camera2.apply(NULL);
+		lights();
 		drawObjects();
-		//lights();
+
 
 	glDisable(GL_SCISSOR_TEST);
-
-	glPopMatrix();
-	
 		
     glutSwapBuffers();
     frameCounter++;
@@ -418,6 +412,7 @@ void reshape (int w, int h) {
 
 void keyboardFunc (unsigned char key, int x, int y) {
    
+    // chances lens focal distance
     if ( key=='s' )
 		lensAngle+=2;
 	if ( key=='w' )
