@@ -92,12 +92,25 @@ void initObjects () {
 	// TODO: organize resolution constants so that the game may
 	//       have configuration of graphics performance.
 	static ObjectModel crypt("obj/crypt.obj");
-	static ObjectModel tableStruct("obj/pooltable_struct2x.obj");
+	static ObjectModel tableStruct("obj/pooltable_struct.obj");
 	static ObjectModel tableTop("obj/pooltable_table16x.obj");
 	static ObjectModel light("obj/light1.obj");
 	static ObjectModel stick("obj/taco4x.obj");
 	static ObjectBall  ball(0.1,100,100);
 	static ObjectModel wall("obj/wall.obj");	
+	static ObjectModel tableStruct2("obj/pooltable_struct.obj");
+	static ObjectModel tableTop2("obj/pooltable_table16x.obj");
+	static ObjectModel tableStruct3("obj/pooltable_struct.obj");
+	static ObjectModel tableTop3("obj/pooltable_table16x.obj");
+	static ObjectModel tableStruct4("obj/pooltable_struct.obj");
+	static ObjectModel tableTop4("obj/pooltable_table16x.obj");
+	
+	// the ball
+	ball.setPos(0,2.95,0);
+	ball.material.setShininess(120);
+	ball.material.setDiffuse(0.6, 0.6, 0.6);
+	ball.material.setSpecular(0.9, 0.9, 0.9);
+	objects.push_back(&ball);
 	
 	// crypt scenario
 	crypt.setPos(0,-2,0);
@@ -105,9 +118,8 @@ void initObjects () {
 	crypt.material.setDiffuse(0.4,0.4,0.4);
 	//crypt.material.setSpecular(0.2,0.2,0.2);
 	crypt.material.setShininess(80);
-	objects.push_back(&crypt);					// objects[0]
+	objects.push_back(&crypt);
 	
-
 	// table
 	tableStruct.material.setDiffuse(0.25,0.09,0.07);
 	tableStruct.material.setSpecular(0.3,0.3,0.3);
@@ -117,8 +129,48 @@ void initObjects () {
 	tableTop.material.setShininess(40);
 	tableStruct.setSize(10,10,10);
 	tableTop.setSize(10,10,10);
-	objects.push_back(&tableStruct);			// objects[1]
-	objects.push_back(&tableTop);				// objects[2]
+	objects.push_back(&tableStruct);
+	objects.push_back(&tableTop);
+	
+	// table2
+	tableStruct2.material.setDiffuse(0.25,0.09,0.07);
+	tableStruct2.material.setSpecular(0.3,0.3,0.3);
+	tableStruct2.material.setShininess(120);
+	tableTop2.material.setDiffuse(0.078 *0.75, 0.66 *0.75, 0.078 *0.75);
+	tableTop2.material.setSpecular(0.1,0.1,0.1);
+	tableTop2.material.setShininess(40);
+	tableStruct2.setSize(10,10,10);
+	tableTop2.setSize(10,10,10);
+	tableStruct2.setPos(0,0,-30);
+	tableTop2.setPos(0,0,-30);
+	objects.push_back(&tableStruct2);
+	objects.push_back(&tableTop2);
+	// table3
+	tableStruct3.material.setDiffuse(0.25,0.09,0.07);
+	tableStruct3.material.setSpecular(0.3,0.3,0.3);
+	tableStruct3.material.setShininess(120);
+	tableTop3.material.setDiffuse(0.078 *0.75, 0.66 *0.75, 0.078 *0.75);
+	tableTop3.material.setSpecular(0.1,0.1,0.1);
+	tableTop3.material.setShininess(40);
+	tableStruct3.setSize(10,10,10);
+	tableTop3.setSize(10,10,10);
+	tableStruct3.setPos(0,0,30);
+	tableTop3.setPos(0,0,30);
+	objects.push_back(&tableStruct3);
+	objects.push_back(&tableTop3);	
+	// table4
+	tableStruct4.material.setDiffuse(0.25,0.09,0.07);
+	tableStruct4.material.setSpecular(0.3,0.3,0.3);
+	tableStruct4.material.setShininess(120);
+	tableTop4.material.setDiffuse(0.078 *0.75, 0.66 *0.75, 0.078 *0.75);
+	tableTop4.material.setSpecular(0.1,0.1,0.1);
+	tableTop4.material.setShininess(40);
+	tableStruct4.setSize(10,10,10);
+	tableTop4.setSize(10,10,10);
+	tableStruct4.setPos(0,0,60);
+	tableTop4.setPos(0,0,60);
+	objects.push_back(&tableStruct4);
+	objects.push_back(&tableTop4);		
 	
 	// ceiling lamp
 	light.setPos(0,10,0);
@@ -127,7 +179,7 @@ void initObjects () {
 	light.material.setSpecular(1,1,1);
 	light.material.setShininess(120);
 	//light.material.setEmission(RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4);
-	objects.push_back(&light);					// objects[3]
+	objects.push_back(&light);
 	
 	// the stick
 	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
@@ -136,14 +188,7 @@ void initObjects () {
 	stick.setPos(0.2,3,0);
 	stick.setRot(30,330,0); // aehoo não consigo fazer isso aqui funcionar!!
 	stick.setSize(0.5,0.5,0.5);
-	objects.push_back(&stick);					// objects[4]
-	
-	// the ball
-	ball.setPos(0,2.95,0);
-	ball.material.setShininess(120);
-	ball.material.setDiffuse(0.6, 0.6, 0.6);
-	ball.material.setSpecular(0.9, 0.9, 0.9);
-	objects.push_back(&ball);					// objects[5]
+	objects.push_back(&stick);
 	
 	// walls
 	wall.material.setDiffuse(0.4,0.4,0.4);
@@ -270,9 +315,9 @@ void lights () {
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.5);
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.4);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.002);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.004);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.006);
 	
 	// spotlight
 	GLfloat lampColor[] = {RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4, 1.0f};
@@ -287,35 +332,39 @@ void lights () {
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
 	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 12.0);
 	
+	// spotlight 2
+	GLfloat light2_position[] = { 0.0, 10.0, -30.0, 1.0 };
+	glLightfv(GL_LIGHT3, GL_DIFFUSE, lampColor);
+	glLightfv(GL_LIGHT3, GL_POSITION, light2_position);
+	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 0.5);
+	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0.04);
+	glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 90);
+	glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, spot_direction);
+	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 6.0);
+	// spotlight 3
+	GLfloat light3_position[] = { 0.0, 10.0, 30.0, 1.0 };
+	glLightfv(GL_LIGHT4, GL_DIFFUSE, lampColor);
+	glLightfv(GL_LIGHT4, GL_POSITION, light3_position);
+	glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 0.5);
+	glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, 0.04);
+	glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 90);
+	glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot_direction);
+	glLightf(GL_LIGHT4, GL_SPOT_EXPONENT, 6.0);
+	// spotlight 4
+	GLfloat light4_position[] = { 0.0, 10.0, 60.0, 1.0 };
+	glLightfv(GL_LIGHT5, GL_DIFFUSE, lampColor);
+	glLightfv(GL_LIGHT5, GL_POSITION, light4_position);
+	glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 0.5);
+	glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, 0.04);
+	glLightf(GL_LIGHT5, GL_SPOT_CUTOFF, 90);
+	glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot_direction);
+	glLightf(GL_LIGHT5, GL_SPOT_EXPONENT, 6.0);	
+	
 	// directional light
 	GLfloat lampColor2[] = {RGB(252), RGB(234), RGB(186), 1.0f};
 	GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, lampColor2);
 	glLightfv(GL_LIGHT2, GL_POSITION, direction);
-	
-	////spotlight 2
-	//GLfloat light2_position[] = { 0.0, 4.0, 0.0, 1.0 };
-	//GLfloat spot2_direction[] = { 0.0, 1.0, 0.0 };
-	//GLfloat shin = 120;
-	//glLightfv(GL_LIGHT3, GL_DIFFUSE, lampColor2);
-	//glLightfv(GL_LIGHT3, GL_SPECULAR, lampColor2);
-	//glLightfv(GL_LIGHT3, GL_SHININESS, &shin);
-	//glLightfv(GL_LIGHT3, GL_POSITION, light2_position);
-	//glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 13);
-	//glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, spot2_direction);
-	//glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 10.0);
-	
-	//// spotlight camera2
-	//GLfloat light2_position[] = { 0.0, 4.0, 0.0, 1.0 };
-	//GLfloat spot2_direction[] = { 0.0, 1.0, 0.0 };
-	//GLfloat shin = 120;
-	//glLightfv(GL_LIGHT4, GL_DIFFUSE, lampColor2);
-	//glLightfv(GL_LIGHT4, GL_SPECULAR, lampColor2);
-	//glLightfv(GL_LIGHT4, GL_SHININESS, &shin);
-	//glLightfv(GL_LIGHT4, GL_POSITION, light2_position);
-	//glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 13);
-	//glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot2_direction);
-	//glLightf(GL_LIGHT4, GL_SPOT_EXPONENT, 10.0);
 }
 
 
@@ -340,7 +389,7 @@ void display () {
 	glLoadIdentity();  
     // IMPORTANT: these calls aren't in arbitrary order.
 		drawOsd();
-		camera.apply(objects[5]);
+		camera.apply(objects[0]);
 		lights();
 		drawObjects();
 				
@@ -352,7 +401,7 @@ void display () {
 	glMatrixMode (GL_PROJECTION); //set the matrix to projection
 	glLoadIdentity ();
     
-    glOrtho(-7, 7, -3.5, 3.5, 0.1, 2000);
+    glOrtho(-7, 7, -4, 3.5, 0.1, 200);
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
     glLoadIdentity();
@@ -380,16 +429,20 @@ void init ()
 	glEnable(GL_NORMALIZE);		//normalizes all normals
 	glEnable (GL_DEPTH_TEST);
     glEnable (GL_LIGHTING);
+    glShadeModel (GL_SMOOTH);
+    
+    
     if(light1)
 		glEnable (GL_LIGHT0); 	// sun
     if(light2)
 		glEnable (GL_LIGHT1);   // spotlight
     if(light3)
 		glEnable (GL_LIGHT2); 	// directional
-	//if(light4)
-	//	glEnable (GL_LIGHT4);
-	glEnable (GL_LIGHT3);
-    glShadeModel (GL_SMOOTH);
+	
+	glEnable (GL_LIGHT3); // extra spotlight1
+	glEnable (GL_LIGHT4); // extra spotlight2
+	glEnable (GL_LIGHT5); // extra spotlight3
+    
     
     // TODO: find better place for this
     Image* image = loadBMP("textures/tiger.bmp");
