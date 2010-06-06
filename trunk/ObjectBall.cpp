@@ -31,7 +31,7 @@ ObjectBall::~ObjectBall() { }
 
 //------------------------------------------------------------ GETTERS & SETTERS
 
-void ObjectBall::draw() const
+void ObjectBall::draw( Texture *tex ) const
 {
 	Object::drawBegin();
 	

@@ -68,12 +68,20 @@ void ObjectModel::calculateNormals()
     glmVertexNormals(getModelPointer(), 90.0);
 }
 
-void ObjectModel::draw() const
+void ObjectModel::draw( Texture *texture ) const
 {
 	if(modelPointer)	// Test if there is anything to draw
 	{
 		Object::drawBegin();		// Move, scale and rotate the object to the right place
-		glmDraw(modelPointer, GLM_SMOOTH);
+		if(texture)
+		{
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, texture->texID);
+			glmDraw(modelPointer, GLM_SMOOTH | GLM_TEXTURE);
+			glDisable(GL_TEXTURE_2D);
+		}
+		else
+			glmDraw(modelPointer, GLM_SMOOTH);
 		Object::drawEnd();
 		
 	}

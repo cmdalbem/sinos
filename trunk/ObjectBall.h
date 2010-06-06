@@ -29,5 +29,5 @@ public:
 
 	
 	//---------------------------- OTHER METHODS
-	virtual void 		draw() const;
+	virtual void 		draw( Texture *tex=NULL ) const;
 };

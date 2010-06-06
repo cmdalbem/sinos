@@ -9,6 +9,8 @@
 
 #include "lib/glm.h"
 #include "lib/imageloader.h"
+#include "lib/Texture.h"
+
 #include "Object.h"
 #include "ObjectModel.h"
 #include "ObjectBall.h"
@@ -27,30 +29,80 @@ point star[NSTARS];
 vector<Object*> objects; /* The ideal is that, in the end, there 
 						  * will be no drawable object that isn't in this vector.
 						  */
+//texturized objects
+static ObjectModel tableStruct("obj/pooltable_struct.obj");
+static ObjectModel tableTop("obj/pooltable_table16x.obj");
+static ObjectModel scenario("obj/crypt.obj");
+//static ObjectModel ball("obj/poolball.obj");
+static ObjectModel globe("obj/globe.obj");
+static ObjectModel stick("obj/taco.obj");
+
+// Texture files
+Texture tigerTex;
+Texture woodTex;
+Texture tableTex;
+Texture rockTex;
+//Texture ballTex;
+Texture starsTex;
+Texture stickTex;
+
+
 Camera camera,
 	   camera2(0, 5, 0, 0, 90, 1);
 						  
-						  
-// !! The following globals aren't in their proper place. !!
-
-//mouse
+// mouse
 static int	xold, yold;		
 static int	left_click = GLUT_UP;
 static int	right_click = GLUT_UP;
-		
-GLuint tigerTexture;
-		
-bool light1=true, light2=true, light3=true, light4=true;
 
-float posit=0; //iterational position for the SUN
+bool invertViewports=true;
 
+						  
+// !! The following globals aren't in their proper place. !!
+
+bool 		light1=true, light2=true, light3=true, light4=true;
+float 		posit=0;
 long int 	frameCounter, fps = 0;	//frames per second counter and register
 char 		osd[1024]; 				//text buffer for on-screen output
-
-int lensAngle = 60;
-
+int 		lensAngle = 60;
 
 
+
+
+void loadTexture(Texture *texVar, string texFile)
+/* Adapted from http://www.3dcodingtutorial.com/Textures/Loading-Textures.html */
+{
+    if (LoadTGA(texVar, (char*)texFile.c_str()))
+    {
+
+        // This tells opengl to create 1 texture and put it's ID in the given integer variable
+        // OpenGL keeps a track of loaded textures by numbering them: the first one you load is 1, second is 2, ...and so on.
+        glGenTextures(1, &texVar->texID);
+        // Binding the texture to GL_TEXTURE_2D is like telling OpenGL that the texture with this ID is now the current 2D texture in use
+        // If you draw anything the used texture will be the last binded texture
+        glBindTexture(GL_TEXTURE_2D, texVar->texID);
+        // This call will actualy load the image data into OpenGL and your video card's memory. The texture is allways loaded into the current texture
+        // you have selected with the last glBindTexture call
+        // It asks for the width, height, type of image (determins the format of the data you are giveing to it) and the pointer to the actual data
+        glTexImage2D(GL_TEXTURE_2D, 0, texVar->bpp / 8, texVar->width, texVar->height, 0, texVar->type, GL_UNSIGNED_BYTE, texVar->imageData);
+
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+        glEnable(GL_TEXTURE_2D);
+        if (texVar->imageData)
+        {
+            // You can now free the image data that was allocated by LoadTGA
+            // You don't want to keep a few Mb of worthless data on heap. It's worthless because OpenGL stores the image someware else after
+            // you call glTexImage2D (usualy in you video card)
+            free(texVar->imageData); 
+        }
+        else
+			cout << "Couldn't set texture " << texFile << " on " << VARNAME(texVar) << "." << endl;
+    }
+    else
+		cout << "Couldn't open TGA texture " << texFile << "." << endl;
+
+}
 
 void drawOsd()
 /* Draws On-Screen Display */
@@ -89,13 +141,9 @@ void drawPlane(int w, int h, float nx, float ny, float nz)
 
 void initObjects () {
 
-	// TODO: organize resolution constants so that the game may
+	// TODO: organize resolution variations so that the game may
 	//       have configuration of graphics performance.
-	static ObjectModel crypt("obj/crypt.obj");
-	static ObjectModel tableStruct("obj/pooltable_struct.obj");
-	static ObjectModel tableTop("obj/pooltable_table16x.obj");
 	static ObjectModel light("obj/light1.obj");
-	static ObjectModel stick("obj/taco4x.obj");
 	static ObjectBall  ball(0.1,100,100);
 	static ObjectModel wall("obj/wall.obj");	
 	static ObjectModel tableStruct2("obj/pooltable_struct.obj");
@@ -113,24 +161,21 @@ void initObjects () {
 	objects.push_back(&ball);
 	
 	// crypt scenario
-	crypt.setPos(0,-2,0);
-	crypt.setSize(25,35,25);
-	crypt.material.setDiffuse(0.4,0.4,0.4);
-	//crypt.material.setSpecular(0.2,0.2,0.2);
-	crypt.material.setShininess(80);
-	objects.push_back(&crypt);
+	scenario.setPos(0,-2,0);
+	scenario.setSize(25,35,25);
+	scenario.material.setDiffuse(0.4,0.4,0.4);
+	//scenario.material.setSpecular(0.2,0.2,0.2);
+	scenario.material.setShininess(80);
 	
 	// table
-	tableStruct.material.setDiffuse(0.25,0.09,0.07);
+	tableStruct.material.setDiffuse(0.5,0.18,0.14);
 	tableStruct.material.setSpecular(0.3,0.3,0.3);
 	tableStruct.material.setShininess(120);
-	tableTop.material.setDiffuse(0.078 *0.75, 0.66 *0.75, 0.078 *0.75);
+	tableTop.material.setDiffuse(0.078 , 0.66 , 0.078 );
 	tableTop.material.setSpecular(0.1,0.1,0.1);
 	tableTop.material.setShininess(40);
 	tableStruct.setSize(10,10,10);
 	tableTop.setSize(10,10,10);
-	objects.push_back(&tableStruct);
-	objects.push_back(&tableTop);
 	
 	// table2
 	tableStruct2.material.setDiffuse(0.25,0.09,0.07);
@@ -173,7 +218,7 @@ void initObjects () {
 	objects.push_back(&tableTop4);		
 	
 	// ceiling lamp
-	light.setPos(0,10,0);
+	light.setPos(0,11,0);
 	light.setSize(5,5,5);
 	light.material.setDiffuse(0.5,0.5,0.5);
 	light.material.setSpecular(1,1,1);
@@ -187,24 +232,18 @@ void initObjects () {
 	stick.material.setShininess(80);
 	stick.setPos(0.2,3,0);
 	stick.setRot(30,330,0); // aehoo não consigo fazer isso aqui funcionar!!
-	stick.setSize(0.5,0.5,0.5);
-	objects.push_back(&stick);
+	stick.setSize(0.7,0.7,0.8);
 	
-	// walls
-	wall.material.setDiffuse(0.4,0.4,0.4);
-	wall.material.setSpecular(0.7,0.7,0.7);
-	wall.material.setShininess(120);
-	wall.setPos(0,20,0);
-	wall.setSize(20,20,20);
-	wall.rotate(90,0,0);
-	//objects.push_back(&wall);
+	// infinite scenario globe
+	globe.setSize(50,50,50);
+	globe.material.setEmission(1,1,1);
 	
 
     for (int i=0;i<NSTARS;i++)
     {
-    	star[i].x = rand()%100 - 50;
-    	star[i].y = rand()%100 - 50;
-    	star[i].z = rand()%100 - 50;
+    	star[i].x = rand()%50 - 25;
+    	star[i].y = rand()%50 - 25;
+    	star[i].z = rand()%50 - 25;
     }
 }
 
@@ -229,53 +268,24 @@ void drawAxis()
 void drawObjects () {
     	
     glDisable(GL_LIGHTING); //stars drawing of not-lighted objects
-    // stars
-    for (int i=0;i<NSTARS;i++)
-    {
-    	glPushMatrix();
-    	glTranslated(star[i].x *20, star[i].y *20 , star[i].z *20);
-	    glutSolidSphere(0.5,10,10);
-    	glPopMatrix();
-    }
-    // sun
-	glPushMatrix();
-    glTranslated( SUN_MOVEMENT_EQUATION );
-	glutSolidSphere(0.5,10,10);
-    glPopMatrix(); 
-
-    
-    //drawAxis();
-
+	    // stars
+	    for (int i=0;i<NSTARS;i++)
+	    {
+	    	glPushMatrix();
+	    	glTranslated(star[i].x *20, star[i].y *20, star[i].z *20);
+		    glutSolidSphere(0.5,10,10);
+	    	glPopMatrix();
+	    }
+	    //// sun
+		//glPushMatrix();
+	    //glTranslated( SUN_MOVEMENT_EQUATION );
+		//glutSolidSphere(0.5,10,10);
+	    //glPopMatrix();
+	    //drawAxis();
 	glEnable(GL_LIGHTING); //ends drawing of not-lighted objects
     
     
-    
-    // tiger carpet
-    //glEnable(GL_TEXTURE_2D);
-	//glBindTexture(GL_TEXTURE_2D, tigerTexture);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	////glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	////glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glBegin(GL_POLYGON);
-		//glColor3f(1.0f, 1.0f, 1.0f);
-		//glTexCoord2f(1.0f, 0.5f);
-		//glVertex3i(6,  0, 0);
-		//glTexCoord2f(0.66666666, 1.0f);
-		//glVertex3i(2,  0, 3);
-		//glTexCoord2f(0.33333333, 1.0f);
-		//glVertex3i(-2, 0, 3);
-		//glTexCoord2f(0.0f, 0.5f);
-		//glVertex3i(-6, 0, 0);
-		//glTexCoord2f(0.33333333, 0.0f);
-		//glVertex3i(-2, 0, -3);
-		//glTexCoord2f(0.66666666, 0.0f);
-		//glVertex3i(2,  0, -3);
-	//glEnd();
-	//glDisable(GL_TEXTURE_2D);
-	
-	
-	// iterational plan drawing test (work in progress)
+	// example of iterational plan drawing test (work in progress)
 	//Material wallMaterial;
 	//wallMaterial.setDiffuse(0.4,0.4,0.4);
 	//wallMaterial.setSpecular(0.7,0.7,0.7);
@@ -293,8 +303,15 @@ void drawObjects () {
 	// draw objects
 	vector<Object*>::iterator ob_it;
 	for( ob_it=objects.begin(); ob_it<objects.end(); ob_it++ )
-		(*ob_it)->draw();
-	glDisable(GL_LIGHTING);
+		(*ob_it)->draw(NULL);
+	
+	// texturized objects
+	tableStruct.draw(&woodTex);
+	tableTop.draw(&tableTex);
+	scenario.draw(&rockTex);
+	//ball.draw(&ballTex);
+	globe.draw(&starsTex);
+	stick.draw(&stickTex);
 }
 
 
@@ -306,8 +323,9 @@ void lights () {
 	
 	
 	// position light (sun)
-	posit++;
-	GLfloat position[] = { SUN_MOVEMENT_EQUATION, 1.0f };
+	//posit++;
+	//GLfloat position[] = { SUN_MOVEMENT_EQUATION, 1.0f };
+	GLfloat position[] = { 0,10,0, 1.0f };
 	GLfloat ambientLight[] = { 0.0, 0.0, 0.0, 1.0f };
 	GLfloat diffuseLight[] = { 0.9f, 0.5f, 0.5f, 1.0f };
 	GLfloat specularLight[] = { 1.0f, 0.6f, 0.6f, 1.0f };
@@ -316,13 +334,16 @@ void lights () {
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.4);
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.002);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.006);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.05);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.001);
+	GLfloat spot_direction[] = { 0.0, -1.0, 0.0 };
+	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 160);
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
+	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.0);
 	
 	// spotlight
 	GLfloat lampColor[] = {RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4, 1.0f};
 	GLfloat light1_position[] = { 0.0, 10.0, 0.0, 1.0 };
-	GLfloat spot_direction[] = { 0.0, -1.0, 0.0 };
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, lampColor);
 	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
 	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.2);
@@ -367,17 +388,7 @@ void lights () {
 	glLightfv(GL_LIGHT2, GL_POSITION, direction);
 }
 
-
-void display () {
-
-	int width = glutGet(GLUT_WINDOW_WIDTH);
-    int height = glutGet(GLUT_WINDOW_HEIGHT);
-
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_SCISSOR_TEST);
-
-
-	// FIRST VIEWPORT
+void perspectiveViewport( int width, int height ) {
 	glMatrixMode (GL_PROJECTION); //set the matrix to projection
 	glLoadIdentity ();
 	
@@ -387,14 +398,14 @@ void display () {
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
 	glLoadIdentity();  
-    // IMPORTANT: these calls aren't in arbitrary order.
+    // IMPORTANT: don't change the order of these calls
 		drawOsd();
 		camera.apply(objects[0]);
 		lights();
 		drawObjects();
-				
+}	
 
-	//SECOND VIEWPORT
+void orthoViewport( int width, int height ) {
 	glViewport ((3*width)/4, (3*height)/4, (GLsizei)width/4, (GLfloat)height/4);
 	glScissor((3*width)/4, (3*height)/4, width/4, height/4);
 	
@@ -405,12 +416,23 @@ void display () {
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
     glLoadIdentity();
-	// IMPORTANT: these calls aren't in arbitrary order.
+	// IMPORTANT: don't change the order of these calls
 		camera2.apply(NULL);
 		lights();
 		drawObjects();
+}	
 
+void display () {
 
+	int width = glutGet(GLUT_WINDOW_WIDTH);
+    int height = glutGet(GLUT_WINDOW_HEIGHT);
+
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_SCISSOR_TEST);
+	
+		perspectiveViewport(width,height);
+		orthoViewport(width,height);
+				
 	glDisable(GL_SCISSOR_TEST);
 		
     glutSwapBuffers();
@@ -444,10 +466,14 @@ void init ()
 	glEnable (GL_LIGHT5); // extra spotlight3
     
     
-    // TODO: find better place for this
-    Image* image = loadBMP("textures/tiger.bmp");
-	tigerTexture = loadTexture(image);
-	delete image;
+    loadTexture(&woodTex, "textures/wood.tga");
+    loadTexture(&tableTex, "textures/table.tga");
+    loadTexture(&rockTex, "textures/rock.tga");
+    //loadTexture(&ballTex, "textures/poolball.tga");
+    loadTexture(&starsTex, "textures/stars2.tga");
+    loadTexture(&stickTex, "textures/stick.tga");
+    //loadTexture(&tigerTex, "textures/tiger.tga");
+    //loadTexture(&ballTex, "textures/poolball.tga");
 }
 
 void reshape (int w, int h) {
@@ -474,8 +500,11 @@ void keyboardFunc (unsigned char key, int x, int y) {
     if( key=='c' )
 		camera.nextCameraMode();
     
+    if ( key=='v' )
+		invertViewports = !invertViewports;
+	
 	// turn on/off light0
-	if (key == '1') {
+	if ( key == '1' ) {
 		if(!light1)
 			glEnable(GL_LIGHT0);
 		else
@@ -484,7 +513,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
 	}
 	
 	// turn on/off light1
-	if (key == '2') {
+	if ( key == '2' ) {
 		if(!light2)
 			glEnable(GL_LIGHT1);
 		else
@@ -493,7 +522,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
 	}
 	
     // turn on/off light2
-    if (key == '3') {
+    if ( key == '3' ) {
 		if(!light3)
 			glEnable(GL_LIGHT2);
 		else
@@ -501,15 +530,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		light3 = !light3;
 	}
 	
-	//if (key == '4') {
-		//if(!light4)
-			//glEnable(GL_LIGHT4);
-		//else
-			//glDisable(GL_LIGHT4);
-		//light4 = !light4;
-	//}
-    
-    if (key==K_ESC)
+    if ( key==K_ESC )
     {
 	    exit(0);
     }

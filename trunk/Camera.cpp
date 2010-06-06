@@ -143,9 +143,8 @@ void Camera::apply(Object* object)
 	switch( cameraMode )
 	{
 		case 0:
-			posit++;
 			// cinematic camera
-			gluLookAt( cos(posit/100)*5, 7 , sin(posit/100)*5,
+			gluLookAt( sin(posit/100)*10, 7 , cos(posit/100)*10,
 					   object->getPosX(), object->getPosY(), object->getPosZ(), /*ball position*/
 					   0,1,0);
 			break;

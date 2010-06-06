@@ -9,6 +9,7 @@
 #include <iostream>
 #include "lib/glm.h"
 #include <GL/glut.h>
+#include "lib/Texture.h"
 
 #include "Material.h"
 
@@ -87,7 +88,7 @@ public:
 	*  have an implementation of a drawing function. This will allow to group
 	*  multiple kinds of object on vectors and call .draw() for each of them.
 	*/
-	virtual void draw() const =0;
+	virtual void draw( Texture *tex=NULL ) const =0;
 	
 	/* Transformations */
 	void translate(GLfloat* offset);

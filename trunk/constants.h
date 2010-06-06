@@ -14,6 +14,7 @@ struct point
 
 // Macros
 #define RGB(x) (float)(x)/(255)
+#define VARNAME(x) #x
 
 // Default values for Materials Attributes
 const float default_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
@@ -27,7 +28,8 @@ const float default_shininess = 0;
 
 // keyboard keys
 enum{
-	K_ESC		= 27
+	K_ESC		= 27,
+	K_SPACE		= 32
 };
 	
 	

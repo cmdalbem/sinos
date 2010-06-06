@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string>
 #include "lib/glm.h"
+#include "lib/Texture.h"
 #include "Object.h"
 
 class ObjectModel: public Object
@@ -32,5 +33,5 @@ public:
 	//---------------------------- OTHER METHODS
 	void			loadFromFile(string file);
 	void			calculateNormals();
-	virtual void	draw() const;
+	virtual void	draw( Texture *tex=NULL ) const;
 };
