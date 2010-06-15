@@ -15,9 +15,7 @@ using namespace std;
 
 Camera::Camera()
 {
-	ncameras=3;
-	
-	cameraMode = 1;
+	cameraMode = 0;
 	
 	posit=0;
 	
@@ -48,7 +46,6 @@ Camera::Camera( GLfloat newXPos, GLfloat newYPos, GLfloat newZPos,
 	yrot2 = 20;		//
 	zoom = 5;		// Default values to these elements
 	posit=0;		//
-	ncameras=3;		//
 }
 
 
@@ -73,20 +70,19 @@ void Camera::setYRot(GLfloat newValue)
 
 
 
-char* Camera::getMode () const
+const char* Camera::getMode () const
 {
 	switch( cameraMode )
 	{
-		case 0:	return "Cinematic";
-		case 1: return "Manual";
-		case 2: return "Ball centered";
-		default: return "Unknown";
+		case 0: return "Manual";
+		case 1: return "Ball centered";
+		case 2:	return "Cinematic";
 	}
 }
 
 void Camera::setCameraMode (int mode)
 {
-	if( cameraMode < ncameras )
+	if( cameraMode < NCAMERAS )
 		cameraMode = mode;
 	else
 		cout << "error: CameraMode " << mode << "doesnt exists." << endl;
@@ -102,15 +98,15 @@ void Camera::action1 (int movex, int movey)
 	switch( cameraMode )
 	{
 		case 0:
-		
-			break;
-		case 1:
 			yrot = yrot + movey / 5.f;
 			xrot = xrot + movex / 5.f;	
 			break;		
-		case 2:
+		case 1:
 			yrot2 = yrot2 + movey / 5.f;
 			xrot2 = xrot2 + movex / 5.f;	
+			break;
+		case 2:
+		
 			break;
 	}	
 }
@@ -120,9 +116,6 @@ void Camera::action2 (int movex, int movey)
 	switch( cameraMode )
 	{
 		case 0:
-		
-			break;
-		case 1:
 			float xrotrad, yrotrad;
 			yrotrad = (xrot / 180 * M_PI);
 			xrotrad = (yrot / 180 * M_PI);
@@ -130,10 +123,13 @@ void Camera::action2 (int movex, int movey)
 			zpos -= -movey/10.0 * float(cos(yrotrad)) ;
 			ypos -= -movey/10.0 * float(sin(xrotrad)) ;		
 			break;
-		case 2:
+		case 1:
 			zoom += movey / 5.f;
 			if(zoom<1) zoom=1;		// do not let reverse the camera
 			break;
+		case 2:
+		
+			break;			
 	}
 }
 
@@ -143,19 +139,14 @@ void Camera::apply(Object* object)
 	switch( cameraMode )
 	{
 		case 0:
-			// cinematic camera
-			gluLookAt( sin(posit/100)*10, 7 , cos(posit/100)*10,
-					   object->getPosX(), object->getPosY(), object->getPosZ(), /*ball position*/
-					   0,1,0);
-			break;
-		case 1:
 			// controlled movement
 			glRotatef(yrot,1.0,0.0,0.0);  //rotate our camera on the x-axis (left and right)
 			glRotatef(xrot,0.0,1.0,0.0);  //rotate our camera on the y-axis (up and down)
 			glTranslated(-xpos,-ypos,-zpos); //translate the screen to the position of our camera
 			break;
 		
-		case 2:
+		case 1:
+		{
 			// ball centered camera
 			float orig[3] = { object->getPosX(), object->getPosY(), object->getPosZ() }; //ball position
 
@@ -163,11 +154,18 @@ void Camera::apply(Object* object)
 					   orig[0], orig[1], orig[2],
 					   0,1,0);
 			break;
+		}
+		case 2:
+			// cinematic camera
+			gluLookAt( sin(posit/100)*10, 7 , cos(posit/100)*10,
+					   object->getPosX(), object->getPosY(), object->getPosZ(), /*ball position*/
+					   0,1,0);
+			break;			
 	}
 	
 }
 
 void Camera::nextCameraMode()
 {
-	setCameraMode( (getCameraMode()+1)%ncameras );
+	setCameraMode( (getCameraMode()+1)%NCAMERAS );
 }

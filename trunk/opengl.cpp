@@ -26,9 +26,8 @@
 
 // Objects
 point star[NSTARS];
-vector<Object*> objects; /* The ideal is that, in the end, there 
-						  * will be no drawable object that isn't in this vector.
-						  */
+vector<Object*> objects;
+
 //texturized objects
 static ObjectModel tableStruct("obj/pooltable_struct.obj");
 static ObjectModel tableTop("obj/pooltable_table16x.obj");
@@ -48,7 +47,7 @@ Texture stickTex;
 
 
 Camera camera,
-	   camera2(0, 5, 0, 0, 90, 1);
+	   camera2(0, 5, 0, 0, 90, 0);
 						  
 // mouse
 static int	xold, yold;		
@@ -58,6 +57,7 @@ static int	right_click = GLUT_UP;
 bool invertViewports=true;
 
 						  
+
 // !! The following globals aren't in their proper place. !!
 
 bool 		light1=true, light2=true, light3=true, light4=true;
@@ -67,7 +67,9 @@ char 		osd[1024]; 				//text buffer for on-screen output
 int 		lensAngle = 60;
 
 
-
+//--------------------------------------------------------------------//
+//----------------------------- UTILS --------------------------------//
+//--------------------------------------------------------------------//
 
 void loadTexture(Texture *texVar, string texFile)
 /* Adapted from http://www.3dcodingtutorial.com/Textures/Loading-Textures.html */
@@ -139,6 +141,12 @@ void drawPlane(int w, int h, float nx, float ny, float nz)
   }
 }
 
+
+
+//--------------------------------------------------------------------//
+//----------------------------- OPENGL -------------------------------//
+//--------------------------------------------------------------------//
+
 void initObjects () {
 
 	// TODO: organize resolution variations so that the game may
@@ -158,73 +166,7 @@ void initObjects () {
 	ball.material.setShininess(120);
 	ball.material.setDiffuse(0.6, 0.6, 0.6);
 	ball.material.setSpecular(0.9, 0.9, 0.9);
-	objects.push_back(&ball);
-	
-	// crypt scenario
-	scenario.setPos(0,-2,0);
-	scenario.setSize(25,35,25);
-	scenario.material.setDiffuse(0.4,0.4,0.4);
-	//scenario.material.setSpecular(0.2,0.2,0.2);
-	scenario.material.setShininess(80);
-	
-	// table
-	tableStruct.material.setDiffuse(0.5,0.18,0.14);
-	tableStruct.material.setSpecular(0.3,0.3,0.3);
-	tableStruct.material.setShininess(120);
-	tableTop.material.setDiffuse(0.078 , 0.66 , 0.078 );
-	tableTop.material.setSpecular(0.1,0.1,0.1);
-	tableTop.material.setShininess(40);
-	tableStruct.setSize(10,10,10);
-	tableTop.setSize(10,10,10);
-	
-	// table2
-	tableStruct2.material.setDiffuse(0.25,0.09,0.07);
-	tableStruct2.material.setSpecular(0.3,0.3,0.3);
-	tableStruct2.material.setShininess(120);
-	tableTop2.material.setDiffuse(0.078 *0.75, 0.66 *0.75, 0.078 *0.75);
-	tableTop2.material.setSpecular(0.1,0.1,0.1);
-	tableTop2.material.setShininess(40);
-	tableStruct2.setSize(10,10,10);
-	tableTop2.setSize(10,10,10);
-	tableStruct2.setPos(0,0,-30);
-	tableTop2.setPos(0,0,-30);
-	objects.push_back(&tableStruct2);
-	objects.push_back(&tableTop2);
-	// table3
-	tableStruct3.material.setDiffuse(0.25,0.09,0.07);
-	tableStruct3.material.setSpecular(0.3,0.3,0.3);
-	tableStruct3.material.setShininess(120);
-	tableTop3.material.setDiffuse(0.078 *0.75, 0.66 *0.75, 0.078 *0.75);
-	tableTop3.material.setSpecular(0.1,0.1,0.1);
-	tableTop3.material.setShininess(40);
-	tableStruct3.setSize(10,10,10);
-	tableTop3.setSize(10,10,10);
-	tableStruct3.setPos(0,0,30);
-	tableTop3.setPos(0,0,30);
-	objects.push_back(&tableStruct3);
-	objects.push_back(&tableTop3);	
-	// table4
-	tableStruct4.material.setDiffuse(0.25,0.09,0.07);
-	tableStruct4.material.setSpecular(0.3,0.3,0.3);
-	tableStruct4.material.setShininess(120);
-	tableTop4.material.setDiffuse(0.078 *0.75, 0.66 *0.75, 0.078 *0.75);
-	tableTop4.material.setSpecular(0.1,0.1,0.1);
-	tableTop4.material.setShininess(40);
-	tableStruct4.setSize(10,10,10);
-	tableTop4.setSize(10,10,10);
-	tableStruct4.setPos(0,0,60);
-	tableTop4.setPos(0,0,60);
-	objects.push_back(&tableStruct4);
-	objects.push_back(&tableTop4);		
-	
-	// ceiling lamp
-	light.setPos(0,11,0);
-	light.setSize(5,5,5);
-	light.material.setDiffuse(0.5,0.5,0.5);
-	light.material.setSpecular(1,1,1);
-	light.material.setShininess(120);
-	//light.material.setEmission(RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4);
-	objects.push_back(&light);
+		objects.push_back(&ball);
 	
 	// the stick
 	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
@@ -234,9 +176,68 @@ void initObjects () {
 	stick.setRot(30,330,0); // aehoo não consigo fazer isso aqui funcionar!!
 	stick.setSize(0.7,0.7,0.8);
 	
+	// crypt scenario
+	scenario.setPos(0,-2,0);
+	scenario.setSize(25,35,25);
+	scenario.material.setDiffuse(0.4,0.4,0.4);
+	//scenario.material.setSpecular(0.2,0.2,0.2);
+	scenario.material.setShininess(80);
+	
+	Material tableStructMat;
+	tableStructMat.setDiffuse(0.5 *1.5, 0.18 *1.5, 0.14 *1.5);
+	tableStructMat.setSpecular(0.3,0.3,0.3);
+	tableStructMat.setShininess(120);
+	Material tableTopMat;
+	tableTopMat.setDiffuse(0.078 , 0.66 , 0.078 );
+	tableTopMat.setSpecular(0.1,0.1,0.1);
+	tableTopMat.setShininess(40);
+	
+	// main table
+	tableStruct.setMaterial(tableStructMat);
+	tableTop.setMaterial(tableTopMat);
+	tableStruct.setSize(10,10,10);
+	tableTop.setSize(10,10,10);
+	
+	tableStructMat.setDiffuse(0.25,0.09,0.07);
+	tableStructMat.setSpecular(0,0,0);
+	tableTopMat.setDiffuse(0.078 *0.5, 0.66 *0.5, 0.078 *0.5);
+	// table2
+	tableStruct2.setMaterial(tableStructMat);
+	tableTop2.setMaterial(tableTopMat);
+	tableStruct2.setSize(10,10,10);
+	tableTop2.setSize(10,10,10);
+	tableStruct2.setPos(0,0,-30);
+	tableTop2.setPos(0,0,-30);
+	// table3
+	tableStruct3.setMaterial(tableStructMat);
+	tableTop3.setMaterial(tableTopMat);
+	tableStruct3.setSize(10,10,10);
+	tableTop3.setSize(10,10,10);
+	tableStruct3.setPos(0,0,30);
+	tableTop3.setPos(0,0,30);
+	// table4
+	tableStruct4.setMaterial(tableStructMat);
+	tableTop4.setMaterial(tableTopMat);
+	tableStruct4.setSize(10,10,10);
+	tableTop4.setSize(10,10,10);
+	tableStruct4.setPos(0,0,60);
+	tableTop4.setPos(0,0,60);
+		objects.push_back(&tableStruct2);objects.push_back(&tableTop2);
+		objects.push_back(&tableStruct3);objects.push_back(&tableTop3);	
+		objects.push_back(&tableStruct4);objects.push_back(&tableTop4);		
+	
+	// ceiling lamp
+	light.setPos(0,11,0);
+	light.setSize(5,5,5);
+	light.material.setDiffuse(0.5,0.5,0.5);
+	light.material.setSpecular(1,1,1);
+	light.material.setShininess(120);
+	//light.material.setEmission(RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4);
+		objects.push_back(&light);
+
+	
 	// infinite scenario globe
 	globe.setSize(50,50,50);
-	globe.material.setEmission(1,1,1);
 	
 
     for (int i=0;i<NSTARS;i++)
@@ -247,22 +248,11 @@ void initObjects () {
     }
 }
 
-void drawAxis()
-{
-    glBegin(GL_LINES);
-       // x = read, y = green, z = blue
-       glColor3f(1.0f, 0.0f, 0.0f);
-       glVertex3i(-100,0,0);
-       glVertex3i(100,0,0);
-       
-       glColor3f(0.0f, 1.0f, 0.0f);
-       glVertex3i(0, -100,0);
-       glVertex3i(0, 100,0);
-       
-       glColor3f(0.0f, 0.0f, 1.0f);
-       glVertex3i(0,0,-100);
-       glVertex3i(0,0,100);
-    glEnd();     
+void drawObjects_partial () {
+	
+	stick.draw(&stickTex);
+	tableStruct.draw(&woodTex);
+	tableTop.draw(&tableTex);
 }
 
 void drawObjects () {
@@ -281,36 +271,21 @@ void drawObjects () {
 	    //glTranslated( SUN_MOVEMENT_EQUATION );
 		//glutSolidSphere(0.5,10,10);
 	    //glPopMatrix();
-	    //drawAxis();
+	
+	globe.draw(&starsTex);
+	
 	glEnable(GL_LIGHTING); //ends drawing of not-lighted objects
     
-    
-	// example of iterational plan drawing test (work in progress)
-	//Material wallMaterial;
-	//wallMaterial.setDiffuse(0.4,0.4,0.4);
-	//wallMaterial.setSpecular(0.7,0.7,0.7);
-	//wallMaterial.setShininess(120);
-    //wallMaterial.apply();
-	//glPushMatrix();
-	//glTranslated(-15, 0, -15);
-	//glRotatef(90,1,0,0);
-	//glScalef(30,30,30);
-	////glTranslated(0,0,0);
-	//drawPlane(100,100, 0,0,-1);
-	//wallMaterial.unapply();
-	//glPopMatrix();
-	
+    	
 	// draw objects
-	vector<Object*>::iterator ob_it;
-	for( ob_it=objects.begin(); ob_it<objects.end(); ob_it++ )
-		(*ob_it)->draw(NULL);
+	for( int it=0; it<objects.size(); it++ )
+		objects[it]->draw(NULL);
 	
 	// texturized objects
 	tableStruct.draw(&woodTex);
 	tableTop.draw(&tableTex);
 	scenario.draw(&rockTex);
 	//ball.draw(&ballTex);
-	globe.draw(&starsTex);
 	stick.draw(&stickTex);
 }
 
@@ -318,7 +293,7 @@ void drawObjects () {
 void lights () {
 	
 	// ambient light
-	GLfloat ambientColor[] = {0.0, 0.0, 0.0, 1.0f};
+	GLfloat ambientColor[] = {0.09, 0.05, 0.05, 1.0f};
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor);
 	
 	
@@ -419,7 +394,7 @@ void orthoViewport( int width, int height ) {
 	// IMPORTANT: don't change the order of these calls
 		camera2.apply(NULL);
 		lights();
-		drawObjects();
+		drawObjects_partial();
 }	
 
 void display () {
@@ -441,8 +416,9 @@ void display () {
 
 void init ()
 {
-	
+	cout << "Loading models...";
 	initObjects();
+	cout << "Done.\n";
 	
     glClearColor(0, 0, 0, 1.0f); //background color
     // Limpa a janela e habilita o teste para eliminar faces ocultas por outras
@@ -465,15 +441,16 @@ void init ()
 	glEnable (GL_LIGHT4); // extra spotlight2
 	glEnable (GL_LIGHT5); // extra spotlight3
     
-    
+    cout << "Loading textures..."; 
     loadTexture(&woodTex, "textures/wood.tga");
-    loadTexture(&tableTex, "textures/table.tga");
+    loadTexture(&tableTex, "textures/table2.tga");
     loadTexture(&rockTex, "textures/rock.tga");
     //loadTexture(&ballTex, "textures/poolball.tga");
-    loadTexture(&starsTex, "textures/stars2.tga");
+    loadTexture(&starsTex, "textures/stars3.tga");
     loadTexture(&stickTex, "textures/stick.tga");
     //loadTexture(&tigerTex, "textures/tiger.tga");
     //loadTexture(&ballTex, "textures/poolball.tga");
+    cout << "Done.\n"; 
 }
 
 void reshape (int w, int h) {
@@ -578,6 +555,7 @@ void timerFunc(int value) {
 
 
 int main (int argc, char **argv) {
+    cout << "Initializing...\n";
     glutInit (&argc, argv);
     glutInitDisplayMode (GLUT_DOUBLE | GLUT_DEPTH); //set the display to Double buffer, with depth
     glutInitWindowSize (1280, 720);                  //set the window size
@@ -595,7 +573,7 @@ int main (int argc, char **argv) {
     glutMouseFunc(mouseFunc);
 	glutMotionFunc(mouseMotionFunc);
 	glutTimerFunc(1000/*1sec*/, timerFunc, 0);
-  
+	
     glutMainLoop(); 
     
     

@@ -16,8 +16,8 @@ using namespace std;
 
 class Camera
 {
+	#define NCAMERAS 2
 private:
-	int ncameras;
 	int cameraMode;
 	int posit;
 	GLfloat xpos, ypos, zpos, xrot, yrot;
@@ -41,7 +41,7 @@ public:
 	
 	void	setCameraMode (int mode);
 	
-	char* 	getMode() const; //name of the current camera mode
+	const char* 	getMode() const; //name of the current camera mode
 	int 	getCameraMode() const;
 	
 	//---------------------------- OTHER METHODS
