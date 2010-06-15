@@ -18,10 +18,15 @@ class Camera
 {
 	#define NCAMERAS 2
 private:
+
 	int cameraMode;
 	int posit;
-	GLfloat xpos, ypos, zpos, xrot, yrot;
-	GLfloat xrot2, yrot2, zoom;
+	GLfloat xpos,  ypos,  zpos,		// variables used in the first camera view
+			xrot,  yrot,			// 
+			
+			xpos2, ypos2, zpos2,	// variables used in the second camera view
+			xrot2, yrot2, zoom,		//
+			xorig, yorig, zorig;	//
 
 public:
 	//---------------------------- CONSTRUCTORS
@@ -39,14 +44,32 @@ public:
 	void	setXRot(GLfloat newValue);
 	void	setYRot(GLfloat newValue);
 	
-	void	setCameraMode (int mode);
+	void	setCameraMode (int mode, Object* object);
+	
+	/* Set the position for the "number 2" variables of the camera - which
+	 * are related to the "camera 2" position.
+	 */
+	void	setPos2();
 	
 	const char* 	getMode() const; //name of the current camera mode
 	int 	getCameraMode() const;
 	
 	//---------------------------- OTHER METHODS
-	void 	apply(Object* object); 					// main method
+	void 	apply(); 					// main method
 	void 	action1 (int movex, int movey);
 	void 	action2 (int movex, int movey);
+	
+
+	/* If an object is passed, then it will make difference when using the
+	 * "camera mode 1". The camera will center on the object passed, instead
+	 * of the default value, which is the center of the principal table.
+	 */
 	void 	nextCameraMode();
+	void 	nextCameraMode(Object* object);
+	
+	/* Returns the euclidian norma of the vector starting on the camera and 
+	*  end on the "position" of the Object (each Object has an array which
+	*  has its position).
+	*/
+	float	distanceFromObject(Object &theObject) const;
 };

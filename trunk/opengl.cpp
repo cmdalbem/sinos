@@ -250,6 +250,7 @@ void initObjects () {
 
 void drawObjects_partial () {
 	
+	objects[0]->draw(NULL);
 	stick.draw(&stickTex);
 	tableStruct.draw(&woodTex);
 	tableTop.draw(&tableTex);
@@ -259,6 +260,7 @@ void drawObjects () {
     	
     glDisable(GL_LIGHTING); //stars drawing of not-lighted objects
 	    // stars
+	    /*
 	    for (int i=0;i<NSTARS;i++)
 	    {
 	    	glPushMatrix();
@@ -266,6 +268,7 @@ void drawObjects () {
 		    glutSolidSphere(0.5,10,10);
 	    	glPopMatrix();
 	    }
+	    */
 	    //// sun
 		//glPushMatrix();
 	    //glTranslated( SUN_MOVEMENT_EQUATION );
@@ -276,7 +279,7 @@ void drawObjects () {
 	
 	glEnable(GL_LIGHTING); //ends drawing of not-lighted objects
     
-    	
+    
 	// draw objects
 	for( int it=0; it<objects.size(); it++ )
 		objects[it]->draw(NULL);
@@ -375,14 +378,18 @@ void perspectiveViewport( int width, int height ) {
 	glLoadIdentity();  
     // IMPORTANT: don't change the order of these calls
 		drawOsd();
-		camera.apply(objects[0]);
+		camera.apply();
 		lights();
 		drawObjects();
 }	
 
 void orthoViewport( int width, int height ) {
 	glViewport ((3*width)/4, (3*height)/4, (GLsizei)width/4, (GLfloat)height/4);
+	
+	// This call isn't working as it would
 	glScissor((3*width)/4, (3*height)/4, width/4, height/4);
+	
+	glEnable(GL_SCISSOR_TEST);
 	
 	glMatrixMode (GL_PROJECTION); //set the matrix to projection
 	glLoadIdentity ();
@@ -392,9 +399,11 @@ void orthoViewport( int width, int height ) {
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
     glLoadIdentity();
 	// IMPORTANT: don't change the order of these calls
-		camera2.apply(NULL);
+		camera2.apply();
 		lights();
 		drawObjects_partial();
+		
+	glDisable(GL_SCISSOR_TEST);
 }	
 
 void display () {
@@ -409,6 +418,8 @@ void display () {
 		orthoViewport(width,height);
 				
 	glDisable(GL_SCISSOR_TEST);
+	
+	//cout << "distance from crypt: " << camera.distanceFromObject(*objects[1]) << endl;
 		
     glutSwapBuffers();
     frameCounter++;
@@ -475,7 +486,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		lensAngle-=2;
     
     if( key=='c' )
-		camera.nextCameraMode();
+		camera.nextCameraMode(objects[0]);
     
     if ( key=='v' )
 		invertViewports = !invertViewports;
