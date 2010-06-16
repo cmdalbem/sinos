@@ -11,7 +11,7 @@
 
 Object::Object()// keeping the consistency
 {
-	pos[0] = 0;		// inicialize every variable with 0
+	pos[0] = 0;
 	pos[1] = 0;
 	pos[2] = 0;
 	
@@ -22,6 +22,25 @@ Object::Object()// keeping the consistency
 	size[0] = 1;
 	size[1] = 1;
 	size[2] = 1;
+	
+	texture = NULL;
+}
+
+Object::Object( Texture *_tex)// keeping the consistency
+{
+	pos[0] = 0;
+	pos[1] = 0;
+	pos[2] = 0;
+	
+	rot[0] = 0;
+	rot[1] = 0;
+	rot[2] = 0;
+	
+	size[0] = 1;
+	size[1] = 1;
+	size[2] = 1;
+	
+	texture = _tex;
 }
 
 Object::Object(GLfloat position[], GLfloat rotation[], GLfloat scale[])
@@ -37,6 +56,8 @@ Object::Object(GLfloat position[], GLfloat rotation[], GLfloat scale[])
 	size[0] = scale[0];
 	size[1] = scale[1];
 	size[2] = scale[2];
+	
+	texture = NULL;
 }
 
 Object::Object( GLfloat posx,  GLfloat posy,  GLfloat posz,
@@ -54,6 +75,8 @@ Object::Object( GLfloat posx,  GLfloat posy,  GLfloat posz,
 	size[0] = sizex;
 	size[1] = sizey;
 	size[2] = sizez;
+	
+	texture = NULL;
 }
 
 //------------------------------------------------------------ DESTRUCTORS
@@ -160,6 +183,17 @@ void Object::setSizeY(GLfloat sizey)
 void Object::setSizeZ(GLfloat sizez)
 {	size[2] = sizez;	}
 
+void Object::setMaterial(Material const newmaterial)
+{
+	material = newmaterial;
+}
+
+void Object::setTexture(Texture *_texture)
+{
+	texture = _texture;;
+}
+
+
 
 //------------------------------------------------------------ OTHER METHODS
 
@@ -215,9 +249,4 @@ void Object::rotate(GLfloat x, GLfloat y, GLfloat z)
 	rot[0] = rot[0] + x;
 	rot[1] = rot[1] + y;
 	rot[2] = rot[2] + z;
-}
-
-void Object::setMaterial(Material const newmaterial)
-{
-	material = newmaterial;
 }

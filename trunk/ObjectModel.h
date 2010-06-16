@@ -33,5 +33,5 @@ public:
 	//---------------------------- OTHER METHODS
 	void			loadFromFile(string file);
 	void			calculateNormals();
-	virtual void	draw( Texture *tex=NULL ) const;
+	virtual void	draw() const;
 };

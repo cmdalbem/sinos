@@ -16,6 +16,7 @@ class ObjectBall: public Object
 private:
 	GLdouble radius;
 	GLint slices, stacks;
+	double speed, direction; //direction is an angle
 
 public:
 	//---------------------------- CONSTRUCTORS
@@ -29,5 +30,7 @@ public:
 
 	
 	//---------------------------- OTHER METHODS
-	virtual void 		draw( Texture *tex=NULL ) const;
+	virtual void 		draw() const;
+	void 				updateState();
+	void				applyForce( double magnitude, double direction );
 };

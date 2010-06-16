@@ -32,18 +32,13 @@ vector<Object*> objects;
 static ObjectModel tableStruct("obj/pooltable_struct.obj");
 static ObjectModel tableTop("obj/pooltable_table16x.obj");
 static ObjectModel scenario("obj/crypt.obj");
-//static ObjectModel ball("obj/poolball.obj");
 static ObjectModel globe("obj/globe.obj");
 static ObjectModel stick("obj/taco.obj");
+//static ObjectModel ball("obj/poolball.obj");
+static ObjectBall  ball(0.1,100,100);
 
 // Texture files
-Texture tigerTex;
-Texture woodTex;
-Texture tableTex;
-Texture rockTex;
-//Texture ballTex;
-Texture starsTex;
-Texture stickTex;
+Texture tigerTex, woodTex, tableTex, rockTex, starsTex, stickTex, ballTex;
 
 
 Camera camera,
@@ -65,13 +60,14 @@ float 		posit=0;
 long int 	frameCounter, fps = 0;	//frames per second counter and register
 char 		osd[1024]; 				//text buffer for on-screen output
 int 		lensAngle = 60;
+int 		cursor = 0;
 
 
 //--------------------------------------------------------------------//
 //----------------------------- UTILS --------------------------------//
 //--------------------------------------------------------------------//
 
-void loadTexture(Texture *texVar, string texFile)
+void loadTexture(Texture *texVar, string texFile, bool makeMipmap=false)
 /* Adapted from http://www.3dcodingtutorial.com/Textures/Loading-Textures.html */
 {
     if (LoadTGA(texVar, (char*)texFile.c_str()))
@@ -88,8 +84,16 @@ void loadTexture(Texture *texVar, string texFile)
         // It asks for the width, height, type of image (determins the format of the data you are giveing to it) and the pointer to the actual data
         glTexImage2D(GL_TEXTURE_2D, 0, texVar->bpp / 8, texVar->width, texVar->height, 0, texVar->type, GL_UNSIGNED_BYTE, texVar->imageData);
 
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+        if( makeMipmap ) {
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR_MIPMAP_LINEAR);			
+			gluBuild2DMipmaps( GL_TEXTURE_2D, 3, texVar->width, texVar->height, GL_RGB, GL_UNSIGNED_BYTE, texVar->imageData ); 
+		}
+		else {
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);			
+		}
+        
         glEnable(GL_TEXTURE_2D);
         if (texVar->imageData)
         {
@@ -152,7 +156,6 @@ void initObjects () {
 	// TODO: organize resolution variations so that the game may
 	//       have configuration of graphics performance.
 	static ObjectModel light("obj/light1.obj");
-	static ObjectBall  ball(0.1,100,100);
 	static ObjectModel wall("obj/wall.obj");	
 	static ObjectModel tableStruct2("obj/pooltable_struct.obj");
 	static ObjectModel tableTop2("obj/pooltable_table16x.obj");
@@ -166,23 +169,29 @@ void initObjects () {
 	ball.material.setShininess(120);
 	ball.material.setDiffuse(0.6, 0.6, 0.6);
 	ball.material.setSpecular(0.9, 0.9, 0.9);
+	ball.setTexture(&ballTex);
 		objects.push_back(&ball);
 	
 	// the stick
 	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
 	stick.material.setSpecular(0.3,0.3,0.3);
 	stick.material.setShininess(80);
+	stick.setTexture(&stickTex);
 	stick.setPos(0.2,3,0);
 	stick.setRot(30,330,0); // aehoo não consigo fazer isso aqui funcionar!!
 	stick.setSize(0.7,0.7,0.8);
+		objects.push_back(&stick);
 	
 	// crypt scenario
-	scenario.setPos(0,-2,0);
+	scenario.setPos(0,-3,0);
 	scenario.setSize(25,35,25);
+	scenario.setTexture(&rockTex);
 	scenario.material.setDiffuse(0.4,0.4,0.4);
 	//scenario.material.setSpecular(0.2,0.2,0.2);
-	scenario.material.setShininess(80);
+	//scenario.material.setShininess(80);
+		objects.push_back(&scenario);
 	
+	// tables material setup
 	Material tableStructMat;
 	tableStructMat.setDiffuse(0.5 *1.5, 0.18 *1.5, 0.14 *1.5);
 	tableStructMat.setSpecular(0.3,0.3,0.3);
@@ -195,13 +204,16 @@ void initObjects () {
 	// main table
 	tableStruct.setMaterial(tableStructMat);
 	tableTop.setMaterial(tableTopMat);
+	tableStruct.setTexture(&woodTex);
+	tableTop.setTexture(&tableTex);
 	tableStruct.setSize(10,10,10);
 	tableTop.setSize(10,10,10);
-	
+		objects.push_back(&tableTop); objects.push_back(&tableStruct);
+
+	// table2
 	tableStructMat.setDiffuse(0.25,0.09,0.07);
 	tableStructMat.setSpecular(0,0,0);
-	tableTopMat.setDiffuse(0.078 *0.5, 0.66 *0.5, 0.078 *0.5);
-	// table2
+	tableTopMat.setDiffuse(0.078 *0.5, 0.66 *0.5, 0.078 *0.5);	
 	tableStruct2.setMaterial(tableStructMat);
 	tableTop2.setMaterial(tableTopMat);
 	tableStruct2.setSize(10,10,10);
@@ -238,6 +250,8 @@ void initObjects () {
 	
 	// infinite scenario globe
 	globe.setSize(50,50,50);
+	globe.setTexture(&starsTex);
+		objects.push_back(&globe);
 	
 
     for (int i=0;i<NSTARS;i++)
@@ -250,119 +264,77 @@ void initObjects () {
 
 void drawObjects_partial () {
 	
-	objects[0]->draw(NULL);
-	stick.draw(&stickTex);
-	tableStruct.draw(&woodTex);
-	tableTop.draw(&tableTex);
+	objects[0]->draw();
+	stick.draw();
+	tableStruct.draw();
+	tableTop.draw();
 }
 
 void drawObjects () {
     	
     glDisable(GL_LIGHTING); //stars drawing of not-lighted objects
-	    // stars
-	    /*
-	    for (int i=0;i<NSTARS;i++)
-	    {
+	    // Stars
+	    for (int i=0;i<NSTARS;i++) {
 	    	glPushMatrix();
 	    	glTranslated(star[i].x *20, star[i].y *20, star[i].z *20);
 		    glutSolidSphere(0.5,10,10);
 	    	glPopMatrix();
 	    }
-	    */
-	    //// sun
+	    //// Sun
 		//glPushMatrix();
 	    //glTranslated( SUN_MOVEMENT_EQUATION );
 		//glutSolidSphere(0.5,10,10);
 	    //glPopMatrix();
-	
-	globe.draw(&starsTex);
-	
+		// Infinite Background
+		globe.draw();
 	glEnable(GL_LIGHTING); //ends drawing of not-lighted objects
-    
-    
-	// draw objects
-	for( int it=0; it<objects.size(); it++ )
-		objects[it]->draw(NULL);
 	
-	// texturized objects
-	tableStruct.draw(&woodTex);
-	tableTop.draw(&tableTex);
-	scenario.draw(&rockTex);
-	//ball.draw(&ballTex);
-	stick.draw(&stickTex);
+	
+	// ball cursor
+	glPushMatrix();
+    glTranslated( ball.getPosX() + cos(RAD(cursor))*0.3, ball.getPosY() , ball.getPosZ() + sin(RAD(cursor))*0.3 );
+    glRotated( -cursor, 0,1,0);
+	glScalef(0.1,0.1,0.1);
+	glutSolidTetrahedron();
+    glPopMatrix();	    
+	cursor+=5;
+    
+    
+	// draw all objects
+	for( int it=0; it<objects.size(); it++ )
+		objects[it]->draw();
 }
 
-
 void lights () {
-	
-	// ambient light
-	GLfloat ambientColor[] = {0.09, 0.05, 0.05, 1.0f};
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor);
-	
 	
 	// position light (sun)
 	//posit++;
 	//GLfloat position[] = { SUN_MOVEMENT_EQUATION, 1.0f };
 	GLfloat position[] = { 0,10,0, 1.0f };
-	GLfloat ambientLight[] = { 0.0, 0.0, 0.0, 1.0f };
-	GLfloat diffuseLight[] = { 0.9f, 0.5f, 0.5f, 1.0f };
-	GLfloat specularLight[] = { 1.0f, 0.6f, 0.6f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, position);    
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.4);
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.05);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.001);
 	GLfloat spot_direction[] = { 0.0, -1.0, 0.0 };
-	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 160);
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
-	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.0);
 	
 	// spotlight
-	GLfloat lampColor[] = {RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4, 1.0f};
 	GLfloat light1_position[] = { 0.0, 10.0, 0.0, 1.0 };
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, lampColor);
 	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
-	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.2);
-	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.04);
-	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.);
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 90);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 12.0);
 	
 	// spotlight 2
 	GLfloat light2_position[] = { 0.0, 10.0, -30.0, 1.0 };
-	glLightfv(GL_LIGHT3, GL_DIFFUSE, lampColor);
 	glLightfv(GL_LIGHT3, GL_POSITION, light2_position);
-	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 0.5);
-	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0.04);
-	glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 90);
 	glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, spot_direction);
-	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 6.0);
 	// spotlight 3
 	GLfloat light3_position[] = { 0.0, 10.0, 30.0, 1.0 };
-	glLightfv(GL_LIGHT4, GL_DIFFUSE, lampColor);
 	glLightfv(GL_LIGHT4, GL_POSITION, light3_position);
-	glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 0.5);
-	glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, 0.04);
-	glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 90);
 	glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot_direction);
-	glLightf(GL_LIGHT4, GL_SPOT_EXPONENT, 6.0);
 	// spotlight 4
 	GLfloat light4_position[] = { 0.0, 10.0, 60.0, 1.0 };
-	glLightfv(GL_LIGHT5, GL_DIFFUSE, lampColor);
 	glLightfv(GL_LIGHT5, GL_POSITION, light4_position);
-	glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 0.5);
-	glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, 0.04);
-	glLightf(GL_LIGHT5, GL_SPOT_CUTOFF, 90);
 	glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot_direction);
-	glLightf(GL_LIGHT5, GL_SPOT_EXPONENT, 6.0);	
 	
 	// directional light
-	GLfloat lampColor2[] = {RGB(252), RGB(234), RGB(186), 1.0f};
 	GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
-	glLightfv(GL_LIGHT2, GL_DIFFUSE, lampColor2);
 	glLightfv(GL_LIGHT2, GL_POSITION, direction);
 }
 
@@ -372,7 +344,7 @@ void perspectiveViewport( int width, int height ) {
 	
     glViewport (0, 0, (GLsizei)width, (GLfloat)height);
     glScissor(0, 0, width, height);
-    gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 2000.0);
+    gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 1000.0);
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
 	glLoadIdentity();  
@@ -394,7 +366,7 @@ void orthoViewport( int width, int height ) {
 	glMatrixMode (GL_PROJECTION); //set the matrix to projection
 	glLoadIdentity ();
     
-    glOrtho(-7, 7, -4, 3.5, 0.1, 200);
+    glOrtho(-7, 7, -4, 3.5, 0.1, 50);
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
     glLoadIdentity();
@@ -425,14 +397,66 @@ void display () {
     frameCounter++;
 }
 
+void initLights () {
+	
+	// ambient light
+	GLfloat ambientColor[] = {0.09, 0.05, 0.05, 1.0f};
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor);
+	
+	
+	// position light (sun)
+	GLfloat ambientLight[] = { 0.0, 0.0, 0.0, 1.0f };
+	GLfloat diffuseLight[] = { 0.9f, 0.5f, 0.5f, 1.0f };
+	GLfloat specularLight[] = { 1.0f, 0.6f, 0.6f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.4);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.05);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.001);
+	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 160);
+	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.0);
+	
+	// spotlight
+	GLfloat lampColor[] = {RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4, 1.0f};
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, lampColor);
+	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.2);
+	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.04);
+	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 90);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 12.0);
+	
+	// spotlight 2
+	glLightfv(GL_LIGHT3, GL_DIFFUSE, lampColor);
+	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 0.5);
+	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0.04);
+	glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 90);
+	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 6.0);
+	// spotlight 3
+	glLightfv(GL_LIGHT4, GL_DIFFUSE, lampColor);
+	glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 0.5);
+	glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, 0.04);
+	glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 90);
+	glLightf(GL_LIGHT4, GL_SPOT_EXPONENT, 6.0);
+	// spotlight 4
+	glLightfv(GL_LIGHT5, GL_DIFFUSE, lampColor);
+	glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 0.5);
+	glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, 0.04);
+	glLightf(GL_LIGHT5, GL_SPOT_CUTOFF, 90);
+	glLightf(GL_LIGHT5, GL_SPOT_EXPONENT, 6.0);	
+	
+	// directional light
+	GLfloat lampColor2[] = {RGB(252), RGB(234), RGB(186), 1.0f};
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, lampColor2);
+}
+
 void init ()
 {
 	cout << "Loading models...";
 	initObjects();
 	cout << "Done.\n";
 	
-    glClearColor(0, 0, 0, 1.0f); //background color
-    // Limpa a janela e habilita o teste para eliminar faces ocultas por outras
+    glClearColor(0, 0, 0, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT);
 	
 	glEnable(GL_NORMALIZE);		//normalizes all normals
@@ -440,27 +464,26 @@ void init ()
     glEnable (GL_LIGHTING);
     glShadeModel (GL_SMOOTH);
     
-    
     if(light1)
 		glEnable (GL_LIGHT0); 	// sun
     if(light2)
 		glEnable (GL_LIGHT1);   // spotlight
     if(light3)
 		glEnable (GL_LIGHT2); 	// directional
+		
+	initLights();
 	
 	glEnable (GL_LIGHT3); // extra spotlight1
 	glEnable (GL_LIGHT4); // extra spotlight2
 	glEnable (GL_LIGHT5); // extra spotlight3
     
     cout << "Loading textures..."; 
+    loadTexture(&ballTex, "textures/poolball.tga");
     loadTexture(&woodTex, "textures/wood.tga");
-    loadTexture(&tableTex, "textures/table2.tga");
-    loadTexture(&rockTex, "textures/rock.tga");
-    //loadTexture(&ballTex, "textures/poolball.tga");
+    loadTexture(&tableTex, "textures/table.tga", true);//set true to use mipmapping
+    loadTexture(&rockTex, "textures/rock.tga", true);//set true to use mipmapping
     loadTexture(&starsTex, "textures/stars3.tga");
     loadTexture(&stickTex, "textures/stick.tga");
-    //loadTexture(&tigerTex, "textures/tiger.tga");
-    //loadTexture(&ballTex, "textures/poolball.tga");
     cout << "Done.\n"; 
 }
 
@@ -479,6 +502,9 @@ void reshape (int w, int h) {
 
 void keyboardFunc (unsigned char key, int x, int y) {
    
+    if ( key=='f')
+		ball.applyForce(10,cursor);   
+		
     // chances lens focal distance
     if ( key=='s' )
 		lensAngle+=2;
@@ -527,7 +553,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
 
 
 void mouseFunc(int button, int state, int x, int y) {
-/* This funciont only updates click states and positions */
+/* This function only updates click states and positions */
  
   if (GLUT_LEFT_BUTTON == button)
     left_click = state;
@@ -553,14 +579,17 @@ void mouseMotionFunc(int x, int y) {
 	yold = y;
 }
 
-void timerFunc(int value) {
+void updateFPS(int value) {
 	fps = frameCounter;
 	frameCounter = 0;
 	
-	glutTimerFunc(1000/*1sec*/, timerFunc, 0);
+	glutTimerFunc(1000/*1sec*/, updateFPS, 0);
 }
 
-
+void updateState(int value) {
+	ball.updateState();
+	glutTimerFunc(1000/STATEUPDATES_PER_SEC, updateState, 0);
+}
 
 
 
@@ -583,7 +612,8 @@ int main (int argc, char **argv) {
     glutKeyboardFunc(keyboardFunc);
     glutMouseFunc(mouseFunc);
 	glutMotionFunc(mouseMotionFunc);
-	glutTimerFunc(1000/*1sec*/, timerFunc, 0);
+	glutTimerFunc(1000/*1sec*/, updateFPS, 0);    
+	glutTimerFunc(1000/STATEUPDATES_PER_SEC , updateState, 0);
 	
     glutMainLoop(); 
     

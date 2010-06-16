@@ -15,6 +15,7 @@ struct point
 // Macros
 #define RGB(x) (float)(x)/(255)
 #define VARNAME(x) #x
+#define RAD(x) ((x)*(M_PI))/(180)
 
 // Default values for Materials Attributes
 const float default_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
@@ -25,6 +26,7 @@ const float default_shininess = 0;
 
 // Global variables
 #define NSTARS 1000
+#define STATEUPDATES_PER_SEC 50
 
 // keyboard keys
 enum{

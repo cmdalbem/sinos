@@ -25,9 +25,11 @@ private:
 public:
 	//---------------------------- ATTRIBUTES
 	Material material;
+	Texture *texture;
 
 	//---------------------------- CONSTRUCTORS
 	Object();
+	Object(Texture *_tex);
 	Object(GLfloat pos[], GLfloat rot[], GLfloat size[]);
 	Object( GLfloat xpos,  GLfloat ypos,  GLfloat zpos,
 			GLfloat xrot,  GLfloat yrot,  GLfloat zrot,
@@ -67,6 +69,9 @@ public:
 	void setSizeY(GLfloat sizey);
 	void setSizeZ(GLfloat sizez);
 	
+	void setMaterial(Material const newmaterial);
+	void setTexture (Texture *tex);
+	
 	//---------------------------- OTHER METHODS
 	
 	/* drawBegin()
@@ -88,13 +93,11 @@ public:
 	*  have an implementation of a drawing function. This will allow to group
 	*  multiple kinds of object on vectors and call .draw() for each of them.
 	*/
-	virtual void draw( Texture *tex=NULL ) const =0;
+	virtual void draw() const =0;
 	
 	/* Transformations */
 	void translate(GLfloat* offset);
 	void translate(GLfloat x, GLfloat y, GLfloat z);
 	void scale(GLfloat x, GLfloat y, GLfloat z);
 	void rotate(GLfloat x, GLfloat y, GLfloat z);
-	
-	void setMaterial(Material const newmaterial);
 };
