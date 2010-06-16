@@ -4,6 +4,7 @@
 //
 
 #include "ObjectStick.h"
+#include "constants.h"
 
 float movex = 1, movey = 1, 
 	  moreStrenght = 0.1,
@@ -74,7 +75,7 @@ void ObjectStick::strenghtDown()
 
 void ObjectStick::calculatePos()
 {
-	double degrees = (2*getRotX()*M_PI)/360;
+	double degrees = RAD(getRotX());
 	
 	setPosX(center->getPosX() + sin(degrees)*(attackStrenght/5));
 	setPosY(center->getPosY() + 0.02*(attackStrenght));
