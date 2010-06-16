@@ -14,6 +14,7 @@
 #include "Object.h"
 #include "ObjectModel.h"
 #include "ObjectBall.h"
+#include "ObjectStick.h"
 #include "Camera.h"
 #include "constants.h"
 
@@ -33,9 +34,9 @@ static ObjectModel tableStruct("obj/pooltable_struct.obj");
 static ObjectModel tableTop("obj/pooltable_table16x.obj");
 static ObjectModel scenario("obj/crypt.obj");
 static ObjectModel globe("obj/globe.obj");
-static ObjectModel stick("obj/taco.obj");
 //static ObjectModel ball("obj/poolball.obj");
 static ObjectBall  ball(0.1,100,100);
+static ObjectStick stick("obj/taco.obj", &ball);
 
 // Texture files
 Texture tigerTex, woodTex, tableTex, rockTex, starsTex, stickTex, ballTex;
@@ -177,10 +178,9 @@ void initObjects () {
 	stick.material.setSpecular(0.3,0.3,0.3);
 	stick.material.setShininess(80);
 	stick.setTexture(&stickTex);
-	stick.setPos(0.2,3,0);
-	stick.setRot(30,330,0); // aehoo não consigo fazer isso aqui funcionar!!
 	stick.setSize(0.7,0.7,0.8);
-		objects.push_back(&stick);
+	stick.rotateLeft();
+	//	objects.push_back(&stick);
 	
 	// crypt scenario
 	scenario.setPos(0,-3,0);
@@ -303,6 +303,8 @@ void drawObjects () {
 	// draw all objects
 	for( int it=0; it<objects.size(); it++ )
 		objects[it]->draw();
+		
+	stick.draw();
 }
 
 void lights () {
@@ -500,6 +502,7 @@ void reshape (int w, int h) {
     */
 }
 
+//--------------------------- KEYBOARD ---------------------------//
 void keyboardFunc (unsigned char key, int x, int y) {
    
     if ( key=='f')
@@ -550,8 +553,30 @@ void keyboardFunc (unsigned char key, int x, int y) {
     }
 }
 
+void specialFunc(int key, int x, int y)
+{
+	if ( key == GLUT_KEY_LEFT )
+	{
+		stick.rotateLeft();
+	}
+	
+	if ( key == GLUT_KEY_RIGHT )
+	{
+		stick.rotateRight();
+	}
+	
+	if ( key == GLUT_KEY_UP )
+	{
+		stick.strenghtUp();
+	}
+	
+	if ( key == GLUT_KEY_DOWN )
+	{
+		stick.strenghtDown();
+	}
+}
 
-
+//--------------------------- MOUSE ---------------------------//
 void mouseFunc(int button, int state, int x, int y) {
 /* This function only updates click states and positions */
  
@@ -610,6 +635,7 @@ int main (int argc, char **argv) {
     glutReshapeFunc (reshape);
     
     glutKeyboardFunc(keyboardFunc);
+    glutSpecialFunc(specialFunc);
     glutMouseFunc(mouseFunc);
 	glutMotionFunc(mouseMotionFunc);
 	glutTimerFunc(1000/*1sec*/, updateFPS, 0);    

@@ -190,7 +190,7 @@ void Object::setMaterial(Material const newmaterial)
 
 void Object::setTexture(Texture *_texture)
 {
-	texture = _texture;;
+	texture = _texture;
 }
 
 

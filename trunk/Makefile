@@ -2,7 +2,7 @@ CC = g++
 
 CFLAGS = -Wall
 
-OBJS = glm.o imageloader.o ObjectModel.o Object.o ObjectBall.o Material.o Camera.o Texture.o
+OBJS = glm.o imageloader.o ObjectModel.o Object.o ObjectStick.o ObjectBall.o Material.o Camera.o Texture.o
 
 LIBS = -lglut
 
@@ -26,6 +26,9 @@ ObjectModel.o: ObjectModel.cpp ObjectModel.h
 
 Object.o: Object.cpp Object.h
 	$(CC) $(FLAGS) $< -c $(FLAGS) $(LIBS) 
+
+ObjectStick.o: ObjectStick.cpp ObjectStick.h
+	$(CC) $(FLAGS) $< -c $(FLAGS) $(LIBS)
 
 ObjectBall.o: ObjectBall.cpp
 	$(CC) $(FLAGS) $< -c $(FLAGS) $(LIBS) 
