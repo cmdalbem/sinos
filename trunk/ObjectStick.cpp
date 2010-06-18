@@ -6,7 +6,7 @@
 #include "ObjectStick.h"
 #include "constants.h"
 
-float movex = 1, movey = 1, 
+float movex = 5, movey = 5,
 	  moreStrenght = 0.1,
 	  rotationConstant = 180;
 
@@ -43,16 +43,16 @@ void ObjectStick::setAttackStrenght(float newForce)
 
 void ObjectStick::rotateLeft()
 {
-	setRotX(getRotX() + movex);
-	setRotY(getRotY() + movey);
+	setRotX(getRotX() - movex);
+	setRotY(getRotY() - movey);
 	
 	calculatePos();
 }
 
 void ObjectStick::rotateRight()
 {
-	setRotX(getRotX() - movex);
-	setRotY(getRotY() - movey);
+	setRotX(getRotX() + movex);
+	setRotY(getRotY() + movey);
 	
 	calculatePos();
 }

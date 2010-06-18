@@ -16,7 +16,8 @@ class ObjectBall: public Object
 private:
 	GLdouble radius;
 	GLint slices, stacks;
-	double speed, direction; //direction is an angle
+	float moveVector[2]; //direction of movement
+	
 
 public:
 	//---------------------------- CONSTRUCTORS
@@ -27,10 +28,18 @@ public:
 	~ObjectBall();
 	
 	//---------------------------- GETTERS & SETTERS
-
+	void 				resetMovement();
+	float				getSpeed();
+	float				getNewX();
+	float				getNewZ();
 	
 	//---------------------------- OTHER METHODS
 	virtual void 		draw() const;
 	void 				updateState();
-	void				applyForce( double magnitude, double direction );
+	void				applyForce( float magnitude, float direction );
+	void				changeSpeed( float multFactor );
+	
+	// Collision detection
+	bool 				canMoveX();
+	bool 				canMoveZ();
 };

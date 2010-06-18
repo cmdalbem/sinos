@@ -27,6 +27,10 @@ const float default_shininess = 0;
 // Global variables
 #define NSTARS 1000
 #define STATEUPDATES_PER_SEC 50
+#define TOPBOUND 2.500
+#define BOTBOUND -2.05
+#define LEFTBOUND -4.550
+#define RIGHTBOUND 4.500
 
 // keyboard keys
 enum{

@@ -20,11 +20,6 @@
 
 						 
 
-#define VFACTOR 100
-#define DFACTOR 5
-#define SUN_MOVEMENT_EQUATION sin(posit/VFACTOR)*DFACTOR, 7 , cos(posit/VFACTOR)*DFACTOR
-
-
 // Objects
 point star[NSTARS];
 vector<Object*> objects;
@@ -36,6 +31,7 @@ static ObjectModel scenario("obj/crypt.obj");
 static ObjectModel globe("obj/globe.obj");
 //static ObjectModel ball("obj/poolball.obj");
 static ObjectBall  ball(0.1,100,100);
+static ObjectBall  ball2(0.05,10,10);
 static ObjectStick stick("obj/taco.obj", &ball);
 
 // Texture files
@@ -56,12 +52,10 @@ bool invertViewports=true;
 
 // !! The following globals aren't in their proper place. !!
 
-bool 		light1=true, light2=true, light3=true, light4=true;
 float 		posit=0;
 long int 	frameCounter, fps = 0;	//frames per second counter and register
 char 		osd[1024]; 				//text buffer for on-screen output
 int 		lensAngle = 60;
-int 		cursor = 0;
 
 
 //--------------------------------------------------------------------//
@@ -117,7 +111,7 @@ void drawOsd()
 {
   glDisable(GL_LIGHTING);
   
-  sprintf(osd,"FPS: %li   camera mode: %s   l1/l2/l3: %i %i %i",fps,camera.getMode(),light1,light2,light3);
+  sprintf(osd,"FPS: %li   camera mode: %s",fps,camera.getMode());
   
   glColor3f(1.0f, 1.0f, 1.0f);
   glRasterPos3f(-1, 0.5, -1);
@@ -172,6 +166,9 @@ void initObjects () {
 	ball.material.setSpecular(0.9, 0.9, 0.9);
 	ball.setTexture(&ballTex);
 		objects.push_back(&ball);
+	
+	ball2.setPos(0,2.95,2);
+	objects.push_back(&ball2);
 	
 	// the stick
 	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
@@ -234,9 +231,9 @@ void initObjects () {
 	tableTop4.setSize(10,10,10);
 	tableStruct4.setPos(0,0,60);
 	tableTop4.setPos(0,0,60);
-		objects.push_back(&tableStruct2);objects.push_back(&tableTop2);
-		objects.push_back(&tableStruct3);objects.push_back(&tableTop3);	
-		objects.push_back(&tableStruct4);objects.push_back(&tableTop4);		
+		//objects.push_back(&tableStruct2);objects.push_back(&tableTop2);
+		//objects.push_back(&tableStruct3);objects.push_back(&tableTop3);	
+		//objects.push_back(&tableStruct4);objects.push_back(&tableTop4);		
 	
 	// ceiling lamp
 	light.setPos(0,11,0);
@@ -285,21 +282,10 @@ void drawObjects () {
 	    //glTranslated( SUN_MOVEMENT_EQUATION );
 		//glutSolidSphere(0.5,10,10);
 	    //glPopMatrix();
-		// Infinite Background
-		globe.draw();
+		
+		globe.draw(); // Infinite Background
 	glEnable(GL_LIGHTING); //ends drawing of not-lighted objects
-	
-	
-	// ball cursor
-	glPushMatrix();
-    glTranslated( ball.getPosX() + cos(RAD(cursor))*0.3, ball.getPosY() , ball.getPosZ() + sin(RAD(cursor))*0.3 );
-    glRotated( -cursor, 0,1,0);
-	glScalef(0.1,0.1,0.1);
-	glutSolidTetrahedron();
-    glPopMatrix();	    
-	cursor+=5;
-    
-    
+	  
 	// draw all objects
 	for( int it=0; it<objects.size(); it++ )
 		objects[it]->draw();
@@ -376,6 +362,7 @@ void orthoViewport( int width, int height ) {
 		camera2.apply();
 		lights();
 		drawObjects_partial();
+		ball2.draw(); printf("%.3f,%.3f,%.3f\n",ball2.getPosX(),ball2.getPosY(),ball2.getPosZ());
 		
 	glDisable(GL_SCISSOR_TEST);
 }	
@@ -466,15 +453,10 @@ void init ()
     glEnable (GL_LIGHTING);
     glShadeModel (GL_SMOOTH);
     
-    if(light1)
-		glEnable (GL_LIGHT0); 	// sun
-    if(light2)
-		glEnable (GL_LIGHT1);   // spotlight
-    if(light3)
-		glEnable (GL_LIGHT2); 	// directional
-		
 	initLights();
-	
+	glEnable (GL_LIGHT0); 	// sun
+	glEnable (GL_LIGHT1);   // spotlight
+	glEnable (GL_LIGHT2); 	// directional
 	glEnable (GL_LIGHT3); // extra spotlight1
 	glEnable (GL_LIGHT4); // extra spotlight2
 	glEnable (GL_LIGHT5); // extra spotlight3
@@ -505,47 +487,30 @@ void reshape (int w, int h) {
 //--------------------------- KEYBOARD ---------------------------//
 void keyboardFunc (unsigned char key, int x, int y) {
    
+    if( key=='w' )
+		ball2.setPosZ( ball2.getPosZ()-0.05 );
+	if( key=='s' )
+		ball2.setPosZ( ball2.getPosZ()+0.05 );
+	if( key=='a' )
+		ball2.setPosX( ball2.getPosX()-0.05 );
+	if( key=='d' )
+		ball2.setPosX( ball2.getPosX()+0.05 );		
+    
     if ( key=='f')
-		ball.applyForce(10,cursor);   
+		ball.applyForce(30,stick.getRotX()+90);   
 		
     // chances lens focal distance
-    if ( key=='s' )
+    /*if ( key=='s' )
 		lensAngle+=2;
 	if ( key=='w' )
 		lensAngle-=2;
+		* */
     
     if( key=='c' )
 		camera.nextCameraMode(objects[0]);
     
     if ( key=='v' )
 		invertViewports = !invertViewports;
-	
-	// turn on/off light0
-	if ( key == '1' ) {
-		if(!light1)
-			glEnable(GL_LIGHT0);
-		else
-			glDisable(GL_LIGHT0);
-		light1 = !light1;
-	}
-	
-	// turn on/off light1
-	if ( key == '2' ) {
-		if(!light2)
-			glEnable(GL_LIGHT1);
-		else
-			glDisable(GL_LIGHT1);
-		light2 = !light2;
-	}
-	
-    // turn on/off light2
-    if ( key == '3' ) {
-		if(!light3)
-			glEnable(GL_LIGHT2);
-		else
-			glDisable(GL_LIGHT2);
-		light3 = !light3;
-	}
 	
     if ( key==K_ESC )
     {
@@ -565,12 +530,12 @@ void specialFunc(int key, int x, int y)
 		stick.rotateRight();
 	}
 	
-	if ( key == GLUT_KEY_UP )
+	if ( key == GLUT_KEY_DOWN )
 	{
 		stick.strenghtUp();
 	}
 	
-	if ( key == GLUT_KEY_DOWN )
+	if ( key == GLUT_KEY_UP )
 	{
 		stick.strenghtDown();
 	}
@@ -625,7 +590,7 @@ int main (int argc, char **argv) {
     glutInitDisplayMode (GLUT_DOUBLE | GLUT_DEPTH); //set the display to Double buffer, with depth
     glutInitWindowSize (1280, 720);                  //set the window size
     glutInitWindowPosition (400, 0);              //set the position of the window
-    glutCreateWindow ("SiNoS - 1/2/3: lights  mouse/w/s: camera  c: mode");     //the caption of the window
+    glutCreateWindow ("SiNoS - mouse/w/s/c: camera  arrows: stick control");     //the caption of the window
     init();
     glutDisplayFunc (display); 						//use the display function to draw everything
     
