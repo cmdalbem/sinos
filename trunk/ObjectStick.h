@@ -42,8 +42,7 @@ class ObjectStick : public ObjectModel
 		 */
 		void	rotate( float rotation );
 
-		void	strenghtUp();
-		void	strenghtDown();
+		void	changePower( float var );
 		
 		/* CalculatePos()
 		 * 

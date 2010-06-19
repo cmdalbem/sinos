@@ -6,9 +6,7 @@
 #include "ObjectStick.h"
 #include "constants.h"
 
-float movex = 5, movey = 5,
-	  moreStrenght = 0.1,
-	  rotationConstant = 180;
+float rotationConstant = 180;
 
 //------------------------------------------------------------ CONSTRUCTORS
 ObjectStick::ObjectStick(string filename, Object* objectCenter)
@@ -33,8 +31,8 @@ void ObjectStick::setAttackStrenght(float newForce)
 {
 	if( newForce < 0.5 )
 		attackStrenght = 0.5;
-	else if ( newForce > 20 )
-		attackStrenght = 20;
+	else if ( newForce > 50 )
+		attackStrenght = 50;
 	else
 		attackStrenght = newForce;
 }
@@ -49,17 +47,9 @@ void ObjectStick::rotate( float rot )
 	calculatePos();
 }
 
-void ObjectStick::strenghtUp()
+void ObjectStick::changePower( float var )
 {
-	setAttackStrenght(attackStrenght + moreStrenght);
-	setRotZ(10 - getAttackStrenght()/5);
-	
-	calculatePos();
-}
-
-void ObjectStick::strenghtDown()
-{
-	setAttackStrenght(attackStrenght - moreStrenght);
+	setAttackStrenght(attackStrenght + var);
 	setRotZ(10 - getAttackStrenght()/5);
 	
 	calculatePos();

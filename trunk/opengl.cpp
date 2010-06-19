@@ -32,7 +32,7 @@ static ObjectModel scenario("obj/crypt.obj");
 static ObjectModel globe("obj/globe.obj");
 //static ObjectModel ball("obj/poolball.obj");
 static ObjectBall  ball(1,100,100);
-static ObjectBall  ball2(1,100,100);
+static ObjectBall  cursor;
 static ObjectStick stick("obj/taco.obj", &ball);
 
 // Texture files
@@ -159,15 +159,14 @@ void initObjects () {
 	static ObjectModel tableTop4("obj/pooltable_table.obj");
 	
 	// the ball
-	ball.setPos(0,29.5,0);
-	ball.material.setShininess(120);
+	ball.setPos(0,BALL_O_Y,0);
+	ball.material.setShininess(120); 
 	ball.material.setDiffuse(0.6, 0.6, 0.6);
 	ball.material.setSpecular(0.9, 0.9, 0.9);
 	ball.setTexture(&ballTex);
 		objects.push_back(&ball);
 	
-	ball2.setPos(0,29.5,2);
-		//objects.push_back(&ball2);
+	cursor.setPos(0,BALL_O_Y,2);
 	
 	// the stick
 	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
@@ -207,7 +206,7 @@ void initObjects () {
 	tableStruct.setSize(100,100,100); 
 	tableTop.setSize(100,100,100);
 	tableFrame.setSize(100,100,100);
-		objects.push_back(&tableTop); objects.push_back(&tableStruct); objects.push_back(&tableFrame); 
+		objects.push_back(&tableTop); objects.push_back(&tableStruct); //objects.push_back(&tableFrame);  
 
 	// table2
 	tableStructMat.setDiffuse(0.25,0.09,0.07);
@@ -349,12 +348,13 @@ void perspectiveViewport( int width, int height ) {
 			camera.apply();
 		lights();
 		drawObjects();		
-		/*printf("%.3f,%.3f,%.3f\n",ball2.getPosX(),ball2.getPosY(),ball2.getPosZ());
+		
+		/*printf("%.3f,%.3f,%.3f\n",cursor.getPosX(),cursor.getPosY(),cursor.getPosZ());
 		glBegin(GL_LINES);
-			glVertex3f(ball2.getPosX()-10, ball2.getPosY(),ball2.getPosZ());
-			glVertex3f(ball2.getPosX()+10, ball2.getPosY(),ball2.getPosZ());
-			glVertex3f(ball2.getPosX(), ball2.getPosY(),ball2.getPosZ()+10);
-			glVertex3f(ball2.getPosX(), ball2.getPosY(),ball2.getPosZ()-10);
+			glVertex3f(cursor.getPosX()-10, cursor.getPosY(),cursor.getPosZ());
+			glVertex3f(cursor.getPosX()+10, cursor.getPosY(),cursor.getPosZ());
+			glVertex3f(cursor.getPosX(), cursor.getPosY(),cursor.getPosZ()+10);
+			glVertex3f(cursor.getPosX(), cursor.getPosY(),cursor.getPosZ()-10);
 		glEnd();*/
 }	
 
@@ -504,16 +504,18 @@ void reshape (int w, int h) {
 void keyboardFunc (unsigned char key, int x, int y) {
    
     if( key=='w' )
-		ball2.setPosZ( ball2.getPosZ()-0.3 );
+		cursor.setPosZ( cursor.getPosZ()-0.3 );
 	if( key=='s' )
-		ball2.setPosZ( ball2.getPosZ()+0.3 );
+		cursor.setPosZ( cursor.getPosZ()+0.3 );
 	if( key=='a' )
-		ball2.setPosX( ball2.getPosX()-0.3 );
+		cursor.setPosX( cursor.getPosX()-0.3 );
 	if( key=='d' )
-		ball2.setPosX( ball2.getPosX()+0.3 );		
+		cursor.setPosX( cursor.getPosX()+0.3 );		
     
-    if ( key=='f')
-		ball.applyForce(300,stick.getRotX()+90);   
+    if ( key==K_SPACE) {
+		ball.applyForce(stick.getAttackStrenght()*10,stick.getRotX()+90);  //some naughty magic numbers here
+		stick.setAttackStrenght(0);
+	}
 		
     // chances lens focal distance
     /*if ( key=='s' )
@@ -524,9 +526,6 @@ void keyboardFunc (unsigned char key, int x, int y) {
     
     if( key=='c' )
 		camera.nextCameraMode(objects[0]);
-    
-    if ( key==K_SPACE )
-		invertViewports = !invertViewports;
 	
 	if ( key=='1' )
 		glDisable(GL_LIGHT1);
@@ -553,12 +552,12 @@ void specialFunc(int key, int x, int y)
 	
 	if ( key == GLUT_KEY_DOWN )
 	{
-		stick.strenghtUp();
+		stick.changePower(0.1);
 	}
 	
 	if ( key == GLUT_KEY_UP )
 	{
-		stick.strenghtDown();
+		stick.changePower(-0.1);
 	}
 }
 
@@ -589,7 +588,10 @@ void mouseMotionFunc(int x, int y) {
 	
 	if (GLUT_DOWN == right_click)
 	{
-		camera.action2(x - xold, y - yold);
+		if( holdCtrl )
+			stick.changePower( (y-yold)/2. );
+		else		
+			camera.action2(x - xold, y - yold);
 	}
 
 	xold = x;
@@ -617,7 +619,7 @@ int main (int argc, char **argv) {
     glutInitDisplayMode (GLUT_DOUBLE | GLUT_DEPTH); //set the display to Double buffer, with depth
     glutInitWindowSize (1280, 720);                  //set the window size
     glutInitWindowPosition (400, 0);              //set the position of the window
-    glutCreateWindow ("SiNoS - mouse/c: camera  arrows: stick control");     //the caption of the window
+    glutCreateWindow ("SiNoS - mouse/c: camera  ctrl+mouse: stick  spacebar: attack");     //the caption of the window
     init();
     glutDisplayFunc (display); 						//use the display function to draw everything
     

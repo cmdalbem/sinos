@@ -11,34 +11,22 @@
 
 Object::Object()// keeping the consistency
 {
-	pos[0] = 0;
-	pos[1] = 0;
-	pos[2] = 0;
+	resetPosition();
 	
-	rot[0] = 0;
-	rot[1] = 0;
-	rot[2] = 0;
+	resetRotation();
 	
-	size[0] = 1;
-	size[1] = 1;
-	size[2] = 1;
+	resetSize();
 	
 	texture = NULL;
 }
 
 Object::Object( Texture *_tex)// keeping the consistency
 {
-	pos[0] = 0;
-	pos[1] = 0;
-	pos[2] = 0;
+	resetPosition();
 	
-	rot[0] = 0;
-	rot[1] = 0;
-	rot[2] = 0;
+	resetRotation();
 	
-	size[0] = 1;
-	size[1] = 1;
-	size[2] = 1;
+	resetSize();
 	
 	texture = _tex;
 }
@@ -191,6 +179,27 @@ void Object::setMaterial(Material const newmaterial)
 void Object::setTexture(Texture *_texture)
 {
 	texture = _texture;
+}
+
+void Object::resetPosition()
+{
+	pos[0] = 0;
+	pos[1] = 0;
+	pos[2] = 0;
+}
+
+void Object::resetRotation()
+{
+	rot[0] = 0;
+	rot[1] = 0;
+	rot[2] = 0;
+}
+
+void Object::resetSize()
+{	
+	size[0] = 1;
+	size[1] = 1;
+	size[2] = 1;
 }
 
 

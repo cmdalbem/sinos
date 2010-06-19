@@ -72,6 +72,10 @@ public:
 	void setMaterial(Material const newmaterial);
 	void setTexture (Texture *tex);
 	
+	void resetPosition();
+	void resetRotation();
+	void resetSize();
+	
 	//---------------------------- OTHER METHODS
 	
 	/* drawBegin()
