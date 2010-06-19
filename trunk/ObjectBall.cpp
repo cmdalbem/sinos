@@ -46,7 +46,7 @@ void ObjectBall::resetSpeed()
 
 float ObjectBall::getSpeed()
 {
-	return abs(moveVector[0]) /*+ abs(moveVector[1])*/ + abs(moveVector[2]);	
+	return abs(moveVector[0]) + abs(moveVector[1]) + abs(moveVector[2]);	
 }
 
 float ObjectBall::getNewX()
@@ -70,28 +70,32 @@ void ObjectBall::updateState()
 {
 	if( getSpeed() )
 	{
-		bool can_move_x = canMoveX(),
-			 can_move_z = canMoveZ();
+		if( !moveVector[1] )
+		{
+			bool can_move_x = canMoveX(),
+				 can_move_z = canMoveZ();
 
-		if( !can_move_x || !can_move_z ) {
-			if( hasSnooked() ) {
-				setPos(0,BALL_O_Y,0);
-				resetSpeed();
-			}
-			else {
-				if( !can_move_x ) {
-					moveVector[0] = -moveVector[0];
-					changeSpeed(0.995);
+			if( !can_move_x || !can_move_z ) {
+				if( hasSnooked() ) { // point!
+					setPos(0,BALL_O_Y,0);
+					resetSpeed();
+	//				moveVector[1]=-50;
 				}
-				if( !can_move_z ) {
-					moveVector[2] = -moveVector[2];
-					changeSpeed(0.995);
+				else {
+					if( !can_move_x ) {
+						moveVector[0] = -moveVector[0];
+						changeSpeed(0.995);
+					}
+					if( !can_move_z ) {
+						moveVector[2] = -moveVector[2];
+						changeSpeed(0.995);
+					}
 				}
 			}
 		}
 		
 		// update position
-		setPos( getNewX(), getPosY(), getNewZ() );
+		setPos( getNewX(), getNewY(), getNewZ() );
 		
 		// update velocity
 		changeSpeed(0.965);
@@ -151,18 +155,23 @@ const float B5P2[] = { 1.8 ,  28.1};
 const float B6P1[] = { 48  ,  24.5};
 const float B6P2[] = { 44.4,  28.1};
 	*/
-
+	
 	float posx = getNewX(),
-		  posy = getPosY(),
+		  posy = getNewY(),
 		  posz = getNewZ();
 
+	/*// Limit Boundaries Test
 	if( posx>B2P1[0] && posx<B2P2[0] &&
 		posy>B2P1[1] )
 		return true;
 	else if( posx>B5P1[0] && posx<B5P2[0] &&
 			 posy<B5P1[1] )
 			return true;
-		
+	else return false;*/
+	
+	for(int i=0; i<NHOLES; i++)
+		if( abs(posx-HC[i][0]) + abs(posz-HC[i][1]) <= HC[i][2] )
+			return true;
 	return false;
 	
 }

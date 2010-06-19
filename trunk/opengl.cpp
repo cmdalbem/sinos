@@ -17,6 +17,7 @@
 #include "ObjectStick.h"
 #include "Camera.h"
 #include "constants.h"
+#include "utils.h"
 
 						 
 
@@ -32,7 +33,7 @@ static ObjectModel scenario("obj/crypt.obj");
 static ObjectModel globe("obj/globe.obj");
 //static ObjectModel ball("obj/poolball.obj");
 static ObjectBall  ball(1,100,100);
-static ObjectBall  cursor;
+static ObjectBall  cursor(1,100,100);
 static ObjectStick stick("obj/taco.obj", &ball);
 
 // Texture files
@@ -41,7 +42,7 @@ Texture tigerTex, woodTex, tableTex, rockTex, starsTex, stickTex, ballTex;
 
 Camera camera, camera2(2);
 						  
-// mouse
+// mouse-keyboard
 static int	xold, yold;		
 static int	left_click = GLUT_UP;
 static int	right_click = GLUT_UP;
@@ -55,90 +56,7 @@ float 		posit=0;
 long int 	frameCounter, fps = 0;	//frames per second counter and register
 char 		osd[1024]; 				//text buffer for on-screen output
 int 		lensAngle = 60;
-
-
-//--------------------------------------------------------------------//
-//----------------------------- UTILS --------------------------------//
-//--------------------------------------------------------------------//
-
-void loadTexture(Texture *texVar, string texFile, bool makeMipmap=false)
-/* Adapted from http://www.3dcodingtutorial.com/Textures/Loading-Textures.html */
-{
-    if (LoadTGA(texVar, (char*)texFile.c_str()))
-    {
-
-        // This tells opengl to create 1 texture and put it's ID in the given integer variable
-        // OpenGL keeps a track of loaded textures by numbering them: the first one you load is 1, second is 2, ...and so on.
-        glGenTextures(1, &texVar->texID);
-        // Binding the texture to GL_TEXTURE_2D is like telling OpenGL that the texture with this ID is now the current 2D texture in use
-        // If you draw anything the used texture will be the last binded texture
-        glBindTexture(GL_TEXTURE_2D, texVar->texID);
-        // This call will actualy load the image data into OpenGL and your video card's memory. The texture is allways loaded into the current texture
-        // you have selected with the last glBindTexture call
-        // It asks for the width, height, type of image (determins the format of the data you are giveing to it) and the pointer to the actual data
-        glTexImage2D(GL_TEXTURE_2D, 0, texVar->bpp / 8, texVar->width, texVar->height, 0, texVar->type, GL_UNSIGNED_BYTE, texVar->imageData);
-
-        if( makeMipmap ) {
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR_MIPMAP_LINEAR);			
-			gluBuild2DMipmaps( GL_TEXTURE_2D, 3, texVar->width, texVar->height, GL_RGB, GL_UNSIGNED_BYTE, texVar->imageData ); 
-		}
-		else {
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);			
-		}
-        
-        glEnable(GL_TEXTURE_2D);
-        if (texVar->imageData)
-        {
-            // You can now free the image data that was allocated by LoadTGA
-            // You don't want to keep a few Mb of worthless data on heap. It's worthless because OpenGL stores the image someware else after
-            // you call glTexImage2D (usualy in you video card)
-            free(texVar->imageData); 
-        }
-        else
-			cout << "Couldn't set texture " << texFile << " on " << VARNAME(texVar) << "." << endl;
-    }
-    else
-		cout << "Couldn't open TGA texture " << texFile << "." << endl;
-
-}
-
-void drawOsd()
-/* Draws On-Screen Display */
-/* Adapted from http://www.opengl.org/resources/code/samples/glut_examples/examples/bitfont.c */
-{
-  glDisable(GL_LIGHTING);
-  
-  sprintf(osd,"FPS: %li   camera mode: %s",fps,camera.getMode());
-  
-  glColor3f(1.0f, 1.0f, 1.0f);
-  glRasterPos3f(-1, 0.5, -1);
-  for (int i = 0; i < (int)strlen(osd); i++) 
-    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, osd[i]);
-   
-  glEnable(GL_LIGHTING);
-}
-
-
-void drawPlane(int w, int h, float nx, float ny, float nz)
-/* Adapted from http://www.opengl.org/resources/code/samples/glut_examples/examples/spots.c */
-{
-  int i, j;
-  float dw = 1.0 / w;
-  float dh = 1.0 / h;
-
-  glNormal3f(nx,ny,nz);
-  for (j = 0; j < h; ++j) {
-    glBegin(GL_TRIANGLE_STRIP);
-    for (i = 0; i <= w; ++i) {
-      glVertex2f(dw * i, dh * (j + 1));
-      glVertex2f(dw * i, dh * j);
-    }
-    glEnd();
-  }
-}
-
+float 		radius=2.3;
 
 
 //--------------------------------------------------------------------//
@@ -286,6 +204,20 @@ void drawObjects () {
 		
 		globe.draw();
 		
+		// Holes delimiters
+		for(int i=0; i<NHOLES; i++)
+			glCircle3f(HC[i][0],BALL_O_Y,HC[i][1],HC[i][2]);
+		
+		/*printf("%.3f,%.3f,%.3f %.3f\n",cursor.getPosX(),cursor.getPosY(),cursor.getPosZ(),radius);
+		glCircle3f(cursor.getPosX(),BALL_O_Y,cursor.getPosZ(),radius);
+		//cursor.draw();
+		glBegin(GL_LINES);
+			glVertex3f(cursor.getPosX()-10, cursor.getPosY(),cursor.getPosZ());
+			glVertex3f(cursor.getPosX()+10, cursor.getPosY(),cursor.getPosZ());
+			glVertex3f(cursor.getPosX(), cursor.getPosY(),cursor.getPosZ()+10);
+			glVertex3f(cursor.getPosX(), cursor.getPosY(),cursor.getPosZ()-10);
+		glEnd();*/
+		
 	glEnable(GL_LIGHTING); //ends drawing of not-lighted objects
 	  
 	// draw all objects
@@ -341,21 +273,13 @@ void perspectiveViewport( int width, int height ) {
     glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();  
     // IMPORTANT: don't change the order of these calls
-		drawOsd();
+		drawOsd(osd,camera,fps);
 		if( invertViewports )
 			camera2.apply();
 		else
 			camera.apply();
 		lights();
 		drawObjects();		
-		
-		/*printf("%.3f,%.3f,%.3f\n",cursor.getPosX(),cursor.getPosY(),cursor.getPosZ());
-		glBegin(GL_LINES);
-			glVertex3f(cursor.getPosX()-10, cursor.getPosY(),cursor.getPosZ());
-			glVertex3f(cursor.getPosX()+10, cursor.getPosY(),cursor.getPosZ());
-			glVertex3f(cursor.getPosX(), cursor.getPosY(),cursor.getPosZ()+10);
-			glVertex3f(cursor.getPosX(), cursor.getPosY(),cursor.getPosZ()-10);
-		glEnd();*/
 }	
 
 void orthoViewport( int width, int height ) {
@@ -511,6 +435,10 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		cursor.setPosX( cursor.getPosX()-0.3 );
 	if( key=='d' )
 		cursor.setPosX( cursor.getPosX()+0.3 );		
+    if( key=='q' )
+		radius-=0.1;
+	if( key=='e' )
+		radius+=0.1;
     
     if ( key==K_SPACE) {
 		ball.applyForce(stick.getAttackStrenght()*10,stick.getRotX()+90);  //some naughty magic numbers here
@@ -523,6 +451,9 @@ void keyboardFunc (unsigned char key, int x, int y) {
 	if ( key=='w' )
 		lensAngle-=2;
 		* */
+		
+	if( key=='v')
+		invertViewports = !invertViewports;
     
     if( key=='c' )
 		camera.nextCameraMode(objects[0]);
@@ -530,7 +461,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
 	if ( key=='1' )
 		glDisable(GL_LIGHT1);
 	if ( key=='2' )
-		glEnable(GL_LIGHT1);
+		glEnable(GL_LIGHT1); 
 	
     if ( key==K_ESC )
     {

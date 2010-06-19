@@ -28,20 +28,22 @@ const float default_shininess = 0;
 #define NSTARS 1000
 #define STATEUPDATES_PER_SEC 50
 #define BALL_O_Y 29.5
+#define NHOLES 6
 
-// with frame
+// Table boundaries
+// (with frame)
 /*#define TOPBOUND 25.4
 #define BOTBOUND -20.5
 #define LEFTBOUND -45.6
 #define RIGHTBOUND 45.2*/
-
-// without frame
+// (without frame)
 #define TOPBOUND 27.2
 #define BOTBOUND -22.3
 #define LEFTBOUND -47.4
 #define RIGHTBOUND 47
 
-// positions of the holes
+// Holes
+// limit boundaries {x,y}
 const float B1P1[] = {-48.3, -19.9};
 const float B1P2[] = {-45  , -23.5};
 const float B2P1[] = {-2.4 , -23.5};
@@ -54,8 +56,15 @@ const float B5P1[] = {-2.4 ,  28.1};
 const float B5P2[] = { 1.8 ,  28.1};
 const float B6P1[] = { 48  ,  24.5};
 const float B6P2[] = { 44.4,  28.1};
+// centers {x,z,radius}
+const float HC[6][3] ={{-48. ,-22.9, 2.7},
+				       {-0.3 ,-24.4, 2.5},
+				  	   { 47.4,-22.6, 2.7},
+				 	   {-48. , 27.8, 2.7},
+					   {-0.3 , 29.3, 2.5},
+					   { 47.4, 27.5, 2.7}};
 
-// keyboard keys
+// Keyboard keys
 enum{
 	K_ESC		= 27,
 	K_SPACE		= 32
