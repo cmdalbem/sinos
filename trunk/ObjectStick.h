@@ -36,12 +36,11 @@ class ObjectStick : public ObjectModel
 		void	draw();
 		/* rotateLeft() & rotateRight()
 		 * 
-		 * These two methods make the same thing: move the stick left or
-		 * right using rotations centering on the object "center" (the
-		 * instance variable we have on ObjectStick class).
+		 * Move the stick left or right using rotations centering on the
+		 * object "center" (the instance variable we have on ObjectStick
+		 * class).
 		 */
-		void	rotateLeft();
-		void	rotateRight();
+		void	rotate( float rotation );
 
 		void	strenghtUp();
 		void	strenghtDown();

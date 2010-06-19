@@ -13,15 +13,15 @@ using namespace std;
 
 //------------------------------------------------------------ CONSTRUCTORS
 
-Camera::Camera()
+Camera::Camera( int _cameraMode )
 {
-	cameraMode = 0;
+	cameraMode = _cameraMode;
 	
 	posit=0;
 	
- 	xpos = 5; 
-	ypos = 7;
-	zpos = 5;
+ 	xpos = 50; 
+	ypos = 70;
+	zpos = 50;
 	xrot = -45;
 	yrot = 45;
 		
@@ -30,13 +30,16 @@ Camera::Camera()
 	zoom = 5;
 	
 	xorig = 0;
-	yorig = 2.95;
+	yorig = 29.5;
 	zorig = 0;
+	
+	zoomTop = 100;
 	
 	setPos2();
 }
 
-Camera::Camera( GLfloat newXPos, GLfloat newYPos, GLfloat newZPos,
+// These constructors implementations has very low modularity
+/*Camera::Camera( GLfloat newXPos, GLfloat newYPos, GLfloat newZPos,
 				GLfloat newXRot, GLfloat newYRot, int newCameraMode)
 {
 	setXPos(newXPos);
@@ -50,15 +53,15 @@ Camera::Camera( GLfloat newXPos, GLfloat newYPos, GLfloat newZPos,
 	
 	xrot2 = 45;		//
 	yrot2 = 20;		//
-	zoom = 5;		// Default values to these elements
+	zoom = 50;		// Default values to these elements
 	posit=0;		//
 	
 	xorig = 0;
-	yorig = 2.95;
+	yorig = 29.5;
 	zorig = 0;
 	
 	setPos2();
-}
+}*/
 
 
 //------------------------------------------------------------ DESTRUCTORS
@@ -87,8 +90,9 @@ const char* Camera::getMode () const
 	switch( cameraMode )
 	{
 		case 0: return "Manual";
-		case 1: return "Ball centered";
-		case 2:	return "Cinematic";
+		case 1: return "Ball Centered";
+		case 2: return "Top View";
+		case 3:	return "Cinematic";
 	}
 }
 
@@ -109,7 +113,7 @@ void Camera::setCameraMode (int mode, Object* object)
 			else
 			{
 				xorig = 0;		// If no object is passed, then the "orig"
-				yorig = 2.95;	// variables receive default values.
+				yorig = 29.5;	// variables receive default values.
 				zorig = 0;		//
 			}
 			
@@ -151,7 +155,8 @@ void Camera::action1 (int movex, int movey)
 					
 			break;
 		case 2:
-		
+			break;
+		case 3:
 			break;
 	}	
 }
@@ -164,27 +169,38 @@ void Camera::action2 (int movex, int movey)
 			float xrotrad, yrotrad;
 			yrotrad = (xrot / 180 * M_PI);
 			xrotrad = (yrot / 180 * M_PI);
-			xpos += -movey/10.0 * float(sin(yrotrad)) ;
-			ypos -= -movey/10.0 * float(sin(xrotrad)) ;	
-			zpos -= -movey/10.0 * float(cos(yrotrad)) ;	
+			xpos += -movey/2. * float(sin(yrotrad)) ;
+			ypos -= -movey/2. * float(sin(xrotrad)) ;	
+			zpos -= -movey/2. * float(cos(yrotrad)) ;	
 			break;
 		case 1:
 			zoom += movey / 5.f;
-			if(zoom<0.2) zoom=0.2;		// do not let reverse the camera
+			if( zoom < 2 )
+				zoom = 2;		// do not let reverse the camera
 			
 			setPos2();
 			
 			break;
 		case 2:
-		
-			break;			
+			zoomTop += movey / 5.f;
+			if( zoomTop < 40 )
+				zoomTop = 40;		// do not let reverse the camera
+			break;
+		case 3:
+			break;
 	}
 }
 
 
-void Camera::apply()
+void Camera::apply( int forceMode )
 {
-	switch( getCameraMode() )
+	int mode;
+	if(forceMode==-1)
+		mode = getCameraMode();
+	else
+		mode = forceMode;
+		
+	switch( mode )
 	{
 		case 0:
 			// controlled movement
@@ -202,6 +218,13 @@ void Camera::apply()
 			break;
 		}
 		case 2:
+		{
+			// top view
+			glRotatef(90, 1.,0.,0.);
+			glTranslated(0,-zoomTop,0);
+			break;
+		}
+		case 3:
 			// cinematic camera
 			gluLookAt( sin(posit/100)*10, 7 , cos(posit/100)*10,
 					   xorig, yorig, zorig, /*ball position*/

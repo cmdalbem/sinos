@@ -45,7 +45,7 @@ void ObjectBall::resetMovement()
 
 float ObjectBall::getSpeed()
 {
-	return abs( moveVector[0] + moveVector[1] );	
+	return abs(moveVector[0]) + abs(moveVector[1]);	
 }
 
 float ObjectBall::getNewX()
@@ -77,15 +77,15 @@ void ObjectBall::updateState()
 		
 		// update velocity
 		changeSpeed(0.95);
-		if( getSpeed() < 0.03) //magic number detected
+		if( getSpeed() < 0.05) //magic number detected
 			resetMovement();
 	}
 }
 
 void ObjectBall::applyForce( float magnitude, float direction )
 {
-	moveVector[0] = magnitude * cos( RAD(direction) );
-	moveVector[1] = -magnitude * sin( RAD(direction) );
+	moveVector[0] += magnitude * cos( RAD(direction) );
+	moveVector[1] += -magnitude * sin( RAD(direction) );
 	
 	/*double m1 = magnitude, m2 = speed;
 	double a1 = _direction, a2 = direction;

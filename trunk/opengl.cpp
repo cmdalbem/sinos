@@ -25,29 +25,28 @@ point star[NSTARS];
 vector<Object*> objects;
 
 //texturized objects
-static ObjectModel tableStruct("obj/pooltable_struct.obj");
-static ObjectModel tableTop("obj/pooltable_table16x.obj");
+static ObjectModel tableStruct("obj/pooltable_struct_noframe.obj");
+static ObjectModel tableTop("obj/pooltable_table.obj");
+static ObjectModel tableFrame("obj/pooltable_frame.obj");
 static ObjectModel scenario("obj/crypt.obj");
 static ObjectModel globe("obj/globe.obj");
 //static ObjectModel ball("obj/poolball.obj");
-static ObjectBall  ball(0.1,100,100);
-static ObjectBall  ball2(0.05,10,10);
+static ObjectBall  ball(1,100,100);
+static ObjectBall  ball2(1,100,100);
 static ObjectStick stick("obj/taco.obj", &ball);
 
 // Texture files
 Texture tigerTex, woodTex, tableTex, rockTex, starsTex, stickTex, ballTex;
 
 
-Camera camera,
-	   camera2(0, 5, 0, 0, 90, 0);
+Camera camera, camera2(2);
 						  
 // mouse
 static int	xold, yold;		
 static int	left_click = GLUT_UP;
 static int	right_click = GLUT_UP;
-
-bool invertViewports=true;
-
+static bool holdCtrl = false;
+static bool invertViewports = false;
 						  
 
 // !! The following globals aren't in their proper place. !!
@@ -153,35 +152,35 @@ void initObjects () {
 	static ObjectModel light("obj/light1.obj");
 	static ObjectModel wall("obj/wall.obj");	
 	static ObjectModel tableStruct2("obj/pooltable_struct.obj");
-	static ObjectModel tableTop2("obj/pooltable_table16x.obj");
+	static ObjectModel tableTop2("obj/pooltable_table.obj");
 	static ObjectModel tableStruct3("obj/pooltable_struct.obj");
-	static ObjectModel tableTop3("obj/pooltable_table16x.obj");
+	static ObjectModel tableTop3("obj/pooltable_table.obj");
 	static ObjectModel tableStruct4("obj/pooltable_struct.obj");
-	static ObjectModel tableTop4("obj/pooltable_table16x.obj");
+	static ObjectModel tableTop4("obj/pooltable_table.obj");
 	
 	// the ball
-	ball.setPos(0,2.95,0);
+	ball.setPos(0,29.5,0);
 	ball.material.setShininess(120);
 	ball.material.setDiffuse(0.6, 0.6, 0.6);
 	ball.material.setSpecular(0.9, 0.9, 0.9);
 	ball.setTexture(&ballTex);
 		objects.push_back(&ball);
 	
-	ball2.setPos(0,2.95,2);
-	objects.push_back(&ball2);
+	ball2.setPos(0,29.5,2);
+		//objects.push_back(&ball2);
 	
 	// the stick
 	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
 	stick.material.setSpecular(0.3,0.3,0.3);
 	stick.material.setShininess(80);
 	stick.setTexture(&stickTex);
-	stick.setSize(0.7,0.7,0.8);
-	stick.rotateLeft();
-	//	objects.push_back(&stick);
+	stick.setSize(7,7,8);
+	stick.rotate(-5);
+		//objects.push_back(&stick);
 	
 	// crypt scenario
-	scenario.setPos(0,-3,0);
-	scenario.setSize(25,35,25);
+	scenario.setPos(0,-30,0);
+	scenario.setSize(250,350,250);
 	scenario.setTexture(&rockTex);
 	scenario.material.setDiffuse(0.4,0.4,0.4);
 	//scenario.material.setSpecular(0.2,0.2,0.2);
@@ -201,11 +200,14 @@ void initObjects () {
 	// main table
 	tableStruct.setMaterial(tableStructMat);
 	tableTop.setMaterial(tableTopMat);
+	tableFrame.setMaterial(tableTopMat);
 	tableStruct.setTexture(&woodTex);
 	tableTop.setTexture(&tableTex);
-	tableStruct.setSize(10,10,10);
-	tableTop.setSize(10,10,10);
-		objects.push_back(&tableTop); objects.push_back(&tableStruct);
+	tableFrame.setTexture(&tableTex);
+	tableStruct.setSize(100,100,100); 
+	tableTop.setSize(100,100,100);
+	tableFrame.setSize(100,100,100);
+		objects.push_back(&tableTop); objects.push_back(&tableStruct); objects.push_back(&tableFrame); 
 
 	// table2
 	tableStructMat.setDiffuse(0.25,0.09,0.07);
@@ -213,31 +215,31 @@ void initObjects () {
 	tableTopMat.setDiffuse(0.078 *0.5, 0.66 *0.5, 0.078 *0.5);	
 	tableStruct2.setMaterial(tableStructMat);
 	tableTop2.setMaterial(tableTopMat);
-	tableStruct2.setSize(10,10,10);
-	tableTop2.setSize(10,10,10);
-	tableStruct2.setPos(0,0,-30);
-	tableTop2.setPos(0,0,-30);
+	tableStruct2.setSize(100,100,100);
+	tableTop2.setSize(100,100,100);
+	tableStruct2.setPos(0,0,-300);
+	tableTop2.setPos(0,0,-300);
 	// table3
 	tableStruct3.setMaterial(tableStructMat);
 	tableTop3.setMaterial(tableTopMat);
-	tableStruct3.setSize(10,10,10);
-	tableTop3.setSize(10,10,10);
-	tableStruct3.setPos(0,0,30);
-	tableTop3.setPos(0,0,30);
+	tableStruct3.setSize(100,100,100);
+	tableTop3.setSize(100,100,100);
+	tableStruct3.setPos(0,0,300);
+	tableTop3.setPos(0,0,300);
 	// table4
 	tableStruct4.setMaterial(tableStructMat);
 	tableTop4.setMaterial(tableTopMat);
-	tableStruct4.setSize(10,10,10);
-	tableTop4.setSize(10,10,10);
-	tableStruct4.setPos(0,0,60);
-	tableTop4.setPos(0,0,60);
-		//objects.push_back(&tableStruct2);objects.push_back(&tableTop2);
-		//objects.push_back(&tableStruct3);objects.push_back(&tableTop3);	
-		//objects.push_back(&tableStruct4);objects.push_back(&tableTop4);		
+	tableStruct4.setSize(100,100,100);
+	tableTop4.setSize(100,100,100);
+	tableStruct4.setPos(0,0,600);
+	tableTop4.setPos(0,0,600);
+		objects.push_back(&tableStruct2);objects.push_back(&tableTop2);
+		objects.push_back(&tableStruct3);objects.push_back(&tableTop3);	
+		objects.push_back(&tableStruct4);objects.push_back(&tableTop4);		
 	
 	// ceiling lamp
-	light.setPos(0,11,0);
-	light.setSize(5,5,5);
+	light.setPos(0,120,0);
+	light.setSize(50,50,50);
 	light.material.setDiffuse(0.5,0.5,0.5);
 	light.material.setSpecular(1,1,1);
 	light.material.setShininess(120);
@@ -246,16 +248,15 @@ void initObjects () {
 
 	
 	// infinite scenario globe
-	globe.setSize(50,50,50);
+	globe.setSize(500,500,500);
 	globe.setTexture(&starsTex);
-		objects.push_back(&globe);
 	
 
     for (int i=0;i<NSTARS;i++)
     {
-    	star[i].x = rand()%50 - 25;
-    	star[i].y = rand()%50 - 25;
-    	star[i].z = rand()%50 - 25;
+    	star[i].x = rand()%500 - 250;
+    	star[i].y = rand()%500 - 250;
+    	star[i].z = rand()%500 - 250;
     }
 }
 
@@ -265,16 +266,17 @@ void drawObjects_partial () {
 	stick.draw();
 	tableStruct.draw();
 	tableTop.draw();
+	tableFrame.draw();
 }
 
 void drawObjects () {
     	
-    glDisable(GL_LIGHTING); //stars drawing of not-lighted objects
+    glDisable(GL_LIGHTING); // drawing of not-lighted objects
 	    // Stars
 	    for (int i=0;i<NSTARS;i++) {
 	    	glPushMatrix();
-	    	glTranslated(star[i].x *20, star[i].y *20, star[i].z *20);
-		    glutSolidSphere(0.5,10,10);
+	    	glTranslated(star[i].x *200, star[i].y *200, star[i].z *200);
+		    glutSolidSphere(5,10,10);
 	    	glPopMatrix();
 	    }
 	    //// Sun
@@ -283,41 +285,40 @@ void drawObjects () {
 		//glutSolidSphere(0.5,10,10);
 	    //glPopMatrix();
 		
-		globe.draw(); // Infinite Background
+		globe.draw();
+		
 	glEnable(GL_LIGHTING); //ends drawing of not-lighted objects
 	  
 	// draw all objects
 	for( int it=0; it<objects.size(); it++ )
 		objects[it]->draw();
 		
-	stick.draw();
+	stick.draw();	
 }
 
 void lights () {
 	
 	// position light (sun)
-	//posit++;
-	//GLfloat position[] = { SUN_MOVEMENT_EQUATION, 1.0f };
-	GLfloat position[] = { 0,10,0, 1.0f };
+	GLfloat position[] = { 0,100,0, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, position);    
 	GLfloat spot_direction[] = { 0.0, -1.0, 0.0 };
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
 	
 	// spotlight
-	GLfloat light1_position[] = { 0.0, 10.0, 0.0, 1.0 };
+	GLfloat light1_position[] = { 0.0, 100.0, 0.0, 1.0 };
 	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
 	
 	// spotlight 2
-	GLfloat light2_position[] = { 0.0, 10.0, -30.0, 1.0 };
+	GLfloat light2_position[] = { 0.0, 100.0, -300.0, 1.0 };
 	glLightfv(GL_LIGHT3, GL_POSITION, light2_position);
 	glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, spot_direction);
 	// spotlight 3
-	GLfloat light3_position[] = { 0.0, 10.0, 30.0, 1.0 };
+	GLfloat light3_position[] = { 0.0, 100.0, 300.0, 1.0 };
 	glLightfv(GL_LIGHT4, GL_POSITION, light3_position);
 	glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot_direction);
 	// spotlight 4
-	GLfloat light4_position[] = { 0.0, 10.0, 60.0, 1.0 };
+	GLfloat light4_position[] = { 0.0, 100.0, 600.0, 1.0 };
 	glLightfv(GL_LIGHT5, GL_POSITION, light4_position);
 	glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot_direction);
 	
@@ -332,37 +333,54 @@ void perspectiveViewport( int width, int height ) {
 	
     glViewport (0, 0, (GLsizei)width, (GLfloat)height);
     glScissor(0, 0, width, height);
-    gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 1000.0);
+    
+    if( invertViewports )
+		glOrtho(-65, 65, -35, 35, 0.1, 10000);
+	else
+		gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 10000.0);
     					
-    glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
+    glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();  
     // IMPORTANT: don't change the order of these calls
 		drawOsd();
-		camera.apply();
+		if( invertViewports )
+			camera2.apply();
+		else
+			camera.apply();
 		lights();
-		drawObjects();
+		drawObjects();		
+		/*printf("%.3f,%.3f,%.3f\n",ball2.getPosX(),ball2.getPosY(),ball2.getPosZ());
+		glBegin(GL_LINES);
+			glVertex3f(ball2.getPosX()-10, ball2.getPosY(),ball2.getPosZ());
+			glVertex3f(ball2.getPosX()+10, ball2.getPosY(),ball2.getPosZ());
+			glVertex3f(ball2.getPosX(), ball2.getPosY(),ball2.getPosZ()+10);
+			glVertex3f(ball2.getPosX(), ball2.getPosY(),ball2.getPosZ()-10);
+		glEnd();*/
 }	
 
 void orthoViewport( int width, int height ) {
 	glViewport ((3*width)/4, (3*height)/4, (GLsizei)width/4, (GLfloat)height/4);
-	
-	// This call isn't working as it would
 	glScissor((3*width)/4, (3*height)/4, width/4, height/4);
 	
 	glEnable(GL_SCISSOR_TEST);
 	
-	glMatrixMode (GL_PROJECTION); //set the matrix to projection
-	glLoadIdentity ();
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
     
-    glOrtho(-7, 7, -4, 3.5, 0.1, 50);
+    if( invertViewports )
+		gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 10000.0);
+	else
+		glOrtho(-65, 65, -35, 35, 5, 10000);
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
     glLoadIdentity();
 	// IMPORTANT: don't change the order of these calls
-		camera2.apply();
+		if( invertViewports )
+			camera.apply();
+		else
+			camera2.apply();
 		lights();
 		drawObjects_partial();
-		ball2.draw(); printf("%.3f,%.3f,%.3f\n",ball2.getPosX(),ball2.getPosY(),ball2.getPosZ());
 		
 	glDisable(GL_SCISSOR_TEST);
 }	
@@ -375,12 +393,10 @@ void display () {
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_SCISSOR_TEST);
 	
-		perspectiveViewport(width,height);
 		orthoViewport(width,height);
+		perspectiveViewport(width,height);
 				
 	glDisable(GL_SCISSOR_TEST);
-	
-	//cout << "distance from crypt: " << camera.distanceFromObject(*objects[1]) << endl;
 		
     glutSwapBuffers();
     frameCounter++;
@@ -400,39 +416,39 @@ void initLights () {
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.4);
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.05);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.001);
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.1);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.002);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.00005);
 	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 160);
 	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.0);
 	
 	// spotlight
 	GLfloat lampColor[] = {RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4, 1.0f};
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, lampColor);
-	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.2);
-	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.04);
+	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0);
+	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.);
 	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.);
 	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 90);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 12.0);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 15.0);
 	
 	// spotlight 2
 	glLightfv(GL_LIGHT3, GL_DIFFUSE, lampColor);
-	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 0.5);
-	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0.04);
+	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 0.);
+	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0.0);
 	glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 90);
-	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 6.0);
+	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 15.0);
 	// spotlight 3
 	glLightfv(GL_LIGHT4, GL_DIFFUSE, lampColor);
-	glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 0.5);
-	glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, 0.04);
+	glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 0.);
+	glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, 0.0);
 	glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 90);
-	glLightf(GL_LIGHT4, GL_SPOT_EXPONENT, 6.0);
+	glLightf(GL_LIGHT4, GL_SPOT_EXPONENT, 15.0);
 	// spotlight 4
 	glLightfv(GL_LIGHT5, GL_DIFFUSE, lampColor);
-	glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 0.5);
-	glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, 0.04);
+	glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 0.);
+	glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, 0.0);
 	glLightf(GL_LIGHT5, GL_SPOT_CUTOFF, 90);
-	glLightf(GL_LIGHT5, GL_SPOT_EXPONENT, 6.0);	
+	glLightf(GL_LIGHT5, GL_SPOT_EXPONENT, 15.0);	
 	
 	// directional light
 	GLfloat lampColor2[] = {RGB(252), RGB(234), RGB(186), 1.0f};
@@ -465,7 +481,7 @@ void init ()
     loadTexture(&ballTex, "textures/poolball.tga");
     loadTexture(&woodTex, "textures/wood.tga");
     loadTexture(&tableTex, "textures/table.tga", true);//set true to use mipmapping
-    loadTexture(&rockTex, "textures/rock.tga", true);//set true to use mipmapping
+    loadTexture(&rockTex, "textures/rock.tga");//set true to use mipmapping
     loadTexture(&starsTex, "textures/stars3.tga");
     loadTexture(&stickTex, "textures/stick.tga");
     cout << "Done.\n"; 
@@ -488,16 +504,16 @@ void reshape (int w, int h) {
 void keyboardFunc (unsigned char key, int x, int y) {
    
     if( key=='w' )
-		ball2.setPosZ( ball2.getPosZ()-0.05 );
+		ball2.setPosZ( ball2.getPosZ()-0.3 );
 	if( key=='s' )
-		ball2.setPosZ( ball2.getPosZ()+0.05 );
+		ball2.setPosZ( ball2.getPosZ()+0.3 );
 	if( key=='a' )
-		ball2.setPosX( ball2.getPosX()-0.05 );
+		ball2.setPosX( ball2.getPosX()-0.3 );
 	if( key=='d' )
-		ball2.setPosX( ball2.getPosX()+0.05 );		
+		ball2.setPosX( ball2.getPosX()+0.3 );		
     
     if ( key=='f')
-		ball.applyForce(30,stick.getRotX()+90);   
+		ball.applyForce(300,stick.getRotX()+90);   
 		
     // chances lens focal distance
     /*if ( key=='s' )
@@ -509,8 +525,13 @@ void keyboardFunc (unsigned char key, int x, int y) {
     if( key=='c' )
 		camera.nextCameraMode(objects[0]);
     
-    if ( key=='v' )
+    if ( key==K_SPACE )
 		invertViewports = !invertViewports;
+	
+	if ( key=='1' )
+		glDisable(GL_LIGHT1);
+	if ( key=='2' )
+		glEnable(GL_LIGHT1);
 	
     if ( key==K_ESC )
     {
@@ -522,12 +543,12 @@ void specialFunc(int key, int x, int y)
 {
 	if ( key == GLUT_KEY_LEFT )
 	{
-		stick.rotateLeft();
+		stick.rotate( -5 );
 	}
 	
 	if ( key == GLUT_KEY_RIGHT )
 	{
-		stick.rotateRight();
+		stick.rotate( 5 );
 	}
 	
 	if ( key == GLUT_KEY_DOWN )
@@ -545,19 +566,25 @@ void specialFunc(int key, int x, int y)
 void mouseFunc(int button, int state, int x, int y) {
 /* This function only updates click states and positions */
  
-  if (GLUT_LEFT_BUTTON == button)
-    left_click = state;
-  if (GLUT_RIGHT_BUTTON == button)
-    right_click = state;
-  xold = x;
-  yold = y;
+	if (GLUT_LEFT_BUTTON == button)
+		left_click = state;
+	if (GLUT_RIGHT_BUTTON == button)
+		right_click = state;
+	
+	xold = x;
+	yold = y;
+	
+	holdCtrl = (glutGetModifiers() == GLUT_ACTIVE_CTRL);
 }
 
 void mouseMotionFunc(int x, int y) {
 	
 	if (GLUT_DOWN == left_click)
     {
-		camera.action1(x - xold, y - yold);
+		if( holdCtrl )
+			stick.rotate( (x-xold)/5. );
+		else
+			camera.action1(x - xold, y - yold);
     }
 	
 	if (GLUT_DOWN == right_click)
@@ -590,7 +617,7 @@ int main (int argc, char **argv) {
     glutInitDisplayMode (GLUT_DOUBLE | GLUT_DEPTH); //set the display to Double buffer, with depth
     glutInitWindowSize (1280, 720);                  //set the window size
     glutInitWindowPosition (400, 0);              //set the position of the window
-    glutCreateWindow ("SiNoS - mouse/w/s/c: camera  arrows: stick control");     //the caption of the window
+    glutCreateWindow ("SiNoS - mouse/c: camera  arrows: stick control");     //the caption of the window
     init();
     glutDisplayFunc (display); 						//use the display function to draw everything
     

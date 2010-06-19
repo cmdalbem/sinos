@@ -27,10 +27,18 @@ const float default_shininess = 0;
 // Global variables
 #define NSTARS 1000
 #define STATEUPDATES_PER_SEC 50
-#define TOPBOUND 2.500
-#define BOTBOUND -2.05
-#define LEFTBOUND -4.550
-#define RIGHTBOUND 4.500
+
+// with frame
+#define TOPBOUND 25.4
+#define BOTBOUND -20.5
+#define LEFTBOUND -45.6
+#define RIGHTBOUND 45.2
+
+// without frame
+/*#define TOPBOUND 27.2
+#define BOTBOUND -22.3
+#define LEFTBOUND -47.4
+#define RIGHTBOUND 47*/
 
 // keyboard keys
 enum{

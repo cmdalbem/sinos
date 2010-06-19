@@ -16,23 +16,25 @@ using namespace std;
 
 class Camera
 {
-	#define NCAMERAS 2
+	#define NCAMERAS 3
 private:
 
 	int cameraMode;
 	int posit;
-	GLfloat xpos,  ypos,  zpos,		// variables used in the first camera view
+	GLfloat xpos,  ypos,  zpos,		// variables used in the Manual mode
 			xrot,  yrot,			// 
 			
-			xpos2, ypos2, zpos2,	// variables used in the second camera view
+			xpos2, ypos2, zpos2,	// variables used in the Ball Centered mode
 			xrot2, yrot2, zoom,		//
-			xorig, yorig, zorig;	//
+			xorig, yorig, zorig,	//
+			
+			zoomTop;					// variable used in the Top View mode
 
 public:
 	//---------------------------- CONSTRUCTORS
-	Camera();
-	Camera( GLfloat newXPos, GLfloat newYPos, GLfloat newZPos,
-			GLfloat newXRot, GLfloat newYRot, int newCameraMode);
+	Camera( int cameraMode=0 );
+	/*Camera( GLfloat newXPos, GLfloat newYPos, GLfloat newZPos,
+			GLfloat newXRot, GLfloat newYRot, int newCameraMode);*/
 	//---------------------------- DESTRUCTORS
 	~Camera();
 	
@@ -55,7 +57,7 @@ public:
 	int 	getCameraMode() const;
 	
 	//---------------------------- OTHER METHODS
-	void 	apply(); 					// main method
+	void 	apply( int forceMode=-1 ); 					// main method
 	void 	action1 (int movex, int movey);
 	void 	action2 (int movex, int movey);
 	

@@ -41,18 +41,10 @@ void ObjectStick::setAttackStrenght(float newForce)
 
 //------------------------------------------------------------ OTHER METHODS
 
-void ObjectStick::rotateLeft()
+void ObjectStick::rotate( float rot )
 {
-	setRotX(getRotX() - movex);
-	setRotY(getRotY() - movey);
-	
-	calculatePos();
-}
-
-void ObjectStick::rotateRight()
-{
-	setRotX(getRotX() + movex);
-	setRotY(getRotY() + movey);
+	setRotX(getRotX() + rot);
+	setRotY(getRotY() + rot);
 	
 	calculatePos();
 }
