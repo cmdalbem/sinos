@@ -215,8 +215,9 @@ void Object::drawBegin() const
 	
 	// basic transformations using object's attributes
 	glTranslated(pos[0], pos[1], pos[2]);
-	glRotatef(rot[0],1,0,0);
+	
 	glRotatef(rot[1],0,1,0);
+	glRotatef(rot[0],1,0,0);
 	glRotatef(rot[2],0,0,1);
 	glScalef(size[0], size[1], size[2]);
 	

@@ -386,7 +386,7 @@ void init ()
 	cout << "Done.\n";
 	
     glClearColor(0, 0, 0, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	glEnable(GL_NORMALIZE);		//normalizes all normals
 	glEnable (GL_DEPTH_TEST);
@@ -441,7 +441,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		radius+=0.1;
     
     if ( key==K_SPACE) {
-		ball.applyForce(stick.getAttackStrenght()*10,stick.getRotX()+90);  //some naughty magic numbers here
+		ball.applyForce(stick.getAttackStrenght()*10,stick.getAngleInXZ()+90);  //some naughty magic numbers here
 		stick.setAttackStrenght(0);
 	}
 		

@@ -6,15 +6,17 @@
 #include "ObjectStick.h"
 #include "constants.h"
 
-float rotationConstant = 180;
-
 //------------------------------------------------------------ CONSTRUCTORS
 ObjectStick::ObjectStick(string filename, Object* objectCenter)
 :	ObjectModel(filename)
 {
+	setRotX(25);
+	setRotY(-180);
+	setRotZ(0);
+	
 	center = objectCenter;
-	setAttackStrenght(0.5);
-	setRotZ(10 - attackStrenght);
+	
+	setAttackStrenght(1);
 	calculatePos();
 }
 
@@ -22,6 +24,16 @@ ObjectStick::ObjectStick(string filename, Object* objectCenter)
 ObjectStick::~ObjectStick()	{ }
 
 //------------------------------------------------------------ GETTERS & SETTERS
+float ObjectStick::getAngleInXZ()
+{
+	return angleInXZ;
+}
+
+void ObjectStick::setAngleInXZ(float newAngle)
+{
+	angleInXZ = newAngle;
+}
+
 float ObjectStick::getAttackStrenght()
 {
 	return attackStrenght;
@@ -29,10 +41,10 @@ float ObjectStick::getAttackStrenght()
 
 void ObjectStick::setAttackStrenght(float newForce)
 {
-	if( newForce < 0.5 )
-		attackStrenght = 0.5;
-	else if ( newForce > 50 )
-		attackStrenght = 50;
+	if( newForce < 1 )
+		attackStrenght = 1;
+	else if ( newForce > 20 )
+		attackStrenght = 20;
 	else
 		attackStrenght = newForce;
 }
@@ -41,7 +53,7 @@ void ObjectStick::setAttackStrenght(float newForce)
 
 void ObjectStick::rotate( float rot )
 {
-	setRotX(getRotX() + rot);
+	setAngleInXZ(getAngleInXZ() + rot);
 	setRotY(getRotY() + rot);
 	
 	calculatePos();
@@ -50,53 +62,16 @@ void ObjectStick::rotate( float rot )
 void ObjectStick::changePower( float var )
 {
 	setAttackStrenght(attackStrenght + var);
-	setRotZ(10 - getAttackStrenght()/5);
+	setRotX(25);
 	
 	calculatePos();
 }
 
 void ObjectStick::calculatePos()
 {
-	double degrees = RAD(getRotX());
+	double degrees = RAD(getAngleInXZ());
 	
-	setPosX(center->getPosX() + sin(degrees)*(attackStrenght/5));
-	setPosY(center->getPosY() + 0.02*(attackStrenght));
-	setPosZ(center->getPosZ() + cos(degrees)*(attackStrenght/5));
+	setPosX(center->getPosX() + sin(degrees)*(getAttackStrenght()));
+	setPosY(center->getPosY() + cos(20)		*(getAttackStrenght()));
+	setPosZ(center->getPosZ() + cos(degrees)*(getAttackStrenght()));
 }
-
-void ObjectStick::drawBegin()
-{
-	glPushMatrix();
-	
-	material.apply();
-	
-	// basic transformations using object's attributes
-	glTranslated(getPosX(), getPosY(), getPosZ());
-	glRotatef(getRotY() - rotationConstant,0,1,0);
-	glRotatef(getRotZ()		 ,1,0,0);		// Here, the name "rotz" is only a name. It is used
-											// to set the inclination of the stick.
-	glScalef(getSizeX(), getSizeY(), getSizeZ());
-}
-
-void ObjectStick::draw()
-{
-	if(getModelPointer())	// Test if there is anything to draw
-	{
-		drawBegin();		// Move, scale and rotate the object to the right place
-		if( texture!=NULL )
-		{
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, texture->texID);
-			glmDraw(getModelPointer(), GLM_SMOOTH | GLM_TEXTURE);
-			glDisable(GL_TEXTURE_2D);
-		}
-		else
-			glmDraw(getModelPointer(), GLM_SMOOTH);
-		Object::drawEnd();
-		
-	}
-	else
-		cout << "There is nothing to draw D= D=" << endl;
-		//exit(0);
-}
-

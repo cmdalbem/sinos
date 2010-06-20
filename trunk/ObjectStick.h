@@ -20,6 +20,8 @@ class ObjectStick : public ObjectModel
 		Object*		center;
 		float 		attackStrenght;
 		
+		float		angleInXZ;
+		
 	public:
 		//---------------------------- CONSTRUCTORS
 		ObjectStick(string filename, Object* objectCenter);
@@ -28,12 +30,13 @@ class ObjectStick : public ObjectModel
 		
 		~ObjectStick();
 		//---------------------------- GETTERS & SETTERS
+		float 	getAngleInXZ();
+		void	setAngleInXZ(float newAngle);
+		
 		float	getAttackStrenght();
 		void	setAttackStrenght(float newForce);
 		
 		//---------------------------- OTHER METHODS
-		void	drawBegin();
-		void	draw();
 		/* rotateLeft() & rotateRight()
 		 * 
 		 * Move the stick left or right using rotations centering on the
