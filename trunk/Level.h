@@ -32,11 +32,12 @@ class Level
 
 	public:
 		ObjectStick *stick;
+		ObjectBall	*ball;
 		Camera *camera, *camera2;
 	//---------------------------- CONSTRUCTORS
 		Level(vector<Object*> *_objects, vector<LightInfo*> *_theLights,
-			  Camera *_camera, Camera *_camera2);
-			  //ObjectStick *_stick);
+			  Camera *_camera, Camera *_camera2,
+			  ObjectStick *_stick, ObjectBall *_ball);
 		
 	//---------------------------- DESTRUCTORS
 		~Level();
@@ -44,12 +45,13 @@ class Level
 	//---------------------------- GETTERS & SETTERS
 
 	//---------------------------- OTHER METHODS
-	void init();
-	void initObjects();
-	void initLights();
+		void updateVariables();
+		void init();
+		void initObjects();
+		void initLights();
 	
-	void drawObjects();
-	void drawObjects_partial();	
-	void lights ();
+		void drawObjects();
+		void drawObjects_partial();	
+		void lights ();
 				
 };

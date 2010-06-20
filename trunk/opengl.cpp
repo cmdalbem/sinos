@@ -27,7 +27,11 @@ point star[NSTARS];
 vector<Object*> objects;
 vector<LightInfo*> theLights;
 Camera camera, camera2(2);
-Level level(&objects, &theLights, &camera, &camera2);
+
+static ObjectBall ball("obj/poolball.obj"); 
+static ObjectStick stick("obj/taco.obj", &ball);
+
+Level level(&objects, &theLights, &camera, &camera2, &stick, &ball);
 
 //texturized objects 
 static ObjectModel tableStruct("obj/pooltable_struct_noframe.obj");
@@ -35,12 +39,11 @@ static ObjectModel tableTop("obj/pooltable_table.obj");
 static ObjectModel tableFrame("obj/pooltable_frame.obj");
 static ObjectModel scenario("obj/crypt.obj");
 static ObjectModel globe("obj/globe.obj");
-static ObjectBall ball("obj/poolball.obj"); 
 //static ObjectBall  ball(10,100,100);
 static ObjectBall  cursor(1,100,100);
-static ObjectStick stick("obj/taco.obj", &ball);
 
 
+// Normal objects
 static ObjectModel light("obj/light1.obj");
 static ObjectModel wall("obj/wall.obj");	
 static ObjectModel tableStruct2("obj/pooltable_struct.obj");
@@ -89,13 +92,13 @@ void initObjects () {
 	cursor.setPos(0,TABLE_PLANE_Y,2);
 	
 	// the stick
-	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
-	stick.material.setSpecular(0.3,0.3,0.3);
-	stick.material.setShininess(80);
-	stick.setTexture(&stickTex);
-	stick.setSize(7,7,8); 
-	stick.rotate(-5);
-		objects.push_back(&stick);		//objects[1]
+	level.stick->material.setDiffuse(RGB(238),RGB(221),RGB(195));
+	level.stick->material.setSpecular(0.3,0.3,0.3);
+	level.stick->material.setShininess(80);
+	level.stick->setTexture(&stickTex);
+	level.stick->setSize(7,7,8); 
+	level.stick->rotate(-5);
+		objects.push_back(level.stick);		//objects[1]
 	
 	// crypt scenario
 	scenario.setPos(0,-30,0);
@@ -193,7 +196,7 @@ void initObjects () {
 void drawObjects_partial () {
 	
 	objects[0]->draw();
-	stick.draw();
+	level.stick->draw();
 	tableStruct.draw();
 	tableTop.draw();
 	tableFrame.draw();
@@ -222,7 +225,7 @@ void castShadows() {
 		glStencilFunc(GL_EQUAL, 0, 1); 						//will let only one vertex be drawn on each position each time shadow
 			tableStruct.draw();
 			tableTop.draw();
-			stick.draw();
+			level.stick->draw();
 	glPopMatrix();
 	
 	// Cast shadows on the table
@@ -237,7 +240,7 @@ void castShadows() {
 		glColorMask(true,true,true,true);
 		glDepthMask(true); 
 		glStencilFunc(GL_EQUAL, 1, 1); 						//now the shadow is cast only where stencil buffer==1, i.e. the table
-			stick.draw();
+			level.stick->draw();
 			ball.draw();
 			#ifdef SHOW_TABLE_FRAME
 				tableFrame.draw();
@@ -283,40 +286,7 @@ void drawObjects () {
 
 void lights ()
 {
-	// position light (sun)
-
-	//GLfloat position[] = { 0 , 100 , 0 , 1.0f };
-	//glLightfv(GL_LIGHT0, GL_POSITION, position);    
-	//GLfloat spot_direction[] = { 0.0 , -1.0 , 0.0 , 0.0};
-	//glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
-	
-	
-	// spotlight
-	//GLfloat light1_position[] = { 0.0, 100.0, 0.0, 1.0 };
-	//glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
-	//glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
-	
-	// spotlight 2
-	//GLfloat light2_position[] = { 0.0, 100.0, -300.0, 1.0 };
-	//glLightfv(GL_LIGHT3, GL_POSITION, light2_position);
-	//glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, spot_direction);
-	
-	// spotlight 3
-	//GLfloat light3_position[] = { 0.0, 100.0, 300.0, 1.0 };
-	//glLightfv(GL_LIGHT4, GL_POSITION, light3_position);
-	//glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot_direction);
-	
-	
-	// spotlight 4
-	//GLfloat light4_position[] = { 0.0, 100.0, 600.0, 1.0 };
-	//glLightfv(GL_LIGHT5, GL_POSITION, light4_position);
-	//glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot_direction);
-	
-	// directional light
-	//GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
-	//glLightfv(GL_LIGHT2, GL_POSITION, direction);
-	
-
+	//
 }
 
 void perspectiveViewport( int width, int height ) {
@@ -338,7 +308,7 @@ void perspectiveViewport( int width, int height ) {
     glLoadIdentity ();
     
     // IMPORTANT: don't change the order of these calls
-		drawOsd(osd,camera,fps);
+		drawOsd(osd, camera,fps);
 		if( invertViewports )
 			level.camera2->apply();
 		else
@@ -407,9 +377,9 @@ void initLights () {
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.4);
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.05);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.001);
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.1);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.002);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.00005);
 	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 160);
 	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.0);
 	
@@ -447,6 +417,15 @@ void initLights () {
 	
 	// Creating LightInfo vector to the level class
 	
+	// THERE IS SOMETHING EXTREMELY WRONG IN THIS PART OF THE CODE.
+	// TRY PRINTING THE VALUE OF THE VARIABLES INSIDE THE LIGHTINFO
+	// INSTANCES ON THE VECTOR AND YOU'RE GONNA SEE VERY STRANGE
+	// VALUES INSTEAD OF THOSE YOU'VE JUST PUT THERE D=
+	//
+	// FOR NOW, THE LEVEL CLASS IS USING THE LIGHTS() FUNCTION INSTEAD
+	// OF THESE LIGHTINFO INSTANCES.
+	
+	
 	// position light (sun)
 	//GLfloat position[] = { 0 , 100 , 0 , 1.0f };
 	//glLightfv(GL_LIGHT0, GL_POSITION, position);    
@@ -463,7 +442,7 @@ void initLights () {
 	//glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
 	GLfloat light1_position[] = { 0.0, 100.0, 0.0, 1.0 };
 	LightInfo light1(true, light1_position, true, spot_direction, GL_LIGHT1);
-	theLights.push_back(&light1);
+	//theLights.push_back(&light1);
 	
 	// spotlight 2
 	//GLfloat light2_position[] = { 0.0, 100.0, -300.0, 1.0 };
@@ -472,7 +451,7 @@ void initLights () {
 	
 	GLfloat light2_position[] = { 0.0, 100.0, -300.0, 1.0 };
 	LightInfo light3(true, light2_position, true, spot_direction, GL_LIGHT3);
-	theLights.push_back(&light3);
+	//theLights.push_back(&light3);
 	
 	// spotlight 3
 	//GLfloat light3_position[] = { 0.0, 100.0, 300.0, 1.0 };
@@ -481,7 +460,7 @@ void initLights () {
 	
 	GLfloat light3_position[] = { 0.0, 100.0, 300.0, 1.0 };
 	LightInfo light4(true, light3_position, true, spot_direction, GL_LIGHT4);
-	theLights.push_back(&light4);
+	//theLights.push_back(&light4);
 	
 	// spotlight 4
 	//GLfloat light4_position[] = { 0.0, 100.0, 600.0, 1.0 };
@@ -490,7 +469,7 @@ void initLights () {
 	
 	GLfloat light4_position[] = { 0.0, 100.0, 600.0, 1.0 };
 	LightInfo light5(true, light4_position, true, spot_direction, GL_LIGHT5);
-	theLights.push_back(&light5);
+	//theLights.push_back(&light5);
 	
 	// directional light
 	//GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
@@ -498,7 +477,7 @@ void initLights () {
 	
 	GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
 	LightInfo light2(true, direction, false, direction, GL_LIGHT2);
-	theLights.push_back(&light2);
+	//theLights.push_back(&light2);
 }
 
 void init ()
@@ -571,15 +550,15 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		* */
 		
 	if ( key==K_SPACE) {
-		ball.applyForce(stick.getAttackStrenght()*10,stick.getAngleInXZ()+90);  //some naughty magic numbers here
-		stick.setAttackStrenght(10);
+		ball.applyForce(level.stick->getAttackStrenght()*10,level.stick->getAngleInXZ()+90);  //some naughty magic numbers here
+		level.stick->setAttackStrenght(10);
 	}
 		
 	if( key=='v')
 		invertViewports = !invertViewports;
     
     if( key=='c' )
-		camera.nextMode(objects[0]);
+		level.camera->nextMode(objects[0]);
 	
     if ( key==K_ESC )
     {
@@ -590,29 +569,29 @@ void keyboardFunc (unsigned char key, int x, int y) {
 void specialFunc(int key, int x, int y)
 {
 	if( key == GLUT_KEY_F1 ) {
-		camera.setMode(0);
+		level.camera->setMode(0);
 	}
 	if( key == GLUT_KEY_F2 ) {
-		camera.setMode(1);
+		level.camera->setMode(1);
 	}
 	if( key == GLUT_KEY_F3 ) {
-		camera.setMode(2);
+		level.camera->setMode(2);
 	}
 	
 	if( key == GLUT_KEY_LEFT ) {
-		stick.rotate( -5 );
+		level.stick->rotate( -5 );
 	}
 	
 	if( key == GLUT_KEY_RIGHT ) {
-		stick.rotate( 5 );
+		level.stick->rotate( 5 );
 	}
 	
 	if( key == GLUT_KEY_DOWN ) {
-		stick.changePower(0.1);
+		level.stick->changePower(0.1);
 	}
 	
 	if( key == GLUT_KEY_UP ) {
-		stick.changePower(-0.1);
+		level.stick->changePower(-0.1);
 	}
 }
 
@@ -640,15 +619,15 @@ void mouseFunc(int button, int state, int x, int y) {
 void mouseMotionFunc(int x, int y) {
 	
 	if ( left_click == GLUT_DOWN ) {
-		stick.rotate( (x-xold)/5. );			
+		level.stick->rotate( (x-xold)/5. );			
     }
 	
 	if ( right_click == GLUT_DOWN ) {
-		stick.changePower( (y-yold)/5. );
+		level.stick->changePower( (y-yold)/5. );
 		
-	    if( stick.getAttackStrenght()<0 ) {
-			ball.applyForce((yold-y),stick.getAngleInXZ()+90);  //some naughty magic numbers here
-			stick.setAttackStrenght(0);
+	    if( level.stick->getAttackStrenght()<0 ) {
+			ball.applyForce((yold-y),level.stick->getAngleInXZ()+90);  //some naughty magic numbers here
+			level.stick->setAttackStrenght(0);
 		}
 	}
 	
@@ -668,7 +647,7 @@ void updateFPS(int value) {
 }
 
 void updateState(int value) {
-	ball.updateState();
+	level.updateVariables();
 	glutTimerFunc(1000/STATEUPDATES_PER_SEC, updateState, 0);
 }
 

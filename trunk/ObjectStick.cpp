@@ -36,6 +36,7 @@ ObjectStick::~ObjectStick()	{ }
 void ObjectStick::setCenter(Object* newCenter)
 {
 	center = newCenter;
+	calculatePos();
 }
 
 float ObjectStick::getAngleInXZ()

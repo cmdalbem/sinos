@@ -11,6 +11,7 @@
 using namespace std;
 
 #include <GL/glut.h>
+#include "constants.h"
 
 class LightInfo
 {

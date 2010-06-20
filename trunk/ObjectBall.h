@@ -50,7 +50,7 @@ public:
 	//---------------------------- OTHER METHODS
 	void 				drawBegin() const;
 	virtual void 		draw() const;
-	void 				updateState();
+	bool 				updateState();
 	void				applyForce( float magnitude, float direction );
 	void				changeSpeed( float multFactor );
 	void				updateRotateMatrix();

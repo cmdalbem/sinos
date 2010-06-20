@@ -133,7 +133,7 @@ void ObjectBall::setSize (GLfloat x, GLfloat y, GLfloat z)
 
 //------------------------------------------------------------ OTHER METHODS
 
-void ObjectBall::updateState()
+bool ObjectBall::updateState()
 {
 	if( getSpeed() )
 	{
@@ -180,8 +180,9 @@ void ObjectBall::updateState()
 				resetSpeed();
 				setPos(0,TABLE_PLANE_Y+radius,0);
 			}
-		
+		return true;
 	}
+	return false;
 }
 
 void ObjectBall::applyForce( float magnitude, float direction )

@@ -26,28 +26,6 @@ LightInfo::LightInfo(
 	}
 	
 	whatLight = newWhatLight;
-	
-	/*
-	switch(newWhatLight)
-	{
-		case 0: whatLight = GL_LIGHT0;
-				break;
-		case 1: whatLight = GL_LIGHT1;
-				break;
-		case 2: whatLight = GL_LIGHT2;
-				break;				
-		case 3: whatLight = GL_LIGHT3;
-				break;				
-		case 4: whatLight = GL_LIGHT4;
-				break;
-		case 5: whatLight = GL_LIGHT5;
-				break;
-		case 6: whatLight = GL_LIGHT6;
-				break;
-		case 7: whatLight = GL_LIGHT7;
-				break;
-	}
-	*/
 }
 
 //------------------------------------------------------------ DESTRUCTORS
@@ -62,5 +40,8 @@ void LightInfo::apply()
 		glLightfv(whatLight, GL_POSITION, position);
 	if(isThereDirection)
 		glLightfv(whatLight, GL_SPOT_DIRECTION, direction);
+		
+	cout << "position " << whatLight << endl
+		 << position[0] << " " << position[1] << " " << position [2] << " " << position[3] << endl;
 }
 

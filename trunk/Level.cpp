@@ -6,10 +6,15 @@
 #include "Level.h"
 
 //------------------------------------------------------------ CONSTRUCTORS
-Level::Level(vector<Object*> *_objects, vector<LightInfo*> *_theLights, Camera *_camera, Camera *_camera2)
+Level::Level(	vector<Object*> *_objects, vector<LightInfo*> *_theLights,
+				Camera *_camera, Camera *_camera2,
+				ObjectStick *_stick, ObjectBall *_ball)
 {
 	objects   = _objects;
 	theLights = _theLights;
+	
+	stick = _stick;
+	ball  = _ball;
 	
 	camera  = _camera;
 	camera2 = _camera2;
@@ -26,28 +31,12 @@ Level::~Level()	{ }
 void Level::drawObjects () {
     // drawing of not-lit objects
     glDisable(GL_LIGHTING);
-	    //// Sun
-		//glPushMatrix();
-	    //glTranslated( SUN_MOVEMENT_EQUATION );
-		//glutSolidSphere(0.5,10,10);
-	    //glPopMatrix();
-		
 		(*objects)[12]->draw();
 		
 		// Holes delimiters
 		for(int i=0; i<NHOLES; i++)
 			glCircle3f(HC[i][0],TABLE_PLANE_Y+1,HC[i][1],HC[i][2]);
-		
-		/*printf("%.3f,%.3f,%.3f %.3f\n",cursor.getPosX(),cursor.getPosY(),cursor.getPosZ(),radius);
-		glCircle3f(cursor.getPosX(),BALL_O_Y,cursor.getPosZ(),radius);
-		//cursor.draw();
-		glBegin(GL_LINES);
-			glVertex3f(cursor.getPosX()-10, cursor.getPosY(),cursor.getPosZ());
-			glVertex3f(cursor.getPosX()+10, cursor.getPosY(),cursor.getPosZ());
-			glVertex3f(cursor.getPosX(), cursor.getPosY(),cursor.getPosZ()+10);
-			glVertex3f(cursor.getPosX(), cursor.getPosY(),cursor.getPosZ()-10);
-		glEnd();*/
-
+	
 	glEnable(GL_LIGHTING); //ends drawing of not-lit objects
 	
 	// draw all objects
@@ -66,6 +55,9 @@ void Level::drawObjects_partial ()
 
 void Level::lights()
 {
+	//for (int i = 0; i < theLights->size(); i++)
+	//	(*theLights)[i]->apply();
+	
 		// position light (sun)
 
 	GLfloat position[] = { 0 , 100 , 0 , 1.0f };
@@ -98,4 +90,17 @@ void Level::lights()
 	 //directional light
 	GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
 	glLightfv(GL_LIGHT2, GL_POSITION, direction);
+}
+
+void Level::updateVariables()
+{
+	bool	theBallWasMovimented;
+	theBallWasMovimented = ball->updateState();
+	
+	if(theBallWasMovimented)
+	{
+		if(camera->getMode() == 1)
+			camera->setMode(1, ball);
+		stick->setCenter(ball);
+	}
 }
