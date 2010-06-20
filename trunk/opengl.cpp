@@ -25,7 +25,7 @@
 point star[NSTARS];
 vector<Object*> objects;
 
-//texturized objects
+//texturized objects 
 static ObjectModel tableStruct("obj/pooltable_struct_noframe.obj");
 static ObjectModel tableTop("obj/pooltable_table.obj");
 static ObjectModel tableFrame("obj/pooltable_frame.obj");
@@ -57,6 +57,7 @@ long int 	frameCounter, fps = 0;	//frames per second counter and register
 char 		osd[1024]; 				//text buffer for on-screen output
 int 		lensAngle = 60;
 float 		radius=2.3;
+
 
 
 //--------------------------------------------------------------------//
@@ -114,7 +115,7 @@ void initObjects () {
 	tableTopMat.setSpecular(0.1,0.1,0.1);
 	tableTopMat.setShininess(40);
 	
-	// main table
+	// main table 
 	tableStruct.setMaterial(tableStructMat);
 	tableTop.setMaterial(tableTopMat);
 	tableFrame.setMaterial(tableTopMat);
@@ -124,7 +125,10 @@ void initObjects () {
 	tableStruct.setSize(100,100,100); 
 	tableTop.setSize(100,100,100);
 	tableFrame.setSize(100,100,100);
-		objects.push_back(&tableTop); objects.push_back(&tableStruct); //objects.push_back(&tableFrame);  
+		objects.push_back(&tableTop); objects.push_back(&tableStruct);
+	#ifdef SHOW_TABLE_FRAME
+		objects.push_back(&tableFrame);
+	#endif
 
 	// table2
 	tableStructMat.setDiffuse(0.25,0.09,0.07);
@@ -186,9 +190,59 @@ void drawObjects_partial () {
 	tableFrame.draw();
 }
 
+void castShadows() {
+	float lightSource[] = { 0, 100, 0, 1 };
+	float tablePlane [] = { 0, BALL_O_Y-1, 0 };
+	float floorPlane [] = { 0, 0, 0 };
+	float planeNormal[] = { 0, -1, 0 };
+
+	glDisable(GL_LIGHTING); 					//lights don't affect shadows
+	glEnable (GL_BLEND); 						//enable transparency
+	glEnable(GL_STENCIL_TEST); 					//enable stencil testing when drawing polygones
+	glStencilOp(GL_KEEP, GL_KEEP, GL_INCR); 	/* sets operations with stencil buffer when: 
+												 * stencil_test = false
+												 * stencil_test = true && depth_test = false
+												 * stencil_test = true
+												 */
+	glColor4f(0,0,0,0.5); 						//black shadow with 50% transparency
+
+	// Cast shadows on the ground
+	glPushMatrix();
+	glShadowProjection(lightSource,floorPlane,planeNormal); //manipulates the matrix so everything will be projected in the FLOORPLANE
+		glClear( GL_STENCIL_BUFFER_BIT);
+		glStencilFunc(GL_EQUAL, 0, 1); 						//will let only one vertex be drawn on each position each time shadow
+			tableStruct.draw();
+			tableTop.draw();
+			stick.draw();
+	glPopMatrix();
+	
+	// Cast shadows on the table
+	glPushMatrix();
+	glShadowProjection(lightSource,tablePlane,planeNormal); //manipulates the matrix so everything will be projected in the TABLEPLANE
+		glClear( GL_STENCIL_BUFFER_BIT);
+		glColorMask(false, false, false, false); 			//disables Color Buffer
+		glDepthMask(false); 								//disables Depth Buffer
+		glStencilFunc(GL_ALWAYS, 1, 1); 					//creates the mask that will define where shadow will be cast
+			tableTop.draw();
+		
+		glColorMask(true,true,true,true);
+		glDepthMask(true); 
+		glStencilFunc(GL_EQUAL, 1, 1); 						//now the shadow is cast only where stencil buffer==1, i.e. the table
+			stick.draw();
+			ball.draw();
+			#ifdef SHOW_TABLE_FRAME
+				tableFrame.draw();
+			#endif
+	glPopMatrix();
+	
+	glDisable(GL_BLEND);
+	glEnable(GL_LIGHTING);
+	glDisable(GL_STENCIL_TEST);
+}
+
 void drawObjects () {
-    	
-    glDisable(GL_LIGHTING); // drawing of not-lighted objects
+    // drawing of not-lit objects
+    glDisable(GL_LIGHTING);
 	    // Stars
 	    for (int i=0;i<NSTARS;i++) {
 	    	glPushMatrix();
@@ -217,14 +271,13 @@ void drawObjects () {
 			glVertex3f(cursor.getPosX(), cursor.getPosY(),cursor.getPosZ()+10);
 			glVertex3f(cursor.getPosX(), cursor.getPosY(),cursor.getPosZ()-10);
 		glEnd();*/
-		
-	glEnable(GL_LIGHTING); //ends drawing of not-lighted objects
-	  
+
+	glEnable(GL_LIGHTING); //ends drawing of not-lit objects
+	
 	// draw all objects
 	for( int it=0; it<objects.size(); it++ )
 		objects[it]->draw();
-		
-	stick.draw();	
+	stick.draw();
 }
 
 void lights () {
@@ -279,7 +332,8 @@ void perspectiveViewport( int width, int height ) {
 		else
 			camera.apply();
 		lights();
-		drawObjects();		
+		drawObjects();
+		castShadows();
 }	
 
 void orthoViewport( int width, int height ) {
@@ -392,6 +446,7 @@ void init ()
 	glEnable (GL_DEPTH_TEST);
     glEnable (GL_LIGHTING);
     glShadeModel (GL_SMOOTH);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
 	initLights();
 	glEnable (GL_LIGHT0); 	// sun
@@ -547,7 +602,7 @@ void updateState(int value) {
 int main (int argc, char **argv) {
     cout << "Initializing...\n";
     glutInit (&argc, argv);
-    glutInitDisplayMode (GLUT_DOUBLE | GLUT_DEPTH); //set the display to Double buffer, with depth
+    glutInitDisplayMode (GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL); //set the display to Double buffer, with depth
     glutInitWindowSize (1280, 720);                  //set the window size
     glutInitWindowPosition (400, 0);              //set the position of the window
     glutCreateWindow ("SiNoS - mouse/c: camera  ctrl+mouse: stick  spacebar: attack");     //the caption of the window

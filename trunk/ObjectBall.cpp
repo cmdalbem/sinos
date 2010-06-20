@@ -75,21 +75,19 @@ void ObjectBall::updateState()
 			bool can_move_x = canMoveX(),
 				 can_move_z = canMoveZ();
 
-			if( !can_move_x || !can_move_z ) {
-				if( hasSnooked() ) { // point!
-					setPos(0,BALL_O_Y,0);
-					resetSpeed();
-	//				moveVector[1]=-50;
+			if( hasSnooked() ) { 
+				//setPos(0,BALL_O_Y,0);
+				//resetSpeed();
+				moveVector[1]=-30;
+			}
+			else {
+				if( !can_move_x ) {
+					moveVector[0] = -moveVector[0];
+					changeSpeed(0.995);
 				}
-				else {
-					if( !can_move_x ) {
-						moveVector[0] = -moveVector[0];
-						changeSpeed(0.995);
-					}
-					if( !can_move_z ) {
-						moveVector[2] = -moveVector[2];
-						changeSpeed(0.995);
-					}
+				if( !can_move_z ) {
+					moveVector[2] = -moveVector[2];
+					changeSpeed(0.995);
 				}
 			}
 		}
@@ -98,26 +96,29 @@ void ObjectBall::updateState()
 		setPos( getNewX(), getNewY(), getNewZ() );
 		
 		// update velocity
-		changeSpeed(0.965);
-		if( getSpeed() < 0.05) //magic number detected
-			resetSpeed();
+		if( !moveVector[1] ) { //if is not falling
+			changeSpeed(0.965);
+			if( getSpeed() < 0.05)
+				resetSpeed();
+		}
+		else
+			if( getPosY() > 1 ) {//until fall to the ground
+				moveVector[1] *= 1.2;
+				moveVector[0] *= 0.965;
+				moveVector[2] *= 0.965;
+			}
+			else {
+				resetSpeed();
+				setPos(0,BALL_O_Y,0);
+			}
+		
 	}
 }
 
 void ObjectBall::applyForce( float magnitude, float direction )
 {
 	moveVector[0] += magnitude * cos( RAD(direction) );
-	moveVector[2] += -magnitude * sin( RAD(direction) );
-	
-	/*double m1 = magnitude, m2 = speed;
-	double a1 = _direction, a2 = direction;
-	speed = sqrt( pow((m1*cos(a1) + m2*cos(a2)),2) + pow((m1*sin(a1) + m2*sin(a2)),2) );
-	direction = acos(  (m1*cos(a1) + m2*cos(a2))
-						/
-						speed);						
-	cout<<speed<<", ";
-	cout<<direction<<endl;*/
-	
+	moveVector[2] += -magnitude * sin( RAD(direction) );	
 }
 	
 void ObjectBall::changeSpeed( float mFactor )
@@ -141,21 +142,6 @@ void ObjectBall::draw() const
 
 bool ObjectBall::hasSnooked()
 {
-	/*	
-const float B1P1[] = {-48.3, -19.9};
-const float B1P2[] = {-45  , -23.5};
-const float B2P1[] = {-2.4 , -23.5};
-const float B2P2[] = { 2.1 , -23.5};
-const float B3P1[] = { 44.7, -23.5};
-const float B3P2[] = { 48  , -19.9};
-const float B4P1[] = {-48.3,  24.8};
-const float B4P2[] = {-45  ,  28.1};
-const float B5P1[] = {-2.4 ,  28.1};
-const float B5P2[] = { 1.8 ,  28.1};
-const float B6P1[] = { 48  ,  24.5};
-const float B6P2[] = { 44.4,  28.1};
-	*/
-	
 	float posx = getNewX(),
 		  posy = getNewY(),
 		  posz = getNewZ();

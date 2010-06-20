@@ -71,7 +71,7 @@ void ObjectStick::calculatePos()
 {
 	double degrees = RAD(getAngleInXZ());
 	
-	setPosX(center->getPosX() + sin(degrees)*(getAttackStrenght()));
-	setPosY(center->getPosY() + cos(20)		*(getAttackStrenght()));
-	setPosZ(center->getPosZ() + cos(degrees)*(getAttackStrenght()));
+	setPosX(center->getPosX() + sin(degrees)*(getAttackStrenght()/2.));
+	setPosY(center->getPosY() + cos(20)		*(getAttackStrenght()/2.));
+	setPosZ(center->getPosZ() + cos(degrees)*(getAttackStrenght()/2.));
 }

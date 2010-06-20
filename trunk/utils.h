@@ -16,6 +16,12 @@ using namespace std;
 #include "constants.h"
 
 
+/* glShadowProjection()
+ * Simple shadow projection.
+ * 	Adapted from ?
+ */
+void glShadowProjection(float * l, float * e, float * n);
+
 /* glCircle3f()
  * Draws a circle contorn with constant y coordinate.
  * 	Adapted from http://forum.gamedeception.net/threads/4723-Drawing-a-circle-in-OpenGL-%28simple!%29
