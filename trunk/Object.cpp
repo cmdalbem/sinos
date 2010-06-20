@@ -76,7 +76,7 @@ Object::~Object()
 
 //------------------------------------------------------------ GETTERS & SETTERS
 
-GLfloat	Object::getPos (int coord)
+GLfloat	Object::getPos (int coord) const
 {
 	if(coord == 0)
 		return pos[0];
@@ -87,14 +87,14 @@ GLfloat	Object::getPos (int coord)
 	else
 		return 0;
 }
-GLfloat Object::getPosX()
+GLfloat Object::getPosX() const
 {	return pos[0];	}
-GLfloat Object::getPosY()
+GLfloat Object::getPosY() const
 {	return pos[1];	}
-GLfloat Object::getPosZ()
+GLfloat Object::getPosZ() const
 {	return pos[2];	}
 	
-GLfloat	Object::getRot (int coord)
+GLfloat	Object::getRot (int coord) const
 {
 	if(coord == 0)
 		return rot[0];
@@ -105,14 +105,14 @@ GLfloat	Object::getRot (int coord)
 	else
 		return 0;
 }
-GLfloat Object::getRotX()
+GLfloat Object::getRotX() const
 {	return rot[0];	}
-GLfloat Object::getRotY()
+GLfloat Object::getRotY() const
 {	return rot[1];	}
-GLfloat Object::getRotZ()
+GLfloat Object::getRotZ() const
 {	return rot[2];	}
 	
-GLfloat	Object::getSize (int coord)
+GLfloat	Object::getSize (int coord) const
 {
 	if(coord == 0)
 		return size[0];
@@ -123,11 +123,11 @@ GLfloat	Object::getSize (int coord)
 	else
 		return 0;
 }
-GLfloat Object::getSizeX()
+GLfloat Object::getSizeX() const
 {	return size[0];	}
-GLfloat Object::getSizeY()
+GLfloat Object::getSizeY() const
 {	return size[1];	}
-GLfloat Object::getSizeZ()
+GLfloat Object::getSizeZ() const
 {	return size[2];	}
 
 
@@ -213,17 +213,11 @@ void Object::drawBegin() const
 	
 	material.apply();
 	
-	// basic transformations using object's attributes
 	glTranslated(pos[0], pos[1], pos[2]);
-	
+	glScalef(size[0], size[1], size[2]);
 	glRotatef(rot[1],0,1,0);
 	glRotatef(rot[0],1,0,0);
 	glRotatef(rot[2],0,0,1);
-	glScalef(size[0], size[1], size[2]);
-	
-	// TODO: transform the next function in
-	// glTranslated(-pos[0], -pos[1], -pos[2]); and test if it's right
-	glTranslated(0,0,0);
 }
 
 void Object::drawEnd() const

@@ -72,7 +72,7 @@ void ObjectModel::draw() const
 {
 	if(modelPointer)	// Test if there is anything to draw
 	{
-		Object::drawBegin();		// Move, scale and rotate the object to the right place
+		drawBegin();		// Move, scale and rotate the object to the right place
 		if( texture!=NULL )
 		{
 			glEnable(GL_TEXTURE_2D);
@@ -82,10 +82,7 @@ void ObjectModel::draw() const
 		}
 		else
 			glmDraw(modelPointer, GLM_SMOOTH);
-		Object::drawEnd();
+		drawEnd();
 		
 	}
-	else
-		cout << "There is nothing to draw D= D=" << endl;
-		//exit(0);
 }

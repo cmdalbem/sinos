@@ -16,7 +16,6 @@ using namespace std;
 
 class Camera
 {
-	#define NCAMERAS 3
 private:
 
 	int cameraMode;
@@ -39,24 +38,23 @@ public:
 	~Camera();
 	
 	//---------------------------- GETTERS & SETTERS
-	void	setCamera( int cameraMode = 0 );		// reset to the default camera values.
+
+	void			setXPos(GLfloat newValue);
+	void			setYPos(GLfloat newValue);
+	void			setZPos(GLfloat newValue);
+	void			setCamera( int cameraMode = 0 );		// reset to the default camera values.
+	void			setXRot(GLfloat newValue);
+	void			setYRot(GLfloat newValue);
 	
-	void	setXPos(GLfloat newValue);
-	void	setYPos(GLfloat newValue);
-	void	setZPos(GLfloat newValue);
-	
-	void	setXRot(GLfloat newValue);
-	void	setYRot(GLfloat newValue);
-	
-	void	setCameraMode (int mode, Object* object);
+	void			setMode (int mode, Object* object=NULL);
 	
 	/* Set the position for the "number 2" variables of the camera - which
 	 * are related to the "camera 2" position.
 	 */
-	void	setPos2();
+	void			setPos2();
 	
-	const char* 	getMode() const; //name of the current camera mode
-	int 	getCameraMode() const;
+	const char* 	getModeName( int mode=-1 ) const; //name of the current camera mode
+	int 			getMode() const;
 	
 	//---------------------------- OTHER METHODS
 	void 	apply( int forceMode=-1 ); 					// main method
@@ -68,8 +66,8 @@ public:
 	 * "camera mode 1". The camera will center on the object passed, instead
 	 * of the default value, which is the center of the principal table.
 	 */
-	void 	nextCameraMode();
-	void 	nextCameraMode(Object* object);
+	void 	nextMode();
+	void 	nextMode(Object* object=NULL);
 	
 	/* Returns the euclidian norma of the vector starting on the camera and 
 	*  end on the "position" of the Object (each Object has an array which

@@ -6,6 +6,13 @@
 #pragma once
 
 
+#ifndef GLUT_WHEEL_UP
+#define GLUT_WHEEL_MIDDLE 1
+#define GLUT_WHEEL_UP   3
+#define GLUT_WHEEL_DOWN 4
+#endif
+
+
 // Types
 struct point
 {
@@ -16,6 +23,7 @@ struct point
 #define RGB(x) (float)(x)/(255)
 #define VARNAME(x) #x
 #define RAD(x) ((x)*(M_PI))/(180)
+#define DEGREES(x) ((x)*(180))/(M_PI)
 
 // Default values for Materials Attributes
 const float default_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
@@ -24,12 +32,16 @@ const float default_specular[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 const float default_emission[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 const float default_shininess = 0;
 
+
 // Global variables
 #define NSTARS 1000
 #define STATEUPDATES_PER_SEC 50
-#define BALL_O_Y 29.5
+#define TABLE_PLANE_Y 28.5
 #define NHOLES 6
-//#define SHOW_TABLE_FRAME 1
+#define BALL_DECELERATION_R (0.995)
+#define BALL_DECELERATION_N (0.965)
+#define NCAMERAMODES 3
+//#define SHOW_TABLE_FRAME 1 //uncomment to apply
 
 // Table boundaries
 #ifdef SHOW_TABLE_FRAME

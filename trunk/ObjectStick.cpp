@@ -25,7 +25,7 @@ ObjectStick::ObjectStick(string filename, Object* objectCenter)
 	
 	center = objectCenter;
 	
-	setAttackStrenght(1);
+	setAttackStrenght(5);
 	calculatePos();
 }
 
@@ -46,6 +46,9 @@ float ObjectStick::getAngleInXZ()
 void ObjectStick::setAngleInXZ(float newAngle)
 {
 	angleInXZ = newAngle;
+	
+	if(angleInXZ>360)
+		angleInXZ = (int)angleInXZ % 360;
 }
 
 float ObjectStick::getAttackStrenght()
@@ -55,9 +58,7 @@ float ObjectStick::getAttackStrenght()
 
 void ObjectStick::setAttackStrenght(float newForce)
 {
-	if( newForce < 1 )
-		attackStrenght = 1;
-	else if ( newForce > 20 )
+	if ( newForce > 20 )
 		attackStrenght = 20;
 	else
 		attackStrenght = newForce;

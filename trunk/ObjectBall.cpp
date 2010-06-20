@@ -9,25 +9,38 @@ using namespace std;
 #include "constants.h"
 #include <math.h>
 #include "constants.h"
+#include "utils.h"
 
 //------------------------------------------------------------ CONSTRUCTORS
 
 ObjectBall::ObjectBall()
-:	Object()
+:	ObjectModel()
 {
 	radius = 0;
 	slices = 0;
 	stacks = 0;	
 	resetSpeed();
+	resetRotateMatrix();
 }
 
 ObjectBall::ObjectBall(GLdouble _radius, GLint _slices, GLint _stacks)
-:   Object()
+:   ObjectModel()
 {
 	radius = _radius;
 	slices = _slices;
 	stacks = _stacks;
 	resetSpeed();
+	resetRotateMatrix();
+}
+
+ObjectBall::ObjectBall(string filename)
+:	ObjectModel(filename)
+{
+	radius = 0;
+	slices = 0;
+	stacks = 0;	
+	resetSpeed();	
+	resetRotateMatrix();
 }
 
 
@@ -36,6 +49,31 @@ ObjectBall::ObjectBall(GLdouble _radius, GLint _slices, GLint _stacks)
 ObjectBall::~ObjectBall() { }
 
 //------------------------------------------------------------ GETTERS & SETTERS
+
+GLdouble ObjectBall::getRadius() const
+{
+	return radius;
+}
+
+float ObjectBall::getDirection() const
+{
+	if( getSpeed() ) {
+		float direction = DEGREES(acosf(moveVector[0]/getSpeed())); //angle of move vector = arc cos x/hypotenuse
+		
+		if( (moveVector[2]/getSpeed()) > 0 )
+			direction += 2*(180-direction);
+			
+		return direction;
+	}
+	else
+		return 0;
+}	
+
+float ObjectBall::getPerimeter() const
+{
+	return 2*M_PI*radius;
+}
+
 
 void ObjectBall::setStacks(GLint newStacks)
 {
@@ -57,26 +95,40 @@ void ObjectBall::resetSpeed()
 	moveVector[0] = 0;
 	moveVector[1] = 0;
 	moveVector[2] = 0;
+	
+	setRot(0,0,0);
 }
 
-float ObjectBall::getSpeed()
+float ObjectBall::getSpeed() const
 {
-	return abs(moveVector[0]) + abs(moveVector[1]) + abs(moveVector[2]);	
+	return sqrt( pow(moveVector[0],2) + pow(moveVector[1],2) + pow(moveVector[2],2) );	
 }
 
-float ObjectBall::getNewX()
+float ObjectBall::getFutureSpeed() const
+{
+	return sqrt( pow(moveVector[0]*BALL_DECELERATION_N,2) + pow(moveVector[1]*BALL_DECELERATION_N,2) + pow(moveVector[2]*BALL_DECELERATION_N,2) );	
+}
+
+float ObjectBall::getNewX() const
 {
 	return getPosX() + moveVector[0] / STATEUPDATES_PER_SEC;
 }
 
-float ObjectBall::getNewY()
+float ObjectBall::getNewY() const
 {
 	return getPosY() + moveVector[1] / STATEUPDATES_PER_SEC;
 }
 
-float ObjectBall::getNewZ()
+float ObjectBall::getNewZ() const
 {
 	return getPosZ() + moveVector[2] / STATEUPDATES_PER_SEC;
+}
+
+void ObjectBall::setSize (GLfloat x, GLfloat y, GLfloat z)
+{
+	Object::setSize(x,y,z);
+	if(x==z && z==y)
+		radius = x/10;
 }
 
 //------------------------------------------------------------ OTHER METHODS
@@ -90,41 +142,43 @@ void ObjectBall::updateState()
 			bool can_move_x = canMoveX(),
 				 can_move_z = canMoveZ();
 
-			if( hasSnooked() ) { 
-				//setPos(0,BALL_O_Y,0);
-				//resetSpeed();
+			if( hasSnooked() )
 				moveVector[1]=-30;
-			}
 			else {
-				if( !can_move_x ) {
+				if( !can_move_x ) { //invert x
 					moveVector[0] = -moveVector[0];
-					changeSpeed(0.995);
+					changeSpeed(BALL_DECELERATION_R);
 				}
-				if( !can_move_z ) {
+				if( !can_move_z ) { //invert z
 					moveVector[2] = -moveVector[2];
-					changeSpeed(0.995);
+					changeSpeed(BALL_DECELERATION_R);
 				}
 			}
 		}
+		
+		// rotation by movement
+		//setRotY(getDirection()+90);
+		//rotate( (360*(getSpeed()-getFutureSpeed())) / getPerimeter() ,0,0);
+		setRot( moveVector[2] ,0, -moveVector[0] );
 		
 		// update position
 		setPos( getNewX(), getNewY(), getNewZ() );
 		
 		// update velocity
 		if( !moveVector[1] ) { //if is not falling
-			changeSpeed(0.965);
+			changeSpeed(BALL_DECELERATION_N);
 			if( getSpeed() < 0.05)
 				resetSpeed();
 		}
 		else
 			if( getPosY() > 1 ) {//until fall to the ground
 				moveVector[1] *= 1.2;
-				moveVector[0] *= 0.965;
-				moveVector[2] *= 0.965;
+				moveVector[0] *= BALL_DECELERATION_N;
+				moveVector[2] *= BALL_DECELERATION_N;
 			}
 			else {
 				resetSpeed();
-				setPos(0,BALL_O_Y,0);
+				setPos(0,TABLE_PLANE_Y+radius,0);
 			}
 		
 	}
@@ -133,7 +187,7 @@ void ObjectBall::updateState()
 void ObjectBall::applyForce( float magnitude, float direction )
 {
 	moveVector[0] += magnitude * cos( RAD(direction) );
-	moveVector[2] += -magnitude * sin( RAD(direction) );	
+	moveVector[2] += -magnitude * sin( RAD(direction) );
 }
 	
 void ObjectBall::changeSpeed( float mFactor )
@@ -143,15 +197,59 @@ void ObjectBall::changeSpeed( float mFactor )
 	moveVector[2] *= mFactor;
 }
 
-void ObjectBall::draw() const
+void ObjectBall::drawBegin() const
 {
-	Object::drawBegin();
+	glPushMatrix();
 	
-	glutSolidSphere(radius,slices,stacks);
+	glTranslated(getPosX(), getPosY(), getPosZ());
+	glScalef(getSizeX(), getSizeY(), getSizeZ());
 	
-	Object::drawEnd();
+	glMultMatrixd(*rotMat);
+	    		
+	material.apply();	
 }
 
+void ObjectBall::draw() const
+{
+	GLMmodel* modelPointer = getModelPointer();
+	
+	if( modelPointer )
+	{
+		ObjectBall::drawBegin();
+		if( texture!=NULL )
+		{
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, texture->texID);
+			glmDraw(modelPointer, GLM_SMOOTH | GLM_TEXTURE);
+			glDisable(GL_TEXTURE_2D);
+		}
+		else
+			glmDraw(modelPointer, GLM_SMOOTH);
+		Object::drawEnd();
+	}
+	else {
+		ObjectBall::drawBegin();
+		glutSolidSphere(radius,slices,stacks);
+		Object::drawEnd();
+	}
+}
+
+void ObjectBall::updateRotateMatrix()
+/* Adapted from OpenGL Screen & Object Space Rotations - MaxH - Mike Werner April 28, 2009 */
+{
+   glLoadIdentity ();
+   glRotatef (getRotX(), 1,0,0);
+   glRotatef (getRotY(), 0,1,0);
+   glRotatef (getRotZ(), 0,0,1);
+   glMultMatrixd (*rotMat);
+   glGetDoublev (GL_MODELVIEW_MATRIX, *rotMat);
+}
+
+void ObjectBall::resetRotateMatrix()
+{
+	static GLdouble rex[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+	*rotMat = rex;
+}
 
 //--------------------------------------------------- POSITION DETECTION
 
@@ -161,6 +259,11 @@ bool ObjectBall::hasSnooked()
 		  posy = getNewY(),
 		  posz = getNewZ();
 
+	for(int i=0; i<NHOLES; i++)
+		if( abs(posx-HC[i][0]) + abs(posz-HC[i][1]) <= HC[i][2] )
+			return true;
+	return false;
+	
 	/*// Limit Boundaries Test
 	if( posx>B2P1[0] && posx<B2P2[0] &&
 		posy>B2P1[1] )
@@ -169,11 +272,6 @@ bool ObjectBall::hasSnooked()
 			 posy<B5P1[1] )
 			return true;
 	else return false;*/
-	
-	for(int i=0; i<NHOLES; i++)
-		if( abs(posx-HC[i][0]) + abs(posz-HC[i][1]) <= HC[i][2] )
-			return true;
-	return false;
 	
 }
 

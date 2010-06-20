@@ -5,10 +5,10 @@
 
 #include <iostream>
 using namespace std;
-#include "Camera.h"
-#include "constants.h"
 #include <math.h>
 
+#include "Camera.h"
+#include "constants.h"
 #include "Object.h"
 
 //------------------------------------------------------------ CONSTRUCTORS
@@ -89,26 +89,30 @@ void Camera::setYRot(GLfloat newValue)
 
 
 
-const char* Camera::getMode () const
+const char* Camera::getModeName ( int mode ) const
 {
-	switch( cameraMode )
+	if( mode == -1 )
+		mode = cameraMode;
+		
+	switch( mode )
 	{
 		case 0: return "Manual";
 		case 1: return "Ball Centered";
 		case 2: return "Top View";
 		case 3:	return "Cinematic";
+		default: return "Unknown";
 	}
 }
 
 
-void Camera::setCameraMode (int mode, Object* object)
+void Camera::setMode (int mode, Object* object)
 {
-	if( cameraMode < NCAMERAS )
+	if( cameraMode < NCAMERAMODES )
 	{
 		cameraMode = mode;
 		if ( mode = 1 )
 		{
-			if( object)
+			if( object!=NULL )
 			{
 				xorig = object->getPosX();	// Saves the position of the object
 				yorig = object->getPosY();	// the camera is looking at.
@@ -116,19 +120,18 @@ void Camera::setCameraMode (int mode, Object* object)
 			}
 			else
 			{
+				cout << "Warning: setting camera to " << getModeName() << " with object=NULL." << endl;
 				xorig = 0;		// If no object is passed, then the "orig"
 				yorig = 29.5;	// variables receive default values.
 				zorig = 0;		//
-			}
-			
-				
+			}	
 		}
 	}
 	else
 		cout << "error: CameraMode " << mode << "doesnt exists." << endl;
 }
 
-int Camera::getCameraMode () const
+int Camera::getMode () const
 {
 	return cameraMode;
 }
@@ -200,7 +203,7 @@ void Camera::apply( int forceMode )
 {
 	int mode;
 	if(forceMode==-1)
-		mode = getCameraMode();
+		mode = getMode();
 	else
 		mode = forceMode;
 		
@@ -238,14 +241,14 @@ void Camera::apply( int forceMode )
 	
 }
 
-void Camera::nextCameraMode()
+void Camera::nextMode()
 {
-	setCameraMode( (getCameraMode()+1)%NCAMERAS, NULL);
+	setMode( (getMode()+1)%NCAMERAMODES, NULL);
 }
 
-void Camera::nextCameraMode(Object* object)
+void Camera::nextMode(Object* object)
 {
-	setCameraMode( (getCameraMode()+1)%NCAMERAS, object);
+	setMode( (getMode()+1)%NCAMERAMODES, object);
 }
 
 /* The euclidian norma is calculated as:
@@ -261,7 +264,7 @@ void Camera::nextCameraMode(Object* object)
  */
 float Camera::distanceFromObject(Object &theObject) const
 {
-	switch ( getCameraMode() )
+	switch ( getMode() )
 	{
 		case 0:
 			return sqrt(pow(xpos - theObject.getPosX(), 2) +	// use "pow" because it has

@@ -10,23 +10,8 @@ using namespace std;
 #include "utils.h"
 
 
-
-/*
- * This is where the "magic" is done:
- *
- * Multiply the current ModelView-Matrix with a shadow-projetion
- * matrix.
- *
- * l is the position of the light source
- * e is a point on within the plane on which the shadow is to be
- *   projected.  
- * n is the normal vector of the plane.
- *
- * Everything that is drawn after this call is "squashed" down
- * to the plane. Hint: Gray or black color and no lighting 
- * looks good for shadows *g*
- */
 void glShadowProjection(float * l, float * e, float * n)
+/* This function was adapted from the Internet. There as so many sources that I can't tell the original author of this.*/
 {
   float d, c;
   float mat[16];
@@ -126,8 +111,15 @@ void drawOsd( char osd[], Camera camera, long int fps )
 {
   glDisable(GL_LIGHTING);
   
-  sprintf(osd,"FPS: %li   camera mode: %s",fps,camera.getMode());
+  // OSD configuration
+  sprintf(osd,"FPS: %li ",fps);
+  for( int i=0; i<NCAMERAMODES; i++ )
+	if( camera.getMode()==i )
+		sprintf(osd,"%s - [%s]",osd,camera.getModeName(i));
+	else
+		sprintf(osd,"%s -  %s ",osd,camera.getModeName(i));
   
+  // OSD drawing
   glColor3f(1.0f, 1.0f, 1.0f);
   glRasterPos3f(-1, 0.5, -1);
   for (int i = 0; i < (int)strlen(osd); i++) 

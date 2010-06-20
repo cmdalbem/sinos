@@ -37,8 +37,8 @@ static ObjectModel tableTop("obj/pooltable_table.obj");
 static ObjectModel tableFrame("obj/pooltable_frame.obj");
 static ObjectModel scenario("obj/crypt.obj");
 static ObjectModel globe("obj/globe.obj");
-//static ObjectModel ball("obj/poolball.obj");
-static ObjectBall  ball(1,100,100);
+static ObjectBall ball("obj/poolball.obj"); 
+//static ObjectBall  ball(10,100,100);
 static ObjectBall  cursor(1,100,100);
 static ObjectStick stick("obj/taco.obj", &ball);
 
@@ -55,11 +55,13 @@ static ObjectModel tableTop4("obj/pooltable_table.obj");
 // Texture files
 Texture tigerTex, woodTex, tableTex, rockTex, starsTex, stickTex, ballTex;
 
+//Camera camera, camera2(2);
 						  
 // mouse-keyboard
 static int	xold, yold;		
 static int	left_click = GLUT_UP;
 static int	right_click = GLUT_UP;
+static int	middle_click = GLUT_UP;
 static bool holdCtrl = false;
 static bool invertViewports = false;
 						  
@@ -73,7 +75,6 @@ int 		lensAngle = 60;
 float 		radius=2.3;
 
 
-
 //--------------------------------------------------------------------//
 //----------------------------- OPENGL -------------------------------//
 //--------------------------------------------------------------------//
@@ -81,21 +82,22 @@ float 		radius=2.3;
 void initObjects () {
 
 	// the ball
-	ball.setPos(0,BALL_O_Y,0);
 	ball.material.setShininess(120); 
 	ball.material.setDiffuse(0.6, 0.6, 0.6);
 	ball.material.setSpecular(0.9, 0.9, 0.9);
 	ball.setTexture(&ballTex);
-		objects.push_back(&ball);		// objects[0]
+	ball.setSize(10,10,10);
+	ball.setPos(0, TABLE_PLANE_Y+ball.getRadius(), 0);
+		objects.push_back(&ball);
 	
-	cursor.setPos(0,BALL_O_Y,2);
+	cursor.setPos(0,TABLE_PLANE_Y,2);
 	
 	// the stick
 	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
 	stick.material.setSpecular(0.3,0.3,0.3);
 	stick.material.setShininess(80);
 	stick.setTexture(&stickTex);
-	stick.setSize(7,7,8);
+	stick.setSize(7,7,8); 
 	stick.rotate(-5);
 		objects.push_back(&stick);		//objects[1]
 	
@@ -128,8 +130,11 @@ void initObjects () {
 	tableStruct.setSize(100,100,100); 
 	tableTop.setSize(100,100,100);
 	tableFrame.setSize(100,100,100);
-		objects.push_back(&tableTop);	//objects[3]
-		objects.push_back(&tableStruct);//objects[4]
+		objects.push_back(&tableTop);
+		objects.push_back(&tableStruct);
+	#ifdef SHOW_TABLE_FRAME
+		objects.push_back(&tableFrame);
+	#endif
 
 	// table2
 	tableStructMat.setDiffuse(0.25,0.09,0.07);
@@ -200,7 +205,7 @@ void drawObjects_partial () {
 
 void castShadows() {
 	float lightSource[] = { 0, 100, 0, 1 };
-	float tablePlane [] = { 0, BALL_O_Y-1, 0 };
+	float tablePlane [] = { 0, TABLE_PLANE_Y, 0 };
 	float floorPlane [] = { 0, 0, 0 };
 	float planeNormal[] = { 0, -1, 0 };
 
@@ -212,7 +217,7 @@ void castShadows() {
 												 * stencil_test = true && depth_test = false
 												 * stencil_test = true
 												 */
-	glColor4f(0,0,0,0.5); 						//black shadow with 50% transparency
+	glColor4f(0,0,0,0.5); 						//black colored shadow with 50% transparency
 
 	// Cast shadows on the ground
 	glPushMatrix();
@@ -259,9 +264,9 @@ void drawObjects () {
 		
 		globe.draw();
 		
-		// Holes delimiters
+		/*// Holes delimiters
 		for(int i=0; i<NHOLES; i++)
-			glCircle3f(HC[i][0],BALL_O_Y,HC[i][1],HC[i][2]);
+			glCircle3f(HC[i][0],TABLE_PLANE_Y,HC[i][1],HC[i][2]);*/
 		
 		/*printf("%.3f,%.3f,%.3f %.3f\n",cursor.getPosX(),cursor.getPosY(),cursor.getPosZ(),radius);
 		glCircle3f(cursor.getPosX(),BALL_O_Y,cursor.getPosZ(),radius);
@@ -283,6 +288,7 @@ void drawObjects () {
 void lights ()
 {
 	// position light (sun)
+
 	//GLfloat position[] = { 0 , 100 , 0 , 1.0f };
 	//glLightfv(GL_LIGHT0, GL_POSITION, position);    
 	//GLfloat spot_direction[] = { 0.0 , -1.0 , 0.0 , 0.0};
@@ -314,7 +320,7 @@ void lights ()
 	//GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
 	//glLightfv(GL_LIGHT2, GL_POSITION, direction);
 	
-	
+
 }
 
 void perspectiveViewport( int width, int height ) {
@@ -330,7 +336,11 @@ void perspectiveViewport( int width, int height ) {
 		gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 10000.0);
     					
     glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();  
+	
+	ball.updateRotateMatrix(); //this MUST be called HERE
+	
+    glLoadIdentity ();
+    
     // IMPORTANT: don't change the order of these calls
 		drawOsd(osd,camera,fps);
 		if( invertViewports )
@@ -358,6 +368,7 @@ void orthoViewport( int width, int height ) {
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
     glLoadIdentity();
+    
 	// IMPORTANT: don't change the order of these calls
 		if( invertViewports )
 			camera.apply();
@@ -556,11 +567,6 @@ void keyboardFunc (unsigned char key, int x, int y) {
 	if( key=='e' )
 		radius+=0.1;
     
-    if ( key==K_SPACE) {
-		ball.applyForce(stick.getAttackStrenght()*10,stick.getAngleInXZ()+90);  //some naughty magic numbers here
-		stick.setAttackStrenght(0);
-	}
-		
     // chances lens focal distance
     /*if ( key=='s' )
 		lensAngle+=2;
@@ -568,16 +574,16 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		lensAngle-=2;
 		* */
 		
+	if ( key==K_SPACE) {
+		ball.applyForce(stick.getAttackStrenght()*10,stick.getAngleInXZ()+90);  //some naughty magic numbers here
+		stick.setAttackStrenght(10);
+	}
+		
 	if( key=='v')
 		invertViewports = !invertViewports;
     
     if( key=='c' )
-		camera.nextCameraMode(objects[0]);
-	
-	if ( key=='1' )
-		glDisable(GL_LIGHT1);
-	if ( key=='2' )
-		glEnable(GL_LIGHT1); 
+		camera.nextMode(objects[0]);
 	
     if ( key==K_ESC )
     {
@@ -587,23 +593,29 @@ void keyboardFunc (unsigned char key, int x, int y) {
 
 void specialFunc(int key, int x, int y)
 {
-	if ( key == GLUT_KEY_LEFT )
-	{
+	if( key == GLUT_KEY_F1 ) {
+		camera.setMode(0);
+	}
+	if( key == GLUT_KEY_F2 ) {
+		camera.setMode(1);
+	}
+	if( key == GLUT_KEY_F3 ) {
+		camera.setMode(2);
+	}
+	
+	if( key == GLUT_KEY_LEFT ) {
 		stick.rotate( -5 );
 	}
 	
-	if ( key == GLUT_KEY_RIGHT )
-	{
+	if( key == GLUT_KEY_RIGHT ) {
 		stick.rotate( 5 );
 	}
 	
-	if ( key == GLUT_KEY_DOWN )
-	{
+	if( key == GLUT_KEY_DOWN ) {
 		stick.changePower(0.1);
 	}
 	
-	if ( key == GLUT_KEY_UP )
-	{
+	if( key == GLUT_KEY_UP ) {
 		stick.changePower(-0.1);
 	}
 }
@@ -612,11 +624,17 @@ void specialFunc(int key, int x, int y)
 void mouseFunc(int button, int state, int x, int y) {
 /* This function only updates click states and positions */
  
-	if (GLUT_LEFT_BUTTON == button)
+	if( button == GLUT_LEFT_BUTTON )
 		left_click = state;
-	if (GLUT_RIGHT_BUTTON == button)
+	if( button == GLUT_RIGHT_BUTTON )
 		right_click = state;
-	
+	if( button == GLUT_WHEEL_MIDDLE )
+		middle_click = state;
+	if( button == GLUT_WHEEL_DOWN )
+		camera.action2(0,5);
+	if( button == GLUT_WHEEL_UP )
+		camera.action2(0,-5);
+		
 	xold = x;
 	yold = y;
 	
@@ -625,20 +643,21 @@ void mouseFunc(int button, int state, int x, int y) {
 
 void mouseMotionFunc(int x, int y) {
 	
-	if (GLUT_DOWN == left_click)
-    {
-		if( holdCtrl )
-			stick.rotate( (x-xold)/5. );
-		else
-			camera.action1(x - xold, y - yold);
+	if ( left_click == GLUT_DOWN ) {
+		stick.rotate( (x-xold)/5. );			
     }
 	
-	if (GLUT_DOWN == right_click)
-	{
-		if( holdCtrl )
-			stick.changePower( (y-yold)/2. );
-		else		
-			camera.action2(x - xold, y - yold);
+	if ( right_click == GLUT_DOWN ) {
+		stick.changePower( (y-yold)/5. );
+		
+	    if( stick.getAttackStrenght()<0 ) {
+			ball.applyForce((yold-y),stick.getAngleInXZ()+90);  //some naughty magic numbers here
+			stick.setAttackStrenght(0);
+		}
+	}
+	
+	if ( middle_click ==GLUT_DOWN  ) {
+		camera.action1(x - xold, y - yold);
 	}
 
 	xold = x;
@@ -666,7 +685,7 @@ int main (int argc, char **argv) {
     glutInitDisplayMode (GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL); //set the display to Double buffer, with depth
     glutInitWindowSize (1280, 720);                  //set the window size
     glutInitWindowPosition (400, 0);              //set the position of the window
-    glutCreateWindow ("SiNoS - mouse/c: camera  ctrl+mouse: stick  spacebar: attack");     //the caption of the window
+    glutCreateWindow ("SiNoS - middleButton/c: camera  mouse: stick  spacebar: attack!");     //the caption of the window
     init();
     
     glutDisplayFunc (display); 						//use the display function to draw everything

@@ -39,20 +39,20 @@ public:
 	~Object();
 	
 	//---------------------------- GETTERS & SETTERS
-	GLfloat getPos (int coord);
-	GLfloat getPosX();
-	GLfloat getPosY();
-	GLfloat getPosZ();
+	GLfloat getPos (int coord) const;
+	GLfloat getPosX() const;
+	GLfloat getPosY() const;
+	GLfloat getPosZ() const;
 	
-	GLfloat getRot (int coord);
-	GLfloat getRotX();
-	GLfloat getRotY();
-	GLfloat getRotZ();
+	GLfloat getRot (int coord) const;
+	GLfloat getRotX() const;
+	GLfloat getRotY() const;
+	GLfloat getRotZ() const;
 	
-	GLfloat getSize (int coord);
-	GLfloat getSizeX();
-	GLfloat getSizeY();
-	GLfloat getSizeZ();
+	GLfloat getSize (int coord) const;
+	GLfloat getSizeX() const;
+	GLfloat getSizeY() const;
+	GLfloat getSizeZ() const;
 	
 	void setPos (GLfloat x, GLfloat y, GLfloat z);
 	void setPosX(GLfloat posx);
