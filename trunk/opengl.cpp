@@ -16,14 +16,20 @@
 #include "ObjectBall.h"
 #include "ObjectStick.h"
 #include "Camera.h"
+#include "LightInfo.h"
+#include "Level.h"
 #include "constants.h"
 #include "utils.h"
-
 						 
 
 // Objects
 point star[NSTARS];
 vector<Object*> objects;
+vector<LightInfo*> theLights;
+
+Level level(&objects, &theLights);
+
+Camera camera, camera2(2);
 
 //texturized objects 
 static ObjectModel tableStruct("obj/pooltable_struct_noframe.obj");
@@ -36,11 +42,19 @@ static ObjectBall  ball(1,100,100);
 static ObjectBall  cursor(1,100,100);
 static ObjectStick stick("obj/taco.obj", &ball);
 
+
+static ObjectModel light("obj/light1.obj");
+static ObjectModel wall("obj/wall.obj");	
+static ObjectModel tableStruct2("obj/pooltable_struct.obj");
+static ObjectModel tableTop2("obj/pooltable_table.obj");
+static ObjectModel tableStruct3("obj/pooltable_struct.obj");
+static ObjectModel tableTop3("obj/pooltable_table.obj");
+static ObjectModel tableStruct4("obj/pooltable_struct.obj");
+static ObjectModel tableTop4("obj/pooltable_table.obj");
+
 // Texture files
 Texture tigerTex, woodTex, tableTex, rockTex, starsTex, stickTex, ballTex;
 
-
-Camera camera, camera2(2);
 						  
 // mouse-keyboard
 static int	xold, yold;		
@@ -66,24 +80,13 @@ float 		radius=2.3;
 
 void initObjects () {
 
-	// TODO: organize resolution variations so that the game may
-	//       have configuration of graphics performance.
-	static ObjectModel light("obj/light1.obj");
-	static ObjectModel wall("obj/wall.obj");	
-	static ObjectModel tableStruct2("obj/pooltable_struct.obj");
-	static ObjectModel tableTop2("obj/pooltable_table.obj");
-	static ObjectModel tableStruct3("obj/pooltable_struct.obj");
-	static ObjectModel tableTop3("obj/pooltable_table.obj");
-	static ObjectModel tableStruct4("obj/pooltable_struct.obj");
-	static ObjectModel tableTop4("obj/pooltable_table.obj");
-	
 	// the ball
 	ball.setPos(0,BALL_O_Y,0);
 	ball.material.setShininess(120); 
 	ball.material.setDiffuse(0.6, 0.6, 0.6);
 	ball.material.setSpecular(0.9, 0.9, 0.9);
 	ball.setTexture(&ballTex);
-		objects.push_back(&ball);
+		objects.push_back(&ball);		// objects[0]
 	
 	cursor.setPos(0,BALL_O_Y,2);
 	
@@ -94,7 +97,7 @@ void initObjects () {
 	stick.setTexture(&stickTex);
 	stick.setSize(7,7,8);
 	stick.rotate(-5);
-		//objects.push_back(&stick);
+		objects.push_back(&stick);		//objects[1]
 	
 	// crypt scenario
 	scenario.setPos(0,-30,0);
@@ -103,7 +106,7 @@ void initObjects () {
 	scenario.material.setDiffuse(0.4,0.4,0.4);
 	//scenario.material.setSpecular(0.2,0.2,0.2);
 	//scenario.material.setShininess(80);
-		objects.push_back(&scenario);
+		objects.push_back(&scenario);	//objects[2]
 	
 	// tables material setup
 	Material tableStructMat;
@@ -125,10 +128,8 @@ void initObjects () {
 	tableStruct.setSize(100,100,100); 
 	tableTop.setSize(100,100,100);
 	tableFrame.setSize(100,100,100);
-		objects.push_back(&tableTop); objects.push_back(&tableStruct);
-	#ifdef SHOW_TABLE_FRAME
-		objects.push_back(&tableFrame);
-	#endif
+		objects.push_back(&tableTop);	//objects[3]
+		objects.push_back(&tableStruct);//objects[4]
 
 	// table2
 	tableStructMat.setDiffuse(0.25,0.09,0.07);
@@ -154,9 +155,12 @@ void initObjects () {
 	tableTop4.setSize(100,100,100);
 	tableStruct4.setPos(0,0,600);
 	tableTop4.setPos(0,0,600);
-		objects.push_back(&tableStruct2);objects.push_back(&tableTop2);
-		objects.push_back(&tableStruct3);objects.push_back(&tableTop3);	
-		objects.push_back(&tableStruct4);objects.push_back(&tableTop4);		
+		objects.push_back(&tableStruct2);//objects[5]
+		objects.push_back(&tableTop2);	 //objects[6]
+		objects.push_back(&tableStruct3);//objects[7]
+		objects.push_back(&tableTop3);	 //objects[8]
+		objects.push_back(&tableStruct4);//objects[9]
+		objects.push_back(&tableTop4);	 //objects[10]
 	
 	// ceiling lamp
 	light.setPos(0,120,0);
@@ -165,13 +169,17 @@ void initObjects () {
 	light.material.setSpecular(1,1,1);
 	light.material.setShininess(120);
 	//light.material.setEmission(RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4);
-		objects.push_back(&light);
+		objects.push_back(&light);		 //objects[11]
 
 	
 	// infinite scenario globe
 	globe.setSize(500,500,500);
 	globe.setTexture(&starsTex);
+		objects.push_back(&globe);		 //objects[12]
 	
+	#ifdef SHOW_TABLE_FRAME
+		objects.push_back(&tableFrame);  //objects[#]
+	#endif
 
     for (int i=0;i<NSTARS;i++)
     {
@@ -243,13 +251,6 @@ void castShadows() {
 void drawObjects () {
     // drawing of not-lit objects
     glDisable(GL_LIGHTING);
-	    // Stars
-	    for (int i=0;i<NSTARS;i++) {
-	    	glPushMatrix();
-	    	glTranslated(star[i].x *200, star[i].y *200, star[i].z *200);
-		    glutSolidSphere(5,10,10);
-	    	glPopMatrix();
-	    }
 	    //// Sun
 		//glPushMatrix();
 	    //glTranslated( SUN_MOVEMENT_EQUATION );
@@ -277,38 +278,43 @@ void drawObjects () {
 	// draw all objects
 	for( int it=0; it<objects.size(); it++ )
 		objects[it]->draw();
-	stick.draw();
 }
 
-void lights () {
-	
+void lights ()
+{
 	// position light (sun)
-	GLfloat position[] = { 0,100,0, 1.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, position);    
-	GLfloat spot_direction[] = { 0.0, -1.0, 0.0 };
-	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
+	//GLfloat position[] = { 0 , 100 , 0 , 1.0f };
+	//glLightfv(GL_LIGHT0, GL_POSITION, position);    
+	//GLfloat spot_direction[] = { 0.0 , -1.0 , 0.0 , 0.0};
+	//glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
+	
 	
 	// spotlight
-	GLfloat light1_position[] = { 0.0, 100.0, 0.0, 1.0 };
-	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
-	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
+	//GLfloat light1_position[] = { 0.0, 100.0, 0.0, 1.0 };
+	//glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
+	//glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
 	
 	// spotlight 2
-	GLfloat light2_position[] = { 0.0, 100.0, -300.0, 1.0 };
-	glLightfv(GL_LIGHT3, GL_POSITION, light2_position);
-	glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, spot_direction);
+	//GLfloat light2_position[] = { 0.0, 100.0, -300.0, 1.0 };
+	//glLightfv(GL_LIGHT3, GL_POSITION, light2_position);
+	//glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, spot_direction);
+	
 	// spotlight 3
-	GLfloat light3_position[] = { 0.0, 100.0, 300.0, 1.0 };
-	glLightfv(GL_LIGHT4, GL_POSITION, light3_position);
-	glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot_direction);
+	//GLfloat light3_position[] = { 0.0, 100.0, 300.0, 1.0 };
+	//glLightfv(GL_LIGHT4, GL_POSITION, light3_position);
+	//glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot_direction);
+	
+	
 	// spotlight 4
-	GLfloat light4_position[] = { 0.0, 100.0, 600.0, 1.0 };
-	glLightfv(GL_LIGHT5, GL_POSITION, light4_position);
-	glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot_direction);
+	//GLfloat light4_position[] = { 0.0, 100.0, 600.0, 1.0 };
+	//glLightfv(GL_LIGHT5, GL_POSITION, light4_position);
+	//glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot_direction);
 	
 	// directional light
-	GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
-	glLightfv(GL_LIGHT2, GL_POSITION, direction);
+	//GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
+	//glLightfv(GL_LIGHT2, GL_POSITION, direction);
+	
+	
 }
 
 void perspectiveViewport( int width, int height ) {
@@ -331,8 +337,8 @@ void perspectiveViewport( int width, int height ) {
 			camera2.apply();
 		else
 			camera.apply();
-		lights();
-		drawObjects();
+		level.lights();
+		level.drawObjects();
 		castShadows();
 }	
 
@@ -346,9 +352,9 @@ void orthoViewport( int width, int height ) {
 	glLoadIdentity();
     
     if( invertViewports )
-		gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 10000.0);
+		gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 500.0);
 	else
-		glOrtho(-65, 65, -35, 35, 5, 10000);
+		glOrtho(-65, 65, -35, 35, 5, 500);
     					
     glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
     glLoadIdentity();
@@ -357,8 +363,8 @@ void orthoViewport( int width, int height ) {
 			camera.apply();
 		else
 			camera2.apply();
-		lights();
-		drawObjects_partial();
+		level.lights();
+		level.drawObjects_partial();
 		
 	glDisable(GL_SCISSOR_TEST);
 }	
@@ -431,6 +437,61 @@ void initLights () {
 	// directional light
 	GLfloat lampColor2[] = {RGB(252), RGB(234), RGB(186), 1.0f};
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, lampColor2);
+	
+	// Creating LightInfo vector to the level class
+	
+	// position light (sun)
+	//GLfloat position[] = { 0 , 100 , 0 , 1.0f };
+	//glLightfv(GL_LIGHT0, GL_POSITION, position);    
+	//GLfloat spot_direction[] = { 0.0 , -1.0 , 0.0 , 0.0};
+	//glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
+	GLfloat position[] = { 0 , 100 , 0 , 1.0f };
+	GLfloat spot_direction[] = { 0.0 , -1.0 , 0.0 , 0.0};
+	LightInfo light0(true, position, true, spot_direction, GL_LIGHT0);
+	theLights.push_back(&light0);
+	
+	// spotlight
+	//GLfloat light1_position[] = { 0.0, 100.0, 0.0, 1.0 };
+	//glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
+	//glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
+	GLfloat light1_position[] = { 0.0, 100.0, 0.0, 1.0 };
+	LightInfo light1(true, light1_position, true, spot_direction, GL_LIGHT1);
+	theLights.push_back(&light1);
+	
+	// spotlight 2
+	//GLfloat light2_position[] = { 0.0, 100.0, -300.0, 1.0 };
+	//glLightfv(GL_LIGHT3, GL_POSITION, light2_position);
+	//glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, spot_direction);
+	
+	GLfloat light2_position[] = { 0.0, 100.0, -300.0, 1.0 };
+	LightInfo light3(true, light2_position, true, spot_direction, GL_LIGHT3);
+	theLights.push_back(&light3);
+	
+	// spotlight 3
+	//GLfloat light3_position[] = { 0.0, 100.0, 300.0, 1.0 };
+	//glLightfv(GL_LIGHT4, GL_POSITION, light3_position);
+	//glLightfv(GL_LIGHT4, GL_SPOT_DIRECTION, spot_direction);
+	
+	GLfloat light3_position[] = { 0.0, 100.0, 300.0, 1.0 };
+	LightInfo light4(true, light3_position, true, spot_direction, GL_LIGHT4);
+	theLights.push_back(&light4);
+	
+	// spotlight 4
+	//GLfloat light4_position[] = { 0.0, 100.0, 600.0, 1.0 };
+	//glLightfv(GL_LIGHT5, GL_POSITION, light4_position);
+	//glLightfv(GL_LIGHT5, GL_SPOT_DIRECTION, spot_direction);
+	
+	GLfloat light4_position[] = { 0.0, 100.0, 600.0, 1.0 };
+	LightInfo light5(true, light4_position, true, spot_direction, GL_LIGHT5);
+	theLights.push_back(&light5);
+	
+	// directional light
+	//GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
+	//glLightfv(GL_LIGHT2, GL_POSITION, direction);
+	
+	GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
+	LightInfo light2(true, direction, false, direction, GL_LIGHT2);
+	theLights.push_back(&light2);
 }
 
 void init ()
@@ -607,6 +668,7 @@ int main (int argc, char **argv) {
     glutInitWindowPosition (400, 0);              //set the position of the window
     glutCreateWindow ("SiNoS - mouse/c: camera  ctrl+mouse: stick  spacebar: attack");     //the caption of the window
     init();
+    
     glutDisplayFunc (display); 						//use the display function to draw everything
     
     

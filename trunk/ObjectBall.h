@@ -28,6 +28,10 @@ public:
 	~ObjectBall();
 	
 	//---------------------------- GETTERS & SETTERS
+	void				setStacks(GLint newStacks);
+	void				setSlices(GLint newSlices);
+	void				setRadius(GLdouble newRadius);
+	
 	void 				resetSpeed();
 	float				getSpeed();
 	float				getNewX();

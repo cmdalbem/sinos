@@ -15,27 +15,7 @@ using namespace std;
 
 Camera::Camera( int _cameraMode )
 {
-	cameraMode = _cameraMode;
-	
-	posit=0;
-	
- 	xpos = 50; 
-	ypos = 70;
-	zpos = 50;
-	xrot = -45;
-	yrot = 45;
-		
-	xrot2 = 45;
-	yrot2 = 20;
-	zoom = 5;
-	
-	xorig = 0;
-	yorig = 29.5;
-	zorig = 0;
-	
-	zoomTop = 100;
-	
-	setPos2();
+	setCamera(_cameraMode);
 }
 
 // These constructors implementations has very low modularity
@@ -69,6 +49,30 @@ Camera::Camera( int _cameraMode )
 Camera::~Camera() { }
 
 //------------------------------------------------------------ GETTERS & SETTERS
+void Camera::setCamera(int _cameraMode)
+{
+	cameraMode = _cameraMode;
+	
+	posit=0;
+	
+ 	xpos = 50; 
+	ypos = 70;
+	zpos = 50;
+	xrot = -45;
+	yrot = 45;
+		
+	xrot2 = 45;
+	yrot2 = 20;
+	zoom = 5;
+	
+	xorig = 0;
+	yorig = 29.5;
+	zorig = 0;
+	
+	zoomTop = 100;
+	
+	setPos2();
+}
 
 void Camera::setXPos(GLfloat newValue)
 {	xpos = newValue;	}
@@ -142,7 +146,7 @@ void Camera::action1 (int movex, int movey)
 	{
 		case 0:
 			yrot = yrot + movey / 5.f;
-			xrot = xrot + movex / 5.f;	
+			xrot = xrot + movex / 5.f;
 			break;		
 		case 1:
 			yrot2 = yrot2 + movey / 5.f;
@@ -158,7 +162,7 @@ void Camera::action1 (int movex, int movey)
 			break;
 		case 3:
 			break;
-	}	
+	}
 }
 
 void Camera::action2 (int movex, int movey)

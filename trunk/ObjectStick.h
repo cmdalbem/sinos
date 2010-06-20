@@ -6,7 +6,7 @@
 // but also has its own features, like the attack force with which is
 // goint to hit the ball, for example.
 //
-
+#pragma once
 
 #include <iostream>
 using namespace std;
@@ -24,12 +24,14 @@ class ObjectStick : public ObjectModel
 		
 	public:
 		//---------------------------- CONSTRUCTORS
+		ObjectStick();
 		ObjectStick(string filename, Object* objectCenter);
 		
 		//---------------------------- DESTRUCTORS
 		
 		~ObjectStick();
 		//---------------------------- GETTERS & SETTERS
+		void	setCenter(Object* newCenter);
 		float 	getAngleInXZ();
 		void	setAngleInXZ(float newAngle);
 		

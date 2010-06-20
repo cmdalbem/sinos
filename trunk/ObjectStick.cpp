@@ -7,6 +7,15 @@
 #include "constants.h"
 
 //------------------------------------------------------------ CONSTRUCTORS
+ObjectStick::ObjectStick()
+: ObjectModel()
+{
+	setRotX(25);
+	setRotY(-180);
+	setRotZ(0);
+	
+	setAttackStrenght(1);
+}
 ObjectStick::ObjectStick(string filename, Object* objectCenter)
 :	ObjectModel(filename)
 {
@@ -24,6 +33,11 @@ ObjectStick::ObjectStick(string filename, Object* objectCenter)
 ObjectStick::~ObjectStick()	{ }
 
 //------------------------------------------------------------ GETTERS & SETTERS
+void ObjectStick::setCenter(Object* newCenter)
+{
+	center = newCenter;
+}
+
 float ObjectStick::getAngleInXZ()
 {
 	return angleInXZ;

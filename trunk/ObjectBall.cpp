@@ -37,6 +37,21 @@ ObjectBall::~ObjectBall() { }
 
 //------------------------------------------------------------ GETTERS & SETTERS
 
+void ObjectBall::setStacks(GLint newStacks)
+{
+	stacks = newStacks;
+}
+
+void ObjectBall::setRadius(GLdouble newRadius)
+{
+	radius = newRadius;
+}
+
+void ObjectBall::setSlices(GLint newSlices)
+{
+	slices = newSlices;
+}
+
 void ObjectBall::resetSpeed()
 {
 	moveVector[0] = 0;

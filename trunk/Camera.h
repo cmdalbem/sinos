@@ -28,7 +28,7 @@ private:
 			xrot2, yrot2, zoom,		//
 			xorig, yorig, zorig,	//
 			
-			zoomTop;					// variable used in the Top View mode
+			zoomTop;				// variable used in the Top View mode
 
 public:
 	//---------------------------- CONSTRUCTORS
@@ -39,6 +39,8 @@ public:
 	~Camera();
 	
 	//---------------------------- GETTERS & SETTERS
+	void	setCamera( int cameraMode = 0 );		// reset to the default camera values.
+	
 	void	setXPos(GLfloat newValue);
 	void	setYPos(GLfloat newValue);
 	void	setZPos(GLfloat newValue);
