@@ -26,10 +26,8 @@
 point star[NSTARS];
 vector<Object*> objects;
 vector<LightInfo*> theLights;
-
-Level level(&objects, &theLights);
-
 Camera camera, camera2(2);
+Level level(&objects, &theLights, &camera, &camera2);
 
 //texturized objects 
 static ObjectModel tableStruct("obj/pooltable_struct_noframe.obj");
@@ -54,8 +52,6 @@ static ObjectModel tableTop4("obj/pooltable_table.obj");
 
 // Texture files
 Texture tigerTex, woodTex, tableTex, rockTex, starsTex, stickTex, ballTex;
-
-//Camera camera, camera2(2);
 						  
 // mouse-keyboard
 static int	xold, yold;		
@@ -344,9 +340,9 @@ void perspectiveViewport( int width, int height ) {
     // IMPORTANT: don't change the order of these calls
 		drawOsd(osd,camera,fps);
 		if( invertViewports )
-			camera2.apply();
+			level.camera2->apply();
 		else
-			camera.apply();
+			level.camera->apply();
 		level.lights();
 		level.drawObjects();
 		castShadows();
@@ -371,9 +367,9 @@ void orthoViewport( int width, int height ) {
     
 	// IMPORTANT: don't change the order of these calls
 		if( invertViewports )
-			camera.apply();
+			level.camera->apply();
 		else
-			camera2.apply();
+			level.camera2->apply();
 		level.lights();
 		level.drawObjects_partial();
 		
@@ -411,37 +407,37 @@ void initLights () {
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.1);
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.002);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.00005);
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.4);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.05);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.001);
 	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 160);
 	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.0);
 	
 	// spotlight
 	GLfloat lampColor[] = {RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4, 1.0f};
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, lampColor);
-	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0);
-	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.);
-	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.);
+	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 0.0001);
+	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION,   0.0001);
+	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION,0.0001);
 	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 90);
 	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 15.0);
 	
 	// spotlight 2
 	glLightfv(GL_LIGHT3, GL_DIFFUSE, lampColor);
-	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 0.);
-	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0.0);
+	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 0.001);
+	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0.005);
 	glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 90);
 	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 15.0);
 	// spotlight 3
 	glLightfv(GL_LIGHT4, GL_DIFFUSE, lampColor);
-	glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 0.);
-	glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, 0.0);
+	glLightf(GL_LIGHT4, GL_CONSTANT_ATTENUATION, 0.001);
+	glLightf(GL_LIGHT4, GL_LINEAR_ATTENUATION, 0.005);
 	glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 90);
 	glLightf(GL_LIGHT4, GL_SPOT_EXPONENT, 15.0);
 	// spotlight 4
 	glLightfv(GL_LIGHT5, GL_DIFFUSE, lampColor);
-	glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 0.);
-	glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, 0.0);
+	glLightf(GL_LIGHT5, GL_CONSTANT_ATTENUATION, 0.001);
+	glLightf(GL_LIGHT5, GL_LINEAR_ATTENUATION, 0.005);
 	glLightf(GL_LIGHT5, GL_SPOT_CUTOFF, 90);
 	glLightf(GL_LIGHT5, GL_SPOT_EXPONENT, 15.0);	
 	
@@ -631,9 +627,9 @@ void mouseFunc(int button, int state, int x, int y) {
 	if( button == GLUT_WHEEL_MIDDLE )
 		middle_click = state;
 	if( button == GLUT_WHEEL_DOWN )
-		camera.action2(0,5);
+		level.camera->action2(0,5);
 	if( button == GLUT_WHEEL_UP )
-		camera.action2(0,-5);
+		level.camera->action2(0,-5);
 		
 	xold = x;
 	yold = y;
@@ -657,7 +653,7 @@ void mouseMotionFunc(int x, int y) {
 	}
 	
 	if ( middle_click ==GLUT_DOWN  ) {
-		camera.action1(x - xold, y - yold);
+		level.camera->action1(x - xold, y - yold);
 	}
 
 	xold = x;

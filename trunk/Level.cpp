@@ -6,10 +6,13 @@
 #include "Level.h"
 
 //------------------------------------------------------------ CONSTRUCTORS
-Level::Level(vector<Object*> *_objects, vector<LightInfo*> *_theLights)
+Level::Level(vector<Object*> *_objects, vector<LightInfo*> *_theLights, Camera *_camera, Camera *_camera2)
 {
 	objects   = _objects;
 	theLights = _theLights;
+	
+	camera  = _camera;
+	camera2 = _camera2;
 }
 
 //------------------------------------------------------------ DESTRUCTORS

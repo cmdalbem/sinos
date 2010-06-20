@@ -28,10 +28,15 @@ class Level
 	private:
 		vector<Object*> *objects;
 		vector<LightInfo*> *theLights;
+		
 
 	public:
+		ObjectStick *stick;
+		Camera *camera, *camera2;
 	//---------------------------- CONSTRUCTORS
-		Level(vector<Object*> *_objects, vector<LightInfo*> *_theLights);
+		Level(vector<Object*> *_objects, vector<LightInfo*> *_theLights,
+			  Camera *_camera, Camera *_camera2);
+			  //ObjectStick *_stick);
 		
 	//---------------------------- DESTRUCTORS
 		~Level();

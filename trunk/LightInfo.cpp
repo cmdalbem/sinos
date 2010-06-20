@@ -15,7 +15,7 @@ LightInfo::LightInfo()
 LightInfo::LightInfo(
  bool newIsTherePosition,  GLfloat newPosition[4],
  bool newIsThereDirection, GLfloat newDirection[4],
- int  newWhatLight )
+ long int  newWhatLight )
 {
 	isTherePosition  = newIsTherePosition;
 	isThereDirection = newIsThereDirection;
@@ -25,6 +25,9 @@ LightInfo::LightInfo(
 		direction[i] = newDirection[i];
 	}
 	
+	whatLight = newWhatLight;
+	
+	/*
 	switch(newWhatLight)
 	{
 		case 0: whatLight = GL_LIGHT0;
@@ -44,6 +47,7 @@ LightInfo::LightInfo(
 		case 7: whatLight = GL_LIGHT7;
 				break;
 	}
+	*/
 }
 
 //------------------------------------------------------------ DESTRUCTORS

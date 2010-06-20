@@ -21,7 +21,7 @@ private:
 	bool	isThereDirection;
 	GLfloat direction[4];
 	
-	int		whatLight;	// GL_LIGHT#
+	long int	whatLight;	// GL_LIGHT#
 	
 
 	
@@ -41,7 +41,7 @@ public:
 				GLfloat	newPosition[4],
 				bool 	newIsThereDirection,
 				GLfloat	newDirection[4],
-				int		newWhatLight	
+				long int	newWhatLight	
 			);
 			
 	//---------------------------- DESTRUCTORS
