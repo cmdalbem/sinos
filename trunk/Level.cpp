@@ -24,14 +24,22 @@ Level::Level(	vector<Object*> *_objects, vector<LightInfo*> *_theLights,
 Level::~Level()	{ }
 
 //------------------------------------------------------------ GETTERS & SETTERS
+ObjectStick* Level::getStick()
+{
+	return stick;
+}
 
+ObjectBall*  Level::getBall()
+{
+	return ball;
+}
 
 //------------------------------------------------------------ OTHER METHODS
 
 void Level::drawObjects () {
     // drawing of not-lit objects
     glDisable(GL_LIGHTING);
-		(*objects)[12]->draw();
+		(*objects)[10]->draw();
 		
 		// Holes delimiters
 		for(int i=0; i<NHOLES; i++)
@@ -39,18 +47,24 @@ void Level::drawObjects () {
 	
 	glEnable(GL_LIGHTING); //ends drawing of not-lit objects
 	
+	getBall()->draw();
+	getStick()->draw();
+	
 	// draw all objects
-	for( int it=0; it<objects->size() && it != 12; it++ )
+	for( int it=0; it<objects->size() -1; it++ )
 		(*objects)[it]->draw();
 }
 
 void Level::drawObjects_partial ()
 {
-	(*objects)[0]->draw();
+	getBall()->draw();
+	getStick()->draw();
 	(*objects)[1]->draw();
-	(*objects)[3]->draw();
-	(*objects)[4]->draw();
-	//tableFrame.draw();
+	(*objects)[2]->draw();
+#ifdef SHOW_TABLE_FRAME
+	//tableFrame.draw();		//----> refatorate this soon
+#endif
+	
 }
 
 void Level::lights()

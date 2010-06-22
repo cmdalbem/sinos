@@ -78,27 +78,29 @@ float 		radius=2.3;
 //----------------------------- OPENGL -------------------------------//
 //--------------------------------------------------------------------//
 
-void initObjects () {
-
+void initObjects ()
+{
 	// the ball
-	ball.material.setShininess(120); 
-	ball.material.setDiffuse(0.6, 0.6, 0.6);
-	ball.material.setSpecular(0.9, 0.9, 0.9);
-	ball.setTexture(&ballTex);
-	ball.setSize(10,10,10);
-	ball.setPos(0, TABLE_PLANE_Y+ball.getRadius(), 0);
-		objects.push_back(&ball);
-	
-	cursor.setPos(0,TABLE_PLANE_Y,2);
+	level.getBall()->material.setShininess(120); 
+	level.getBall()->material.setDiffuse(0.6, 0.6, 0.6);
+	level.getBall()->material.setSpecular(0.9, 0.9, 0.9);
+	level.getBall()->setTexture(&ballTex);
+	level.getBall()->setSize(10,10,10);
+	level.getBall()->setPos(0, TABLE_PLANE_Y+ball.getRadius(), 0);
+		//objects.push_back(level.getBall());
 	
 	// the stick
-	level.stick->material.setDiffuse(RGB(238),RGB(221),RGB(195));
-	level.stick->material.setSpecular(0.3,0.3,0.3);
-	level.stick->material.setShininess(80);
-	level.stick->setTexture(&stickTex);
-	level.stick->setSize(7,7,8); 
-	level.stick->rotate(-5);
-		objects.push_back(level.stick);		//objects[1]
+	level.getStick()->calculatePos();	// This is needed to put the Stick on the right place
+										// since only now the ball is put its place.
+	
+	level.getStick()->material.setDiffuse(RGB(238),RGB(221),RGB(195));
+	level.getStick()->material.setSpecular(0.3,0.3,0.3);
+	level.getStick()->material.setShininess(80);
+	level.getStick()->setTexture(&stickTex);
+	level.getStick()->setSize(7,7,8);
+		//objects.push_back(level.getStick());
+	
+	cursor.setPos(0,TABLE_PLANE_Y,2);
 	
 	// crypt scenario
 	scenario.setPos(0,-30,0);
@@ -107,7 +109,7 @@ void initObjects () {
 	scenario.material.setDiffuse(0.4,0.4,0.4);
 	//scenario.material.setSpecular(0.2,0.2,0.2);
 	//scenario.material.setShininess(80);
-		objects.push_back(&scenario);	//objects[2]
+		objects.push_back(&scenario);	//objects[0]
 	
 	// tables material setup
 	Material tableStructMat;
@@ -129,11 +131,8 @@ void initObjects () {
 	tableStruct.setSize(100,100,100); 
 	tableTop.setSize(100,100,100);
 	tableFrame.setSize(100,100,100);
-		objects.push_back(&tableTop);
-		objects.push_back(&tableStruct);
-	#ifdef SHOW_TABLE_FRAME
-		objects.push_back(&tableFrame);
-	#endif
+		objects.push_back(&tableTop);		//objects[1]
+		objects.push_back(&tableStruct);	//objects[2]
 
 	// table2
 	tableStructMat.setDiffuse(0.25,0.09,0.07);
@@ -159,12 +158,12 @@ void initObjects () {
 	tableTop4.setSize(100,100,100);
 	tableStruct4.setPos(0,0,600);
 	tableTop4.setPos(0,0,600);
-		objects.push_back(&tableStruct2);//objects[5]
-		objects.push_back(&tableTop2);	 //objects[6]
-		objects.push_back(&tableStruct3);//objects[7]
-		objects.push_back(&tableTop3);	 //objects[8]
-		objects.push_back(&tableStruct4);//objects[9]
-		objects.push_back(&tableTop4);	 //objects[10]
+		objects.push_back(&tableStruct2);//objects[3]
+		objects.push_back(&tableTop2);	 //objects[4]
+		objects.push_back(&tableStruct3);//objects[5]
+		objects.push_back(&tableTop3);	 //objects[6]
+		objects.push_back(&tableStruct4);//objects[7]
+		objects.push_back(&tableTop4);	 //objects[8]
 	
 	// ceiling lamp
 	light.setPos(0,120,0);
@@ -173,16 +172,16 @@ void initObjects () {
 	light.material.setSpecular(1,1,1);
 	light.material.setShininess(120);
 	//light.material.setEmission(RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4);
-		objects.push_back(&light);		 //objects[11]
+		objects.push_back(&light);		 //objects[9]
 
 	
 	// infinite scenario globe
 	globe.setSize(500,500,500);
 	globe.setTexture(&starsTex);
-		objects.push_back(&globe);		 //objects[12]
+		objects.push_back(&globe);		 //objects[10]
 	
 	#ifdef SHOW_TABLE_FRAME
-		objects.push_back(&tableFrame);  //objects[#]
+		objects.push_back(&tableFrame);  //objects[11]
 	#endif
 
     for (int i=0;i<NSTARS;i++)
@@ -196,7 +195,7 @@ void initObjects () {
 void drawObjects_partial () {
 	
 	objects[0]->draw();
-	level.stick->draw();
+	level.getStick()->draw();
 	tableStruct.draw();
 	tableTop.draw();
 	tableFrame.draw();
@@ -211,11 +210,12 @@ void castShadows() {
 	glDisable(GL_LIGHTING); 					//lights don't affect shadows
 	glEnable (GL_BLEND); 						//enable transparency
 	glEnable(GL_STENCIL_TEST); 					//enable stencil testing when drawing polygones
-	glStencilOp(GL_KEEP, GL_KEEP, GL_INCR); 	/* sets operations with stencil buffer when: 
-												 * stencil_test = false
-												 * stencil_test = true && depth_test = false
-												 * stencil_test = true
-												 */
+	
+	glStencilOp(GL_KEEP, GL_KEEP, GL_INCR); 	// sets operations with stencil buffer when: 
+												// stencil_test = false
+												// stencil_test = true && depth_test = false
+												// stencil_test = true
+												
 	glColor4f(0,0,0,0.5); 						//black colored shadow with 50% transparency
 
 	// Cast shadows on the ground
@@ -225,7 +225,7 @@ void castShadows() {
 		glStencilFunc(GL_EQUAL, 0, 1); 						//will let only one vertex be drawn on each position each time shadow
 			tableStruct.draw();
 			tableTop.draw();
-			level.stick->draw();
+			level.getStick()->draw();
 	glPopMatrix();
 	
 	// Cast shadows on the table
@@ -240,8 +240,8 @@ void castShadows() {
 		glColorMask(true,true,true,true);
 		glDepthMask(true); 
 		glStencilFunc(GL_EQUAL, 1, 1); 						//now the shadow is cast only where stencil buffer==1, i.e. the table
-			level.stick->draw();
-			ball.draw();
+			level.getStick()->draw();
+			level.getBall()->draw();
 			#ifdef SHOW_TABLE_FRAME
 				tableFrame.draw();
 			#endif
@@ -303,7 +303,7 @@ void perspectiveViewport( int width, int height ) {
     					
     glMatrixMode(GL_MODELVIEW);
 	
-	ball.updateRotateMatrix(); //this MUST be called HERE
+	level.getBall()->updateRotateMatrix(); //this MUST be called HERE
 	
     glLoadIdentity ();
     
@@ -550,8 +550,8 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		* */
 		
 	if ( key==K_SPACE) {
-		ball.applyForce(level.stick->getAttackStrenght()*10,level.stick->getAngleInXZ()+90);  //some naughty magic numbers here
-		level.stick->setAttackStrenght(10);
+		level.getBall()->applyForce(level.getStick()->getAttackStrenght()*10,level.getStick()->getAngleInXZ()+90);  //some naughty magic numbers here
+		//level.stick->setAttackStrenght(10);
 	}
 		
 	if( key=='v')
@@ -579,19 +579,19 @@ void specialFunc(int key, int x, int y)
 	}
 	
 	if( key == GLUT_KEY_LEFT ) {
-		level.stick->rotate( -5 );
+		level.getStick()->rotate( -5 );
 	}
 	
 	if( key == GLUT_KEY_RIGHT ) {
-		level.stick->rotate( 5 );
+		level.getStick()->rotate( 5 );
 	}
 	
 	if( key == GLUT_KEY_DOWN ) {
-		level.stick->changePower(0.1);
+		level.getStick()->changePower(0.1);
 	}
 	
 	if( key == GLUT_KEY_UP ) {
-		level.stick->changePower(-0.1);
+		level.getStick()->changePower(-0.1);
 	}
 }
 
@@ -619,15 +619,15 @@ void mouseFunc(int button, int state, int x, int y) {
 void mouseMotionFunc(int x, int y) {
 	
 	if ( left_click == GLUT_DOWN ) {
-		level.stick->rotate( (x-xold)/5. );			
+		level.getStick()->rotate( (x-xold)/5. );			
     }
 	
 	if ( right_click == GLUT_DOWN ) {
-		level.stick->changePower( (y-yold)/5. );
+		level.getStick()->changePower( (y-yold)/5. );
 		
-	    if( level.stick->getAttackStrenght()<0 ) {
-			ball.applyForce((yold-y),level.stick->getAngleInXZ()+90);  //some naughty magic numbers here
-			level.stick->setAttackStrenght(0);
+	    if( level.getStick()->getAttackStrenght()<0 ) {
+			level.getBall()->applyForce((yold-y),level.getStick()->getAngleInXZ()+90);  //some naughty magic numbers here
+			level.getStick()->setAttackStrenght(0);
 		}
 	}
 	
