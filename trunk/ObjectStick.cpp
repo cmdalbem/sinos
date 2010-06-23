@@ -59,8 +59,8 @@ float ObjectStick::getAttackStrenght()
 
 void ObjectStick::setAttackStrenght(float newForce)
 {
-	if ( newForce > 20 )
-		attackStrenght = 20;
+	if ( newForce > 40 )
+		attackStrenght = 40;
 	else
 		attackStrenght = newForce;
 }
@@ -90,4 +90,9 @@ void ObjectStick::calculatePos()
 	setPosX(center->getPosX() + sin(degrees)*(getAttackStrenght()/2.));
 	setPosY(center->getPosY() + cos(20)		*(getAttackStrenght()/2.));
 	setPosZ(center->getPosZ() + cos(degrees)*(getAttackStrenght()/2.));
+}
+
+void ObjectStick::attack()
+{
+	setAttackStrenght(3);
 }

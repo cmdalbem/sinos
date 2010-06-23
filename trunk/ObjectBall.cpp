@@ -205,7 +205,7 @@ void ObjectBall::drawBegin() const
 	glTranslated(getPosX(), getPosY(), getPosZ());
 	glScalef(getSizeX(), getSizeY(), getSizeZ());
 	
-	glMultMatrixd(*rotMat);
+	glMultMatrixd(*rotMat); 						//see updateRotateMatrix()
 	    		
 	material.apply();	
 }

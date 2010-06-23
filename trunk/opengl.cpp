@@ -44,8 +44,8 @@ static ObjectBall  cursor(1,100,100);
 
 
 // Normal objects
+static ObjectModel tableShadow("obj/pooltable_shadow.obj");
 static ObjectModel light("obj/light1.obj");
-static ObjectModel wall("obj/wall.obj");	
 static ObjectModel tableStruct2("obj/pooltable_struct.obj");
 static ObjectModel tableTop2("obj/pooltable_table.obj");
 static ObjectModel tableStruct3("obj/pooltable_struct.obj");
@@ -61,7 +61,8 @@ static int	xold, yold;
 static int	left_click = GLUT_UP;
 static int	right_click = GLUT_UP;
 static int	middle_click = GLUT_UP;
-static bool holdCtrl = false;
+static bool heldCtrl = false;
+static bool heldShift = false;
 static bool invertViewports = false;
 						  
 
@@ -82,7 +83,9 @@ void initObjects ()
 {
 	// the ball
 	level.getBall()->material.setShininess(120); 
-	level.getBall()->material.setDiffuse(0.6, 0.6, 0.6);
+	level.getBall()->material.setAmbient(1,1,1); 
+	level.getBall()->material.setEmission(0.1,0.1,0.1); 
+	level.getBall()->material.setDiffuse(0.5, 0.5, 0.5);
 	level.getBall()->material.setSpecular(0.9, 0.9, 0.9);
 	level.getBall()->setTexture(&ballTex);
 	level.getBall()->setSize(10,10,10);
@@ -133,6 +136,7 @@ void initObjects ()
 	tableFrame.setSize(100,100,100);
 		objects.push_back(&tableTop);		//objects[1]
 		objects.push_back(&tableStruct);	//objects[2]
+	tableShadow.setSize(100,100,100);
 
 	// table2
 	tableStructMat.setDiffuse(0.25,0.09,0.07);
@@ -202,6 +206,8 @@ void drawObjects_partial () {
 }
 
 void castShadows() {
+/* TO DO: modularize shadowing */
+	
 	float lightSource[] = { 0, 100, 0, 1 };
 	float tablePlane [] = { 0, TABLE_PLANE_Y, 0 };
 	float floorPlane [] = { 0, 0, 0 };
@@ -220,31 +226,30 @@ void castShadows() {
 
 	// Cast shadows on the ground
 	glPushMatrix();
-	glShadowProjection(lightSource,floorPlane,planeNormal); //manipulates the matrix so everything will be projected in the FLOORPLANE
-		glClear( GL_STENCIL_BUFFER_BIT);
-		glStencilFunc(GL_EQUAL, 0, 1); 						//will let only one vertex be drawn on each position each time shadow
-			tableStruct.draw();
-			tableTop.draw();
-			level.getStick()->draw();
+		glShadowProjection(lightSource,floorPlane,planeNormal); //manipulates the matrix so everything will be projected in the FLOORPLANE
+			glClear( GL_STENCIL_BUFFER_BIT);
+			glStencilFunc(GL_EQUAL, 0, 1); 						//will let only one vertex be drawn on each position each time shadow
+				tableShadow.draw(); 
+				level.getStick()->draw();
 	glPopMatrix();
 	
 	// Cast shadows on the table
 	glPushMatrix();
-	glShadowProjection(lightSource,tablePlane,planeNormal); //manipulates the matrix so everything will be projected in the TABLEPLANE
-		glClear( GL_STENCIL_BUFFER_BIT);
-		glColorMask(false, false, false, false); 			//disables Color Buffer
-		glDepthMask(false); 								//disables Depth Buffer
-		glStencilFunc(GL_ALWAYS, 1, 1); 					//creates the mask that will define where shadow will be cast
-			tableTop.draw();
-		
-		glColorMask(true,true,true,true);
-		glDepthMask(true); 
-		glStencilFunc(GL_EQUAL, 1, 1); 						//now the shadow is cast only where stencil buffer==1, i.e. the table
-			level.getStick()->draw();
-			level.getBall()->draw();
-			#ifdef SHOW_TABLE_FRAME
-				tableFrame.draw();
-			#endif
+		glShadowProjection(lightSource,tablePlane,planeNormal); //manipulates the matrix so everything will be projected in the TABLEPLANE
+			glClear( GL_STENCIL_BUFFER_BIT);
+			glColorMask(false, false, false, false); 			//disables Color Buffer
+			glDepthMask(false); 								//disables Depth Buffer
+			glStencilFunc(GL_ALWAYS, 1, 1); 					//creates the mask that will define where shadow will be cast
+				tableTop.draw();
+			
+			glColorMask(true,true,true,true);
+			glDepthMask(true); 
+			glStencilFunc(GL_EQUAL, 1, 1); 						//now the shadow is cast only where stencil buffer==1, i.e. the table
+				level.getStick()->draw();
+				level.getBall()->draw();
+				#ifdef SHOW_TABLE_FRAME
+					tableFrame.draw();
+				#endif
 	glPopMatrix();
 	
 	glDisable(GL_BLEND);
@@ -332,7 +337,7 @@ void orthoViewport( int width, int height ) {
 	else
 		glOrtho(-65, 65, -35, 35, 5, 500);
     					
-    glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
+    glMatrixMode (GL_MODELVIEW);
     glLoadIdentity();
     
 	// IMPORTANT: don't change the order of these calls
@@ -529,6 +534,8 @@ void reshape (int w, int h) {
 //--------------------------- KEYBOARD ---------------------------//
 void keyboardFunc (unsigned char key, int x, int y) {
    
+    /*
+    // debug-cursor controls
     if( key=='w' )
 		cursor.setPosZ( cursor.getPosZ()-0.3 );
 	if( key=='s' )
@@ -540,7 +547,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
     if( key=='q' )
 		radius-=0.1;
 	if( key=='e' )
-		radius+=0.1;
+		radius+=0.1;*/
     
     // chances lens focal distance
     /*if ( key=='s' )
@@ -551,14 +558,14 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		
 	if ( key==K_SPACE) {
 		level.getBall()->applyForce(level.getStick()->getAttackStrenght()*10,level.getStick()->getAngleInXZ()+90);  //some naughty magic numbers here
-		//level.stick->setAttackStrenght(10);
+		level.getStick()->attack();
 	}
 		
 	if( key=='v')
 		invertViewports = !invertViewports;
     
     if( key=='c' )
-		level.camera->nextMode(objects[0]);
+		level.camera->nextMode(level.getBall());
 	
     if ( key==K_ESC )
     {
@@ -572,7 +579,7 @@ void specialFunc(int key, int x, int y)
 		level.camera->setMode(0);
 	}
 	if( key == GLUT_KEY_F2 ) {
-		level.camera->setMode(1);
+		level.camera->setMode(1,&ball);
 	}
 	if( key == GLUT_KEY_F3 ) {
 		level.camera->setMode(2);
@@ -613,7 +620,8 @@ void mouseFunc(int button, int state, int x, int y) {
 	xold = x;
 	yold = y;
 	
-	holdCtrl = (glutGetModifiers() == GLUT_ACTIVE_CTRL);
+	heldCtrl = (glutGetModifiers() == GLUT_ACTIVE_CTRL);
+	heldShift = (glutGetModifiers() == GLUT_ACTIVE_SHIFT);
 }
 
 void mouseMotionFunc(int x, int y) {
@@ -623,11 +631,12 @@ void mouseMotionFunc(int x, int y) {
     }
 	
 	if ( right_click == GLUT_DOWN ) {
+		// stick manual attack
 		level.getStick()->changePower( (y-yold)/5. );
 		
-	    if( level.getStick()->getAttackStrenght()<0 ) {
+	    if( level.getStick()->getAttackStrenght()<level.getBall()->getRadius() ) {
 			level.getBall()->applyForce((yold-y),level.getStick()->getAngleInXZ()+90);  //some naughty magic numbers here
-			level.getStick()->setAttackStrenght(0);
+			level.getStick()->attack();
 		}
 	}
 	
@@ -657,18 +666,20 @@ void updateState(int value) {
 int main (int argc, char **argv) {
     cout << "Initializing...\n";
     glutInit (&argc, argv);
-    glutInitDisplayMode (GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL); //set the display to Double buffer, with depth
-    glutInitWindowSize (1280, 720);                  //set the window size
-    glutInitWindowPosition (400, 0);              //set the position of the window
-    glutCreateWindow ("SiNoS - middleButton/c: camera  mouse: stick  spacebar: attack!");     //the caption of the window
+    glutInitDisplayMode ( GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL ); //set the display to Double buffer, with depth and stencil buffers
+    glutInitWindowSize (1280, 720);
+    glutInitWindowPosition (400, 0);              					 //set the position of the window
+    glutCreateWindow ("SiNoS - middleButton/c: camera  mouse: stick  spacebar: attack!");
+    //glutGameModeString("1920x1080:16@60");			//Full Screen Mode (adjust resolution for your full resolution values)
+    //glutEnterGameMode();
     init();
     
-    glutDisplayFunc (display); 						//use the display function to draw everything
+    glutDisplayFunc (display);
     
     
     glutIdleFunc (display);							// update any variables in display, display can be changed to anyhing,
                             						// as long as you move the variables to be updated, in this case, angle++;
-    glutReshapeFunc (reshape);
+    //glutReshapeFunc (reshape);
     
     glutKeyboardFunc(keyboardFunc);
     glutSpecialFunc(specialFunc);

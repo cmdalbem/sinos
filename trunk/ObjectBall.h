@@ -48,15 +48,37 @@ public:
 	float				getNewZ() const;
 	
 	//---------------------------- OTHER METHODS
+	/*
+	 * Drawing of ball needs some adjusments on drawing time, i.e. multiplication
+	 * by a special rotation matrix. So, Object::drawBegin() needed to 
+	 * be overloaded for ObjectBall.
+	 */
 	void 				drawBegin() const;
 	virtual void 		draw() const;
 	bool 				updateState();
 	void				applyForce( float magnitude, float direction );
 	void				changeSpeed( float multFactor );
+		
+	/* updateRotateMatrix()
+	 * 
+	 * This function is golden. It will update rotMat with clean world, 
+	 * coordinates. The matrix, when multiplied on drawBegin(), will
+	 * allow us to take care of the ball's rotations using World 
+	 * Coordinates - what seems to be the only way of making it the ball
+	 * to rotate well when moving.
+	 * It must be called in DisplayFunc before any transformation of
+	 * the scene.
+	 */
 	void				updateRotateMatrix();
+	
+	/* resetRotateMatrix()
+	 * 
+	 * This will set primary values on the rotationMatrix.
+	 */
 	void				resetRotateMatrix();
 	
 	//---------------------------- POSITION DETECTION
+	// TO DO: Study about moving these functions to an dedicated class.
 	bool				hasSnooked();
 	bool 				canMoveX();
 	bool 				canMoveZ();

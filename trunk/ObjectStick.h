@@ -55,4 +55,6 @@ class ObjectStick : public ObjectModel
 		 * and put in the position variables called pos ([0], [1] and [2]).
 		 */
 		void	calculatePos();
+		
+		void 	attack();
 };

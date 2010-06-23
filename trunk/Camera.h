@@ -45,33 +45,29 @@ public:
 	void			setCamera( int cameraMode = 0 );		// reset to the default camera values.
 	void			setXRot(GLfloat newValue);
 	void			setYRot(GLfloat newValue);
-	
 	void			setMode (int mode, Object* object=NULL);
 	
 	/* Set the position for the "number 2" variables of the camera - which
 	 * are related to the "camera 2" position.
 	 */
 	void			setPos2();
-	
 	const char* 	getModeName( int mode=-1 ) const; //name of the current camera mode
 	int 			getMode() const;
 	
 	//---------------------------- OTHER METHODS
-	void 	apply( int forceMode=-1 ); 					// main method
-	void 	action1 (int movex, int movey);
-	void 	action2 (int movex, int movey);
+	void 			apply( int forceAMode=-1 ); 					// main method
+	void 			action1 (int movex, int movey);					// usually, rotating the view
+	void 			action2 (int movex, int movey);					// usually, zooming
 	
-
 	/* If an object is passed, then it will make difference when using the
 	 * "camera mode 1". The camera will center on the object passed, instead
-	 * of the default value, which is the center of the principal table.
+	 * of the default value, which is the center of the main table.
 	 */
-	void 	nextMode();
-	void 	nextMode(Object* object=NULL);
+	void 			nextMode(Object* object=NULL);
 	
 	/* Returns the euclidian norma of the vector starting on the camera and 
 	*  end on the "position" of the Object (each Object has an array which
 	*  has its position).
 	*/
-	float	distanceFromObject(Object &theObject) const;
+	float			distanceFromObject(Object &theObject) const;
 };

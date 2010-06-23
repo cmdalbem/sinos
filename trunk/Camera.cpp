@@ -144,6 +144,7 @@ void Camera::setPos2 ()
 }
 
 void Camera::action1 (int movex, int movey)
+/* Usually, rotating the view. */
 {
 	switch( cameraMode )
 	{
@@ -169,6 +170,7 @@ void Camera::action1 (int movex, int movey)
 }
 
 void Camera::action2 (int movex, int movey)
+/* Usually, zooming. */
 {
 	switch( cameraMode )
 	{
@@ -199,13 +201,13 @@ void Camera::action2 (int movex, int movey)
 }
 
 
-void Camera::apply( int forceMode )
+void Camera::apply( int forceAMode )
 {
 	int mode;
-	if(forceMode==-1)
+	if( forceAMode==-1 /*default value*/ )
 		mode = getMode();
 	else
-		mode = forceMode;
+		mode = forceAMode;
 		
 	switch( mode )
 	{
@@ -219,6 +221,7 @@ void Camera::apply( int forceMode )
 		case 1:
 		{
 			// object centered camera
+			setPos2(); //updates relative position of the camera
 			gluLookAt( xpos2, ypos2, zpos2,
 					   xorig, yorig, zorig,
 					   0,1,0);
@@ -232,6 +235,7 @@ void Camera::apply( int forceMode )
 			break;
 		}
 		case 3:
+			// this is not working.
 			// cinematic camera
 			gluLookAt( sin(posit/100)*10, 7 , cos(posit/100)*10,
 					   xorig, yorig, zorig, /*ball position*/
@@ -239,11 +243,6 @@ void Camera::apply( int forceMode )
 			break;			
 	}
 	
-}
-
-void Camera::nextMode()
-{
-	setMode( (getMode()+1)%NCAMERAMODES, NULL);
 }
 
 void Camera::nextMode(Object* object)

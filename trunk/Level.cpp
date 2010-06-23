@@ -39,20 +39,26 @@ ObjectBall*  Level::getBall()
 void Level::drawObjects () {
     // drawing of not-lit objects
     glDisable(GL_LIGHTING);
+		#warning Direct objects vector access.
 		(*objects)[10]->draw();
 		
 		// Holes delimiters
 		for(int i=0; i<NHOLES; i++)
 			glCircle3f(HC[i][0],TABLE_PLANE_Y+1,HC[i][1],HC[i][2]);
-	
-	glEnable(GL_LIGHTING); //ends drawing of not-lit objects
+			
+	glEnable(GL_LIGHTING);
 	
 	getBall()->draw();
 	getStick()->draw();
 	
 	// draw all objects
-	for( int it=0; it<objects->size() -1; it++ )
+	for( int it=1; it<objects->size(); it++ )
 		(*objects)[it]->draw();
+	
+	// TEMP: directional light only on crypt
+	glEnable (GL_LIGHT2);
+		(*objects)[0]->draw();
+	glDisable (GL_LIGHT2);
 }
 
 void Level::drawObjects_partial ()
