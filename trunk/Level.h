@@ -29,15 +29,15 @@ class Level
 		vector<Object*> *objects;
 		vector<LightInfo*> *theLights;
 		
-		ObjectStick *stick;
-		ObjectBall	*ball;
+		ObjectStick stick;
+		ObjectBall	ball;
 
 	public:
 		Camera *camera, *camera2;
 	//---------------------------- CONSTRUCTORS
 		Level(vector<Object*> *_objects, vector<LightInfo*> *_theLights,
 			  Camera *_camera, Camera *_camera2,
-			  ObjectStick *_stick, ObjectBall *_ball);
+			  Texture *ballTex, Texture *stickTex);
 		
 	//---------------------------- DESTRUCTORS
 		~Level();

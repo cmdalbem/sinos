@@ -8,16 +8,39 @@
 //------------------------------------------------------------ CONSTRUCTORS
 Level::Level(	vector<Object*> *_objects, vector<LightInfo*> *_theLights,
 				Camera *_camera, Camera *_camera2,
-				ObjectStick *_stick, ObjectBall *_ball)
-{
+				Texture *ballTex, Texture *stickTex)
+{	
 	objects   = _objects;
 	theLights = _theLights;
-	
-	stick = _stick;
-	ball  = _ball;
-	
+
 	camera  = _camera;
 	camera2 = _camera2;
+	
+	// the ball
+	ball.loadFromFile("obj/poolball.obj");
+	ball.material.setShininess(120); 
+	ball.material.setAmbient(1,1,1); 
+	ball.material.setEmission(0.1,0.1,0.1); 
+	ball.material.setDiffuse(0.5, 0.5, 0.5);
+	ball.material.setSpecular(0.9, 0.9, 0.9);
+	ball.setTexture(ballTex);
+	ball.setSize(10,10,10);
+	ball.setPos(0, TABLE_PLANE_Y+ball.getRadius(), 0);
+		//objects.push_back(level.getBall());
+	
+	// the stick
+	stick.setCenter(&ball);
+	
+	stick.loadFromFile("obj/taco.obj");	
+	stick.calculatePos();	// This is needed to put the Stick on the right place
+							// since only now the ball is put its place.
+	
+	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
+	stick.material.setSpecular(0.3,0.3,0.3);
+	stick.material.setShininess(80);
+	stick.setTexture(stickTex);
+	stick.setSize(7,7,8);
+		//objects.push_back(level.getStick());
 }
 
 //------------------------------------------------------------ DESTRUCTORS
@@ -26,12 +49,12 @@ Level::~Level()	{ }
 //------------------------------------------------------------ GETTERS & SETTERS
 ObjectStick* Level::getStick()
 {
-	return stick;
+	return &stick;
 }
 
 ObjectBall*  Level::getBall()
 {
-	return ball;
+	return &ball;
 }
 
 //------------------------------------------------------------ OTHER METHODS
@@ -48,8 +71,8 @@ void Level::drawObjects () {
 			
 	glEnable(GL_LIGHTING);
 	
-	getBall()->draw();
-	getStick()->draw();
+	ball.draw();
+	stick.draw();
 	
 	// draw all objects
 	for( int it=1; it<objects->size(); it++ )
@@ -63,8 +86,8 @@ void Level::drawObjects () {
 
 void Level::drawObjects_partial ()
 {
-	getBall()->draw();
-	getStick()->draw();
+	ball.draw();
+	stick.draw();
 	(*objects)[1]->draw();
 	(*objects)[2]->draw();
 #ifdef SHOW_TABLE_FRAME
@@ -115,12 +138,12 @@ void Level::lights()
 void Level::updateVariables()
 {
 	bool	theBallWasMovimented;
-	theBallWasMovimented = ball->updateState();
+	theBallWasMovimented = ball.updateState();
 	
 	if(theBallWasMovimented)
 	{
 		if(camera->getMode() == 1)
-			camera->setMode(1, ball);
-		stick->setCenter(ball);
+			camera->setMode(1, &ball);
+		stick.setCenter(&ball);
 	}
 }

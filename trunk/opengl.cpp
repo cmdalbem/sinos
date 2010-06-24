@@ -28,10 +28,10 @@ vector<Object*> objects;
 vector<LightInfo*> theLights;
 Camera camera, camera2(2);
 
-static ObjectBall ball("obj/poolball.obj"); 
-static ObjectStick stick("obj/taco.obj", &ball);
+// Texture files
+Texture tigerTex, woodTex, tableTex, rockTex, starsTex, ballTex, stickTex;
 
-Level level(&objects, &theLights, &camera, &camera2, &stick, &ball);
+Level level(&objects, &theLights, &camera, &camera2, &ballTex, &stickTex);
 
 //texturized objects 
 static ObjectModel tableStruct("obj/pooltable_struct_noframe.obj");
@@ -39,7 +39,6 @@ static ObjectModel tableTop("obj/pooltable_table.obj");
 static ObjectModel tableFrame("obj/pooltable_frame.obj");
 static ObjectModel scenario("obj/crypt.obj");
 static ObjectModel globe("obj/globe.obj");
-//static ObjectBall  ball(10,100,100);
 static ObjectBall  cursor(1,100,100);
 
 
@@ -52,9 +51,6 @@ static ObjectModel tableStruct3("obj/pooltable_struct.obj");
 static ObjectModel tableTop3("obj/pooltable_table.obj");
 static ObjectModel tableStruct4("obj/pooltable_struct.obj");
 static ObjectModel tableTop4("obj/pooltable_table.obj");
-
-// Texture files
-Texture tigerTex, woodTex, tableTex, rockTex, starsTex, stickTex, ballTex;
 						  
 // mouse-keyboard
 static int	xold, yold;		
@@ -81,28 +77,6 @@ float 		radius=2.3;
 
 void initObjects ()
 {
-	// the ball
-	level.getBall()->material.setShininess(120); 
-	level.getBall()->material.setAmbient(1,1,1); 
-	level.getBall()->material.setEmission(0.1,0.1,0.1); 
-	level.getBall()->material.setDiffuse(0.5, 0.5, 0.5);
-	level.getBall()->material.setSpecular(0.9, 0.9, 0.9);
-	level.getBall()->setTexture(&ballTex);
-	level.getBall()->setSize(10,10,10);
-	level.getBall()->setPos(0, TABLE_PLANE_Y+ball.getRadius(), 0);
-		//objects.push_back(level.getBall());
-	
-	// the stick
-	level.getStick()->calculatePos();	// This is needed to put the Stick on the right place
-										// since only now the ball is put its place.
-	
-	level.getStick()->material.setDiffuse(RGB(238),RGB(221),RGB(195));
-	level.getStick()->material.setSpecular(0.3,0.3,0.3);
-	level.getStick()->material.setShininess(80);
-	level.getStick()->setTexture(&stickTex);
-	level.getStick()->setSize(7,7,8);
-		//objects.push_back(level.getStick());
-	
 	cursor.setPos(0,TABLE_PLANE_Y,2);
 	
 	// crypt scenario
@@ -196,15 +170,6 @@ void initObjects ()
     }
 }
 
-void drawObjects_partial () {
-	
-	objects[0]->draw();
-	level.getStick()->draw();
-	tableStruct.draw();
-	tableTop.draw();
-	tableFrame.draw();
-}
-
 void castShadows() {
 /* TO DO: modularize shadowing */
 	
@@ -255,43 +220,6 @@ void castShadows() {
 	glDisable(GL_BLEND);
 	glEnable(GL_LIGHTING);
 	glDisable(GL_STENCIL_TEST);
-}
-
-void drawObjects () {
-    // drawing of not-lit objects
-    glDisable(GL_LIGHTING);
-	    //// Sun
-		//glPushMatrix();
-	    //glTranslated( SUN_MOVEMENT_EQUATION );
-		//glutSolidSphere(0.5,10,10);
-	    //glPopMatrix();
-		
-		globe.draw();
-		
-		/*// Holes delimiters
-		for(int i=0; i<NHOLES; i++)
-			glCircle3f(HC[i][0],TABLE_PLANE_Y,HC[i][1],HC[i][2]);*/
-		
-		/*printf("%.3f,%.3f,%.3f %.3f\n",cursor.getPosX(),cursor.getPosY(),cursor.getPosZ(),radius);
-		glCircle3f(cursor.getPosX(),BALL_O_Y,cursor.getPosZ(),radius);
-		//cursor.draw();
-		glBegin(GL_LINES);
-			glVertex3f(cursor.getPosX()-10, cursor.getPosY(),cursor.getPosZ());
-			glVertex3f(cursor.getPosX()+10, cursor.getPosY(),cursor.getPosZ());
-			glVertex3f(cursor.getPosX(), cursor.getPosY(),cursor.getPosZ()+10);
-			glVertex3f(cursor.getPosX(), cursor.getPosY(),cursor.getPosZ()-10);
-		glEnd();*/
-
-	glEnable(GL_LIGHTING); //ends drawing of not-lit objects
-	
-	// draw all objects
-	for( int it=0; it<objects.size(); it++ )
-		objects[it]->draw();
-}
-
-void lights ()
-{
-	//
 }
 
 void perspectiveViewport( int width, int height ) {
@@ -420,8 +348,10 @@ void initLights () {
 	GLfloat lampColor2[] = {RGB(252), RGB(234), RGB(186), 1.0f};
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, lampColor2);
 	
-	// Creating LightInfo vector to the level class
 	
+	/*
+	// Creating LightInfo vector to the level class
+	//
 	// THERE IS SOMETHING EXTREMELY WRONG IN THIS PART OF THE CODE.
 	// TRY PRINTING THE VALUE OF THE VARIABLES INSIDE THE LIGHTINFO
 	// INSTANCES ON THE VECTOR AND YOU'RE GONNA SEE VERY STRANGE
@@ -429,7 +359,6 @@ void initLights () {
 	//
 	// FOR NOW, THE LEVEL CLASS IS USING THE LIGHTS() FUNCTION INSTEAD
 	// OF THESE LIGHTINFO INSTANCES.
-	
 	
 	// position light (sun)
 	//GLfloat position[] = { 0 , 100 , 0 , 1.0f };
@@ -483,6 +412,7 @@ void initLights () {
 	GLfloat direction[] = {0.0f, -1.0f, 0.0f, 0.0f};
 	LightInfo light2(true, direction, false, direction, GL_LIGHT2);
 	//theLights.push_back(&light2);
+	*/
 }
 
 void init ()
@@ -509,53 +439,18 @@ void init ()
 	glEnable (GL_LIGHT5); // extra spotlight3
     
     cout << "Loading textures..."; 
-    loadTexture(&ballTex, "textures/poolball.tga");
     loadTexture(&woodTex, "textures/wood.tga");
     loadTexture(&tableTex, "textures/table.tga", true);//set true to use mipmapping
     loadTexture(&rockTex, "textures/rock.tga");//set true to use mipmapping
     loadTexture(&starsTex, "textures/stars3.tga");
     loadTexture(&stickTex, "textures/stick.tga");
+    loadTexture(&ballTex,  "textures/poolball.tga");
     cout << "Done.\n"; 
-}
-
-void reshape (int w, int h) {
-    /*
-    glMatrixMode (GL_PROJECTION); //set the matrix to projection
-    
-	glLoadIdentity ();
-	
-    glViewport (0, 0, (GLsizei)w, (GLfloat)h);
-    gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.1, 2000.0);
-    					
-    glMatrixMode (GL_MODELVIEW);  //set the matrix back to model
-    */
 }
 
 //--------------------------- KEYBOARD ---------------------------//
 void keyboardFunc (unsigned char key, int x, int y) {
-   
-    /*
-    // debug-cursor controls
-    if( key=='w' )
-		cursor.setPosZ( cursor.getPosZ()-0.3 );
-	if( key=='s' )
-		cursor.setPosZ( cursor.getPosZ()+0.3 );
-	if( key=='a' )
-		cursor.setPosX( cursor.getPosX()-0.3 );
-	if( key=='d' )
-		cursor.setPosX( cursor.getPosX()+0.3 );		
-    if( key=='q' )
-		radius-=0.1;
-	if( key=='e' )
-		radius+=0.1;*/
-    
-    // chances lens focal distance
-    /*if ( key=='s' )
-		lensAngle+=2;
-	if ( key=='w' )
-		lensAngle-=2;
-		* */
-		
+			
 	if ( key==K_SPACE) {
 		level.getBall()->applyForce(level.getStick()->getAttackStrenght()*10,level.getStick()->getAngleInXZ()+90);  //some naughty magic numbers here
 		level.getStick()->attack();
@@ -579,7 +474,7 @@ void specialFunc(int key, int x, int y)
 		level.camera->setMode(0);
 	}
 	if( key == GLUT_KEY_F2 ) {
-		level.camera->setMode(1,&ball);
+		level.camera->setMode(1,level.getBall());
 	}
 	if( key == GLUT_KEY_F3 ) {
 		level.camera->setMode(2);
@@ -679,7 +574,6 @@ int main (int argc, char **argv) {
     
     glutIdleFunc (display);							// update any variables in display, display can be changed to anyhing,
                             						// as long as you move the variables to be updated, in this case, angle++;
-    //glutReshapeFunc (reshape);
     
     glutKeyboardFunc(keyboardFunc);
     glutSpecialFunc(specialFunc);
