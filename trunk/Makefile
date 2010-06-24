@@ -4,7 +4,7 @@ CFLAGS = -Wall
 
 OBJS = glm.o imageloader.o ObjectModel.o Object.o ObjectStick.o ObjectBall.o Material.o LightInfo.o Level.o Camera.o Game.o Texture.o utils.o
 
-LIBS = -lglut
+LIBS = -lGL -lglut -lGLU
 
 
 
