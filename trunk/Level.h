@@ -28,11 +28,10 @@ class Level
 	private:
 		vector<Object*> *objects;
 		vector<LightInfo*> *theLights;
-		
-		ObjectStick stick;
-		ObjectBall	ball;
 
 	public:
+		ObjectStick stick;
+		ObjectBall	ball;
 		Camera *camera, *camera2;
 	//---------------------------- CONSTRUCTORS
 		Level(vector<Object*> *_objects, vector<LightInfo*> *_theLights,
@@ -43,8 +42,6 @@ class Level
 		~Level();
 	
 	//---------------------------- GETTERS & SETTERS
-		ObjectStick* getStick();
-		ObjectBall*	 getBall();
 
 	//---------------------------- OTHER METHODS
 		void updateVariables();

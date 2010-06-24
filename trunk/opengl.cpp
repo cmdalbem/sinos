@@ -195,7 +195,7 @@ void castShadows() {
 			glClear( GL_STENCIL_BUFFER_BIT);
 			glStencilFunc(GL_EQUAL, 0, 1); 						//will let only one vertex be drawn on each position each time shadow
 				tableShadow.draw(); 
-				level.getStick()->draw();
+				level.stick.draw();
 	glPopMatrix();
 	
 	// Cast shadows on the table
@@ -210,8 +210,8 @@ void castShadows() {
 			glColorMask(true,true,true,true);
 			glDepthMask(true); 
 			glStencilFunc(GL_EQUAL, 1, 1); 						//now the shadow is cast only where stencil buffer==1, i.e. the table
-				level.getStick()->draw();
-				level.getBall()->draw();
+				level.stick.draw();
+				level.ball.draw();
 				#ifdef SHOW_TABLE_FRAME
 					tableFrame.draw();
 				#endif
@@ -236,7 +236,7 @@ void perspectiveViewport( int width, int height ) {
     					
     glMatrixMode(GL_MODELVIEW);
 	
-	level.getBall()->updateRotateMatrix(); //this MUST be called HERE
+	level.ball.updateRotateMatrix(); //this MUST be called HERE
 	
     glLoadIdentity ();
     
@@ -452,15 +452,15 @@ void init ()
 void keyboardFunc (unsigned char key, int x, int y) {
 			
 	if ( key==K_SPACE) {
-		level.getBall()->applyForce(level.getStick()->getAttackStrenght()*10,level.getStick()->getAngleInXZ()+90);  //some naughty magic numbers here
-		level.getStick()->attack();
+		level.ball.applyForce(level.stick.getAttackStrenght()*10,level.stick.getAngleInXZ()+90);  //some naughty magic numbers here
+		level.stick.attack();
 	}
 		
 	if( key=='v')
 		invertViewports = !invertViewports;
     
     if( key=='c' )
-		level.camera->nextMode(level.getBall());
+		level.camera->nextMode(&(level.ball));
 	
     if ( key==K_ESC )
     {
@@ -474,26 +474,27 @@ void specialFunc(int key, int x, int y)
 		level.camera->setMode(0);
 	}
 	if( key == GLUT_KEY_F2 ) {
-		level.camera->setMode(1,level.getBall());
+		
+		level.camera->setMode(1,&(level.ball));
 	}
 	if( key == GLUT_KEY_F3 ) {
 		level.camera->setMode(2);
 	}
 	
 	if( key == GLUT_KEY_LEFT ) {
-		level.getStick()->rotate( -5 );
+		level.stick.rotate( -5 );
 	}
 	
 	if( key == GLUT_KEY_RIGHT ) {
-		level.getStick()->rotate( 5 );
+		level.stick.rotate( 5 );
 	}
 	
 	if( key == GLUT_KEY_DOWN ) {
-		level.getStick()->changePower(0.1);
+		level.stick.changePower(0.1);
 	}
 	
 	if( key == GLUT_KEY_UP ) {
-		level.getStick()->changePower(-0.1);
+		level.stick.changePower(-0.1);
 	}
 }
 
@@ -522,16 +523,16 @@ void mouseFunc(int button, int state, int x, int y) {
 void mouseMotionFunc(int x, int y) {
 	
 	if ( left_click == GLUT_DOWN ) {
-		level.getStick()->rotate( (x-xold)/5. );			
+		level.stick.rotate( (x-xold)/5. );			
     }
 	
 	if ( right_click == GLUT_DOWN ) {
 		// stick manual attack
-		level.getStick()->changePower( (y-yold)/5. );
+		level.stick.changePower( (y-yold)/5. );
 		
-	    if( level.getStick()->getAttackStrenght()<level.getBall()->getRadius() ) {
-			level.getBall()->applyForce((yold-y),level.getStick()->getAngleInXZ()+90);  //some naughty magic numbers here
-			level.getStick()->attack();
+	    if( level.stick.getAttackStrenght()<level.ball.getRadius() ) {
+			level.ball.applyForce((yold-y),level.stick.getAngleInXZ()+90);  //some naughty magic numbers here
+			level.stick.attack();
 		}
 	}
 	

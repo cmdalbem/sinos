@@ -47,15 +47,6 @@ Level::Level(	vector<Object*> *_objects, vector<LightInfo*> *_theLights,
 Level::~Level()	{ }
 
 //------------------------------------------------------------ GETTERS & SETTERS
-ObjectStick* Level::getStick()
-{
-	return &stick;
-}
-
-ObjectBall*  Level::getBall()
-{
-	return &ball;
-}
 
 //------------------------------------------------------------ OTHER METHODS
 
