@@ -227,6 +227,13 @@ void Object::drawEnd() const
 	glPopMatrix();
 }
 
+float Object::distanceFromObject(Object &obj) const
+{
+	return sqrt(pow(getPosX() - obj.getPosX(), 2) +	// use "pow" because it has
+				pow(getPosY() - obj.getPosY(), 2) +	// log(n) complexity instead
+				pow(getPosZ() - obj.getPosZ(), 2));	// of n
+}
+
 void Object::translate(GLfloat* offset)
 {
 	pos[0] = offset[0];

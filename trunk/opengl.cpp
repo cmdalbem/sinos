@@ -5,6 +5,7 @@
 #include <math.h>
 #include <time.h>
 #include <vector>
+#include <map>
 #include <string.h>
 
 #include "lib/glm.h"
@@ -24,7 +25,7 @@
 
 // Objects
 point star[NSTARS];
-vector<Object*> objects;
+map<string,Object*> objects;
 vector<LightInfo*> theLights;
 Camera camera, camera2(2);
 
@@ -33,25 +34,6 @@ Texture tigerTex, woodTex, tableTex, rockTex, starsTex, ballTex, stickTex;
 
 Level level(&objects, &theLights, &camera, &camera2, &ballTex, &stickTex);
 
-//texturized objects 
-static ObjectModel tableStruct("obj/pooltable_struct_noframe.obj");
-static ObjectModel tableTop("obj/pooltable_table.obj");
-static ObjectModel tableFrame("obj/pooltable_frame.obj");
-static ObjectModel scenario("obj/crypt.obj");
-static ObjectModel globe("obj/globe.obj");
-static ObjectBall  cursor(1,100,100);
-
-
-// Normal objects
-static ObjectModel tableShadow("obj/pooltable_shadow.obj");
-static ObjectModel light("obj/light1.obj");
-static ObjectModel tableStruct2("obj/pooltable_struct.obj");
-static ObjectModel tableTop2("obj/pooltable_table.obj");
-static ObjectModel tableStruct3("obj/pooltable_struct.obj");
-static ObjectModel tableTop3("obj/pooltable_table.obj");
-static ObjectModel tableStruct4("obj/pooltable_struct.obj");
-static ObjectModel tableTop4("obj/pooltable_table.obj");
-						  
 // mouse-keyboard
 static int	xold, yold;		
 static int	left_click = GLUT_UP;
@@ -59,7 +41,6 @@ static int	right_click = GLUT_UP;
 static int	middle_click = GLUT_UP;
 static bool heldCtrl = false;
 static bool heldShift = false;
-static bool invertViewports = false;
 						  
 
 // !! The following globals aren't in their proper place. !!
@@ -77,6 +58,20 @@ float 		radius=2.3;
 
 void initObjects ()
 {
+	static ObjectModel tableStruct("obj/pooltable_struct_noframe.obj");
+	static ObjectModel tableTop("obj/pooltable_table.obj");
+	static ObjectModel tableFrame("obj/pooltable_frame.obj");
+	static ObjectModel scenario("obj/crypt.obj");
+	static ObjectModel globe("obj/globe.obj");
+	static ObjectBall  cursor(1,100,100);
+	static ObjectModel tableShadow("obj/pooltable_shadow.obj");
+	static ObjectModel light("obj/light1.obj");
+	static ObjectModel tableStruct2("obj/pooltable_struct.obj");
+	static ObjectModel tableTop2("obj/pooltable_table.obj");
+	static ObjectModel tableStruct3("obj/pooltable_struct.obj");
+	static ObjectModel tableTop3("obj/pooltable_table.obj");
+	static ObjectModel tableStruct4("obj/pooltable_struct.obj");
+	static ObjectModel tableTop4("obj/pooltable_table.obj");
 	cursor.setPos(0,TABLE_PLANE_Y,2);
 	
 	// crypt scenario
@@ -84,9 +79,7 @@ void initObjects ()
 	scenario.setSize(250,350,250);
 	scenario.setTexture(&rockTex);
 	scenario.material.setDiffuse(0.4,0.4,0.4);
-	//scenario.material.setSpecular(0.2,0.2,0.2);
-	//scenario.material.setShininess(80);
-		objects.push_back(&scenario);	//objects[0]
+		objects["crypt"] = &scenario;
 	
 	// tables material setup
 	Material tableStructMat;
@@ -108,9 +101,10 @@ void initObjects ()
 	tableStruct.setSize(100,100,100); 
 	tableTop.setSize(100,100,100);
 	tableFrame.setSize(100,100,100);
-		objects.push_back(&tableTop);		//objects[1]
-		objects.push_back(&tableStruct);	//objects[2]
+		objects["tableTop"] = &tableTop;
+		objects["tableStruct"] = &tableStruct;
 	tableShadow.setSize(100,100,100);
+		//objects["tableShadow"] = &tableShadow;
 
 	// table2
 	tableStructMat.setDiffuse(0.25,0.09,0.07);
@@ -136,12 +130,12 @@ void initObjects ()
 	tableTop4.setSize(100,100,100);
 	tableStruct4.setPos(0,0,600);
 	tableTop4.setPos(0,0,600);
-		objects.push_back(&tableStruct2);//objects[3]
-		objects.push_back(&tableTop2);	 //objects[4]
-		objects.push_back(&tableStruct3);//objects[5]
-		objects.push_back(&tableTop3);	 //objects[6]
-		objects.push_back(&tableStruct4);//objects[7]
-		objects.push_back(&tableTop4);	 //objects[8]
+		objects["tableStruct2"] = &tableStruct2;
+		objects["tableTop2"] = &tableTop2;	 //objects[4]
+		objects["tableStruct3"] = &tableStruct3;//objects[5]
+		objects["tableTop3"] = &tableTop3;	 //objects[6]
+		objects["tableStruct4"] = &tableStruct4;//objects[7]
+		objects["tableTop4"] = &tableTop4;	 //objects[8]
 	
 	// ceiling lamp
 	light.setPos(0,120,0);
@@ -150,13 +144,14 @@ void initObjects ()
 	light.material.setSpecular(1,1,1);
 	light.material.setShininess(120);
 	//light.material.setEmission(RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4);
-		objects.push_back(&light);		 //objects[9]
+		objects["lamp"] = &light;
 
 	
 	// infinite scenario globe
 	globe.setSize(500,500,500);
+	globe.material.setEmission(1,1,1);
 	globe.setTexture(&starsTex);
-		objects.push_back(&globe);		 //objects[10]
+		objects["globe"] = &globe;		 //objects[10]
 	
 	#ifdef SHOW_TABLE_FRAME
 		objects.push_back(&tableFrame);  //objects[11]
@@ -170,58 +165,6 @@ void initObjects ()
     }
 }
 
-void castShadows() {
-/* TO DO: modularize shadowing */
-	
-	float lightSource[] = { 0, 100, 0, 1 };
-	float tablePlane [] = { 0, TABLE_PLANE_Y, 0 };
-	float floorPlane [] = { 0, 0, 0 };
-	float planeNormal[] = { 0, -1, 0 };
-
-	glDisable(GL_LIGHTING); 					//lights don't affect shadows
-	glEnable (GL_BLEND); 						//enable transparency
-	glEnable(GL_STENCIL_TEST); 					//enable stencil testing when drawing polygones
-	
-	glStencilOp(GL_KEEP, GL_KEEP, GL_INCR); 	// sets operations with stencil buffer when: 
-												// stencil_test = false
-												// stencil_test = true && depth_test = false
-												// stencil_test = true
-												
-	glColor4f(0,0,0,0.5); 						//black colored shadow with 50% transparency
-
-	// Cast shadows on the ground
-	glPushMatrix();
-		glShadowProjection(lightSource,floorPlane,planeNormal); //manipulates the matrix so everything will be projected in the FLOORPLANE
-			glClear( GL_STENCIL_BUFFER_BIT);
-			glStencilFunc(GL_EQUAL, 0, 1); 						//will let only one vertex be drawn on each position each time shadow
-				tableShadow.draw(); 
-				level.stick.draw();
-	glPopMatrix();
-	
-	// Cast shadows on the table
-	glPushMatrix();
-		glShadowProjection(lightSource,tablePlane,planeNormal); //manipulates the matrix so everything will be projected in the TABLEPLANE
-			glClear( GL_STENCIL_BUFFER_BIT);
-			glColorMask(false, false, false, false); 			//disables Color Buffer
-			glDepthMask(false); 								//disables Depth Buffer
-			glStencilFunc(GL_ALWAYS, 1, 1); 					//creates the mask that will define where shadow will be cast
-				tableTop.draw();
-			
-			glColorMask(true,true,true,true);
-			glDepthMask(true); 
-			glStencilFunc(GL_EQUAL, 1, 1); 						//now the shadow is cast only where stencil buffer==1, i.e. the table
-				level.stick.draw();
-				level.ball.draw();
-				#ifdef SHOW_TABLE_FRAME
-					tableFrame.draw();
-				#endif
-	glPopMatrix();
-	
-	glDisable(GL_BLEND);
-	glEnable(GL_LIGHTING);
-	glDisable(GL_STENCIL_TEST);
-}
-
 void perspectiveViewport( int width, int height ) {
 	glMatrixMode (GL_PROJECTION); //set the matrix to projection
 	glLoadIdentity ();
@@ -229,10 +172,7 @@ void perspectiveViewport( int width, int height ) {
     glViewport (0, 0, (GLsizei)width, (GLfloat)height);
     glScissor(0, 0, width, height);
     
-    if( invertViewports )
-		glOrtho(-65, 65, -35, 35, 0.1, 10000);
-	else
-		gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 10000.0);
+	gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 10000.0);
     					
     glMatrixMode(GL_MODELVIEW);
 	
@@ -242,13 +182,10 @@ void perspectiveViewport( int width, int height ) {
     
     // IMPORTANT: don't change the order of these calls
 		drawOsd(osd, camera,fps);
-		if( invertViewports )
-			level.camera2->apply();
-		else
-			level.camera->apply();
+		level.camera->apply();
 		level.lights();
 		level.drawObjects();
-		castShadows();
+		level.castShadows();
 }	
 
 void orthoViewport( int width, int height ) {
@@ -260,19 +197,13 @@ void orthoViewport( int width, int height ) {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
     
-    if( invertViewports )
-		gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 500.0);
-	else
-		glOrtho(-65, 65, -35, 35, 5, 500);
+	glOrtho(-65, 65, -35, 35, 5, 500);
     					
     glMatrixMode (GL_MODELVIEW);
     glLoadIdentity();
     
 	// IMPORTANT: don't change the order of these calls
-		if( invertViewports )
-			level.camera->apply();
-		else
-			level.camera2->apply();
+		level.camera2->apply();
 		level.lights();
 		level.drawObjects_partial();
 		
@@ -456,9 +387,6 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		level.stick.attack();
 	}
 		
-	if( key=='v')
-		invertViewports = !invertViewports;
-    
     if( key=='c' )
 		level.camera->nextMode(&(level.ball));
 	

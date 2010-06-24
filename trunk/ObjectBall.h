@@ -31,8 +31,8 @@ public:
 	
 	//---------------------------- GETTERS & SETTERS
 
+	// PHISICAL STRUCTURE
 	void				setSize (GLfloat x, GLfloat y, GLfloat z); //overloads Object's function to update Ball's radius
-	float				getDirection() const;
 	GLdouble			getRadius() const;
 	float				getPerimeter() const;
 
@@ -40,12 +40,15 @@ public:
 	void				setSlices(GLint newSlices);
 	void				setRadius(GLdouble newRadius);
 	
-	void 				resetSpeed();
+	// BEHAVIOUR
+	float				getDirection() const;
 	float				getSpeed() const;
 	float				getFutureSpeed() const;
-	float				getNewX() const;
-	float				getNewY() const;
-	float				getNewZ() const;
+	float				getFutureX() const;
+	float				getFutureY() const;
+	float				getFutureZ() const;
+	void 				resetSpeed();
+	void				setDirection();
 	
 	//---------------------------- OTHER METHODS
 	/*
@@ -57,7 +60,7 @@ public:
 	virtual void 		draw() const;
 	bool 				updateState();
 	void				applyForce( float magnitude, float direction );
-	void				changeSpeed( float multFactor );
+	void				changeSpeed( float factor );
 		
 	/* updateRotateMatrix()
 	 * 
@@ -80,6 +83,6 @@ public:
 	//---------------------------- POSITION DETECTION
 	// TO DO: Study about moving these functions to an dedicated class.
 	bool				hasSnooked();
-	bool 				canMoveX();
-	bool 				canMoveZ();
+	bool 				testHorizontalBound();
+	bool 				testVerticalBound();
 };

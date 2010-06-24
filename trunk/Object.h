@@ -84,24 +84,29 @@ public:
 	*  rotational argument and scaling argument. This function will initialize
 	*  the matrix, materials and do the scaling, rotation and translation.
 	*/
-	void drawBegin() const;		// TODO: function return 1 if succesfully drawn the object
+	void 			drawBegin() const;		// TODO: function return 1 if succesfully drawn the object
 	
 	/* drawEnd()
 	*  Call this one after all other drawing calls. This will recover default
 	*  values of materials and pop this object matrix.
 	*/
-	void drawEnd() const;
+	void			 drawEnd() const;
 	
 	/* virtual draw()
 	*  This virtual declaration specifies that every kind of subobject must
 	*  have an implementation of a drawing function. This will allow to group
 	*  multiple kinds of object on vectors and call .draw() for each of them.
 	*/
-	virtual void draw() const =0;
+	virtual void 	draw() const =0;
+	
+	/* Returns the euclidian norma of the vector starting on the camera and 
+	*  end on the "position" of the Object.
+	*/
+	float			distanceFromObject(Object &theObject) const;
 	
 	/* Transformations */
-	void translate(GLfloat* offset);
-	void translate(GLfloat x, GLfloat y, GLfloat z);
-	void scale(GLfloat x, GLfloat y, GLfloat z);
-	void rotate(GLfloat x, GLfloat y, GLfloat z);
+	void 			translate(GLfloat* offset);
+	void 			translate(GLfloat x, GLfloat y, GLfloat z);
+	void 			scale(GLfloat x, GLfloat y, GLfloat z);
+	void 			rotate(GLfloat x, GLfloat y, GLfloat z);
 };

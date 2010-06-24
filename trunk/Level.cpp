@@ -6,7 +6,7 @@
 #include "Level.h"
 
 //------------------------------------------------------------ CONSTRUCTORS
-Level::Level(	vector<Object*> *_objects, vector<LightInfo*> *_theLights,
+Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 				Camera *_camera, Camera *_camera2,
 				Texture *ballTex, Texture *stickTex)
 {	
@@ -24,9 +24,20 @@ Level::Level(	vector<Object*> *_objects, vector<LightInfo*> *_theLights,
 	ball.material.setDiffuse(0.5, 0.5, 0.5);
 	ball.material.setSpecular(0.9, 0.9, 0.9);
 	ball.setTexture(ballTex);
-	ball.setSize(10,10,10);
+	ball.setRadius(10);
 	ball.setPos(0, TABLE_PLANE_Y+ball.getRadius(), 0);
-		//objects.push_back(level.getBall());
+	
+	// ball2
+	static ObjectBall ball2("obj/poolball.obj");
+	ball2.setRadius(10);
+	ball2.setPos(30, TABLE_PLANE_Y+ball2.getRadius(), 10);
+	// ball3
+	static ObjectBall ball3("obj/poolball.obj");
+	ball3.setRadius(10);
+	ball3.setPos(40, TABLE_PLANE_Y+ball2.getRadius(), 20);
+		//balls.push_back(ball);
+		//objects["ball2"] = &ball2;
+		//objects["ball3"] = &ball3;
 	
 	// the stick
 	stick.setCenter(&ball);
@@ -40,7 +51,6 @@ Level::Level(	vector<Object*> *_objects, vector<LightInfo*> *_theLights,
 	stick.material.setShininess(80);
 	stick.setTexture(stickTex);
 	stick.setSize(7,7,8);
-		//objects.push_back(level.getStick());
 }
 
 //------------------------------------------------------------ DESTRUCTORS
@@ -53,9 +63,6 @@ Level::~Level()	{ }
 void Level::drawObjects () {
     // drawing of not-lit objects
     glDisable(GL_LIGHTING);
-		#warning Direct objects vector access.
-		(*objects)[10]->draw();
-		
 		// Holes delimiters
 		for(int i=0; i<NHOLES; i++)
 			glCircle3f(HC[i][0],TABLE_PLANE_Y+1,HC[i][1],HC[i][2]);
@@ -66,12 +73,14 @@ void Level::drawObjects () {
 	stick.draw();
 	
 	// draw all objects
-	for( int it=1; it<objects->size(); it++ )
-		(*objects)[it]->draw();
+	map<string,Object*>::iterator it;
+	for( it = objects->begin(); it!=objects->end(); it++ )
+		if( (*it).first!="crypt" )
+			(*it).second->draw();
 	
 	// TEMP: directional light only on crypt
 	glEnable (GL_LIGHT2);
-		(*objects)[0]->draw();
+		(*objects)["crypt"]->draw();
 	glDisable (GL_LIGHT2);
 }
 
@@ -79,12 +88,66 @@ void Level::drawObjects_partial ()
 {
 	ball.draw();
 	stick.draw();
-	(*objects)[1]->draw();
-	(*objects)[2]->draw();
+	(*objects)["tableStruct"]->draw();
+	(*objects)["tableTop"]->draw();
 #ifdef SHOW_TABLE_FRAME
 	//tableFrame.draw();		//----> refatorate this soon
 #endif
 	
+}
+
+void Level::castShadows() {
+/* TO DO: modularize shadowing */
+	
+	float lightSource[] = { 0, 100, 0, 1 };
+	float tablePlane [] = { 0, TABLE_PLANE_Y, 0 };
+	float floorPlane [] = { 0, 0, 0 };
+	float planeNormal[] = { 0, -1, 0 };
+
+	glDisable(GL_LIGHTING); 					//lights don't affect shadows
+	glEnable (GL_BLEND); 						//enable transparency
+	glEnable(GL_STENCIL_TEST); 					//enable stencil testing when drawing polygones
+	
+	glStencilOp(GL_KEEP, GL_KEEP, GL_INCR); 	// sets operations with stencil buffer when: 
+												// stencil_test = false
+												// stencil_test = true && depth_test = false
+												// stencil_test = true
+												
+	glColor4f(0,0,0,0.5); 						//black colored shadow with 50% transparency
+
+	// Cast shadows on the ground
+	glPushMatrix();
+		glShadowProjection(lightSource,floorPlane,planeNormal); //manipulates the matrix so everything will be projected in the FLOORPLANE
+			glClear( GL_STENCIL_BUFFER_BIT);
+			glStencilFunc(GL_EQUAL, 0, 1); 						//will let only one vertex be drawn on each position each time shadow
+				//tableShadow.draw(); 
+				stick.draw();
+	glPopMatrix();
+	
+	// Cast shadows on the table
+	glPushMatrix();
+		glShadowProjection(lightSource,tablePlane,planeNormal); //manipulates the matrix so everything will be projected in the TABLEPLANE
+			glClear( GL_STENCIL_BUFFER_BIT);
+			glColorMask(false, false, false, false); 			//disables Color Buffer
+			glDepthMask(false); 								//disables Depth Buffer
+			glStencilFunc(GL_ALWAYS, 1, 1); 					//creates the mask that will define where shadow will be cast
+				(*objects)["tableTop"]->draw();
+			
+			glColorMask(true,true,true,true);
+			glDepthMask(true); 
+			glStencilFunc(GL_EQUAL, 1, 1); 						//now the shadow is cast only where stencil buffer==1, i.e. the table
+				stick.draw();
+				ball.draw();
+				for(int i=0;i<balls.size();i++)
+					balls[i].draw();
+				#ifdef SHOW_TABLE_FRAME
+					tableFrame.draw();
+				#endif
+	glPopMatrix();
+	
+	glDisable(GL_BLEND);
+	glEnable(GL_LIGHTING);
+	glDisable(GL_STENCIL_TEST);
 }
 
 void Level::lights()
@@ -128,13 +191,28 @@ void Level::lights()
 
 void Level::updateVariables()
 {
-	bool	theBallWasMovimented;
-	theBallWasMovimented = ball.updateState();
+	bool	ballHasMoved = ball.updateState();
 	
-	if(theBallWasMovimented)
+	if(ballHasMoved)
 	{
 		if(camera->getMode() == 1)
 			camera->setMode(1, &ball);
 		stick.setCenter(&ball);
 	}
+}
+
+void Level::testBallsCollision()
+{
+	for(int i=0; i<balls.size(); i++)
+		for(int j=0; j<balls.size(); j++)
+			if(i!=j)
+				if( balls[i].distanceFromObject(balls[j]) < balls[i].getRadius() + balls[j].getRadius()) // is distance > sum of their radius
+				{
+					cout << "collision between " << i << " and " << j << endl;
+				}
+				
+	
+	
+	
+	
 }

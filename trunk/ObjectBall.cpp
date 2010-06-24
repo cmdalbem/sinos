@@ -55,20 +55,6 @@ GLdouble ObjectBall::getRadius() const
 	return radius;
 }
 
-float ObjectBall::getDirection() const
-{
-	if( getSpeed() ) {
-		float direction = DEGREES(acosf(moveVector[0]/getSpeed())); //angle of move vector = arc cos x/hypotenuse
-		
-		if( (moveVector[2]/getSpeed()) > 0 )
-			direction += 2*(180-direction);
-			
-		return direction;
-	}
-	else
-		return 0;
-}	
-
 float ObjectBall::getPerimeter() const
 {
 	return 2*M_PI*radius;
@@ -83,6 +69,8 @@ void ObjectBall::setStacks(GLint newStacks)
 void ObjectBall::setRadius(GLdouble newRadius)
 {
 	radius = newRadius;
+	
+	setSize(newRadius,newRadius,newRadius);
 }
 
 void ObjectBall::setSlices(GLint newSlices)
@@ -99,6 +87,20 @@ void ObjectBall::resetSpeed()
 	setRot(0,0,0);
 }
 
+float ObjectBall::getDirection() const
+{
+	if( getSpeed() ) {
+		float direction = DEGREES(acosf(moveVector[0]/getSpeed())); //angle of move vector = arc cos x/hypotenuse
+		
+		if( (moveVector[2]/getSpeed()) > 0 )
+			direction += 2*(180-direction);
+			
+		return direction;
+	}
+	else
+		return 0;
+}	
+
 float ObjectBall::getSpeed() const
 {
 	return sqrt( pow(moveVector[0],2) + pow(moveVector[1],2) + pow(moveVector[2],2) );	
@@ -109,17 +111,17 @@ float ObjectBall::getFutureSpeed() const
 	return sqrt( pow(moveVector[0]*BALL_DECELERATION_N,2) + pow(moveVector[1]*BALL_DECELERATION_N,2) + pow(moveVector[2]*BALL_DECELERATION_N,2) );	
 }
 
-float ObjectBall::getNewX() const
+float ObjectBall::getFutureX() const
 {
 	return getPosX() + moveVector[0] / STATEUPDATES_PER_SEC;
 }
 
-float ObjectBall::getNewY() const
+float ObjectBall::getFutureY() const
 {
 	return getPosY() + moveVector[1] / STATEUPDATES_PER_SEC;
 }
 
-float ObjectBall::getNewZ() const
+float ObjectBall::getFutureZ() const
 {
 	return getPosZ() + moveVector[2] / STATEUPDATES_PER_SEC;
 }
@@ -139,8 +141,8 @@ bool ObjectBall::updateState()
 	{
 		if( !moveVector[1] )
 		{
-			bool can_move_x = canMoveX(),
-				 can_move_z = canMoveZ();
+			bool can_move_x = testHorizontalBound(),
+				 can_move_z = testVerticalBound();
 
 			if( hasSnooked() )
 				moveVector[1]=-30;
@@ -157,26 +159,22 @@ bool ObjectBall::updateState()
 		}
 		
 		// rotation by movement
-		//setRotY(getDirection()+90);
-		//rotate( (360*(getSpeed()-getFutureSpeed())) / getPerimeter() ,0,0);
 		setRot( moveVector[2] ,0, -moveVector[0] );
 		
 		// update position
-		setPos( getNewX(), getNewY(), getNewZ() );
+		setPos( getFutureX(), getFutureY(), getFutureZ() );
 		
 		// update velocity
 		if( !moveVector[1] ) { //if is not falling
 			changeSpeed(BALL_DECELERATION_N);
-			if( getSpeed() < 0.05)
-				resetSpeed();
 		}
 		else
-			if( getPosY() > 1 ) {//until fall to the ground
-				moveVector[1] *= 1.2;
+			if( getPosY() > 1 ) {
+				moveVector[1] *= BALL_ACCELERATION_G;
 				moveVector[0] *= BALL_DECELERATION_N;
 				moveVector[2] *= BALL_DECELERATION_N;
 			}
-			else {
+			else { //fell to the ground
 				resetSpeed();
 				setPos(0,TABLE_PLANE_Y+radius,0);
 			}
@@ -191,14 +189,15 @@ void ObjectBall::applyForce( float magnitude, float direction )
 	moveVector[2] += -magnitude * sin( RAD(direction) );
 }
 	
-void ObjectBall::changeSpeed( float mFactor )
+void ObjectBall::changeSpeed( float factor )
 {
-	moveVector[0] *= mFactor;
-	moveVector[1] *= mFactor;
-	moveVector[2] *= mFactor;
+	moveVector[0] *= factor;
+	moveVector[1] *= factor;
+	moveVector[2] *= factor;
 }
 
 void ObjectBall::drawBegin() const
+/* Overloading of original Object::drawBegin() */
 {
 	glPushMatrix();
 	
@@ -228,11 +227,7 @@ void ObjectBall::draw() const
 			glmDraw(modelPointer, GLM_SMOOTH);
 		Object::drawEnd();
 	}
-	else {
-		ObjectBall::drawBegin();
-		glutSolidSphere(radius,slices,stacks);
-		Object::drawEnd();
-	}
+
 }
 
 void ObjectBall::updateRotateMatrix()
@@ -256,9 +251,9 @@ void ObjectBall::resetRotateMatrix()
 
 bool ObjectBall::hasSnooked()
 {
-	float posx = getNewX(),
-		  posy = getNewY(),
-		  posz = getNewZ();
+	float posx = getFutureX(),
+		  posy = getFutureY(),
+		  posz = getFutureZ();
 
 	for(int i=0; i<NHOLES; i++)
 		if( abs(posx-HC[i][0]) + abs(posz-HC[i][1]) <= HC[i][2] )
@@ -276,9 +271,9 @@ bool ObjectBall::hasSnooked()
 	
 }
 
-bool ObjectBall::canMoveX()
+bool ObjectBall::testHorizontalBound()
 {
-	float posx = getNewX();
+	float posx = getFutureX();
 	
 	if( posx > RIGHTBOUND  ||  posx < LEFTBOUND )
 		return false;
@@ -286,9 +281,9 @@ bool ObjectBall::canMoveX()
 		return true;
 }
 
-bool ObjectBall::canMoveZ()
+bool ObjectBall::testVerticalBound()
 {
-	float posz = getNewZ();
+	float posz = getFutureZ();
 	
 	if( posz > TOPBOUND  ||  posz < BOTBOUND )
 		return false;

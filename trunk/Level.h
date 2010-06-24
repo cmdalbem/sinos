@@ -12,6 +12,8 @@
 using namespace std;
 
 #include <vector>
+#include <string>
+#include <map>
 
 #include "ObjectModel.h"
 #include "ObjectBall.h"
@@ -26,15 +28,16 @@ using namespace std;
 class Level
 {
 	private:
-		vector<Object*> *objects;
+		map<string,Object*> *objects;
 		vector<LightInfo*> *theLights;
-
+		
 	public:
 		ObjectStick stick;
 		ObjectBall	ball;
+		vector<ObjectBall> balls;
 		Camera *camera, *camera2;
 	//---------------------------- CONSTRUCTORS
-		Level(vector<Object*> *_objects, vector<LightInfo*> *_theLights,
+		Level(map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 			  Camera *_camera, Camera *_camera2,
 			  Texture *ballTex, Texture *stickTex);
 		
@@ -44,13 +47,16 @@ class Level
 	//---------------------------- GETTERS & SETTERS
 
 	//---------------------------- OTHER METHODS
-		void updateVariables();
 		void init();
 		void initObjects();
 		void initLights();
 	
 		void drawObjects();
 		void drawObjects_partial();	
-		void lights ();
+		void lights();
+		void castShadows();
+		
+		void updateVariables();
+		void testBallsCollision();
 				
 };
