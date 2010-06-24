@@ -78,6 +78,11 @@ void ObjectBall::setSlices(GLint newSlices)
 	slices = newSlices;
 }
 
+void ObjectBall::setDirection( float newDir )
+{
+	applyForce(0, newDir);
+}
+
 void ObjectBall::resetSpeed()
 {
 	moveVector[0] = 0;
@@ -245,6 +250,22 @@ void ObjectBall::resetRotateMatrix()
 {
 	static GLdouble rex[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 	*rotMat = rex;
+	/*rotMat[0]=1;
+	rotMat[1]=0;
+	rotMat[2]=0;
+	rotMat[3]=0;
+	rotMat[4]=0;
+	rotMat[5]=1;
+	rotMat[6]=0;
+	rotMat[7]=0;
+	rotMat[8]=0;
+	rotMat[9]=0;
+	rotMat[10]=1;
+	rotMat[11]=0;
+	rotMat[12]=0;
+	rotMat[13]=0;
+	rotMat[14]=0;
+	rotMat[15]=1;*/
 }
 
 //--------------------------------------------------- POSITION DETECTION

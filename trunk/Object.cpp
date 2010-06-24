@@ -227,7 +227,7 @@ void Object::drawEnd() const
 	glPopMatrix();
 }
 
-float Object::distanceFromObject(Object &obj) const
+double Object::distanceFromObject(Object &obj) const
 {
 	return sqrt(pow(getPosX() - obj.getPosX(), 2) +	// use "pow" because it has
 				pow(getPosY() - obj.getPosY(), 2) +	// log(n) complexity instead

@@ -35,9 +35,9 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	static ObjectBall ball3("obj/poolball.obj");
 	ball3.setRadius(10);
 	ball3.setPos(40, TABLE_PLANE_Y+ball2.getRadius(), 20);
-		//balls.push_back(ball);
-		//objects["ball2"] = &ball2;
-		//objects["ball3"] = &ball3;
+		balls.push_back(&ball);
+		balls.push_back(&ball2);
+		balls.push_back(&ball3);
 	
 	// the stick
 	stick.setCenter(&ball);
@@ -77,6 +77,9 @@ void Level::drawObjects () {
 	for( it = objects->begin(); it!=objects->end(); it++ )
 		if( (*it).first!="crypt" )
 			(*it).second->draw();
+			
+	for( int i=0; i<balls.size(); i++ )
+		balls[i]->draw();
 	
 	// TEMP: directional light only on crypt
 	glEnable (GL_LIGHT2);
@@ -91,7 +94,7 @@ void Level::drawObjects_partial ()
 	(*objects)["tableStruct"]->draw();
 	(*objects)["tableTop"]->draw();
 #ifdef SHOW_TABLE_FRAME
-	//tableFrame.draw();		//----> refatorate this soon
+	(*objects)["tableFrame"]->draw();
 #endif
 	
 }
@@ -139,7 +142,7 @@ void Level::castShadows() {
 				stick.draw();
 				ball.draw();
 				for(int i=0;i<balls.size();i++)
-					balls[i].draw();
+					balls[i]->draw();
 				#ifdef SHOW_TABLE_FRAME
 					tableFrame.draw();
 				#endif
@@ -193,12 +196,17 @@ void Level::updateVariables()
 {
 	bool	ballHasMoved = ball.updateState();
 	
+	for(int i=0; i<balls.size(); i++)
+		balls[i]->updateState();
+	
 	if(ballHasMoved)
 	{
 		if(camera->getMode() == 1)
 			camera->setMode(1, &ball);
 		stick.setCenter(&ball);
 	}
+	
+	testBallsCollision();
 }
 
 void Level::testBallsCollision()
@@ -206,13 +214,14 @@ void Level::testBallsCollision()
 	for(int i=0; i<balls.size(); i++)
 		for(int j=0; j<balls.size(); j++)
 			if(i!=j)
-				if( balls[i].distanceFromObject(balls[j]) < balls[i].getRadius() + balls[j].getRadius()) // is distance > sum of their radius
+				if( balls[i]->distanceFromObject(*balls[j]) < balls[i]->getRadius() + balls[j]->getRadius()) // is distance > sum of their radius
 				{
-					cout << "collision between " << i << " and " << j << endl;
+					float impactv[3];
+					impactv[0] = balls[i]->getPosX() - balls[j]->getPosX();
+					impactv[1] = 0;
+					impactv[2] = balls[i]->getPosZ() - balls[j]->getPosZ();
+					
+					balls[i]->applyForce( balls[i]->getSpeed() + balls[j]->getSpeed(), 200 );
+					balls[j]->applyForce( balls[i]->getSpeed() + balls[j]->getSpeed(), -200 );
 				}
-				
-	
-	
-	
-	
 }

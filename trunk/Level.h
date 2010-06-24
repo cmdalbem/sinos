@@ -34,7 +34,7 @@ class Level
 	public:
 		ObjectStick stick;
 		ObjectBall	ball;
-		vector<ObjectBall> balls;
+		vector<ObjectBall*> balls;
 		Camera *camera, *camera2;
 	//---------------------------- CONSTRUCTORS
 		Level(map<string,Object*> *_objects, vector<LightInfo*> *_theLights,

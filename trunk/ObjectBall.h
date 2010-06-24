@@ -47,8 +47,9 @@ public:
 	float				getFutureX() const;
 	float				getFutureY() const;
 	float				getFutureZ() const;
+	
+	void				setDirection( float newDir );
 	void 				resetSpeed();
-	void				setDirection();
 	
 	//---------------------------- OTHER METHODS
 	/*

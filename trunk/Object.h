@@ -102,7 +102,7 @@ public:
 	/* Returns the euclidian norma of the vector starting on the camera and 
 	*  end on the "position" of the Object.
 	*/
-	float			distanceFromObject(Object &theObject) const;
+	double			distanceFromObject(Object &theObject) const;
 	
 	/* Transformations */
 	void 			translate(GLfloat* offset);

@@ -154,7 +154,7 @@ void initObjects ()
 		objects["globe"] = &globe;		 //objects[10]
 	
 	#ifdef SHOW_TABLE_FRAME
-		objects.push_back(&tableFrame);  //objects[11]
+		objects["tableFrame"] = &tableFrame;  //objects[11]
 	#endif
 
     for (int i=0;i<NSTARS;i++)
