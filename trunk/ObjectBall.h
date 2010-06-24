@@ -19,7 +19,7 @@ private:
 	float moveVector[3]; //direction of movement
 	
 public:
-	GLdouble *rotMat[16];
+	GLdouble rotMat[16];
 	
 	//---------------------------- CONSTRUCTORS
 	ObjectBall();
@@ -41,12 +41,16 @@ public:
 	void				setRadius(GLdouble newRadius);
 	
 	// BEHAVIOUR
-	float				getDirection() const;
-	float				getSpeed() const;
+	float				getDirection( float avector[]=NULL ) const;
+	float				getSpeed( float avector[]=NULL ) const;
 	float				getFutureSpeed() const;
 	float				getFutureX() const;
 	float				getFutureY() const;
 	float				getFutureZ() const;
+	float				getFuturePos( float *futurePos[] ) const;
+	float				getPastX() const;
+	float				getPastY() const;
+	float				getPastZ() const;
 	
 	void				setDirection( float newDir );
 	void 				resetSpeed();

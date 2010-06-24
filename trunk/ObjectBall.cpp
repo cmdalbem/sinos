@@ -92,12 +92,24 @@ void ObjectBall::resetSpeed()
 	setRot(0,0,0);
 }
 
-float ObjectBall::getDirection() const
+float ObjectBall::getDirection( float avector[] ) const
 {
+	float vector[3];
+	if( avector ) {
+		vector[0] = avector[0];
+		vector[1] = avector[1];
+		vector[2] = avector[2];
+	}
+	else {
+		vector[0] = moveVector[0];
+		vector[1] = moveVector[1];
+		vector[2] = moveVector[2];
+	}
+	
 	if( getSpeed() ) {
-		float direction = DEGREES(acosf(moveVector[0]/getSpeed())); //angle of move vector = arc cos x/hypotenuse
+		float direction = DEGREES(acosf(vector[0]/getSpeed(vector))); //angle of move vector = arc cos x/hypotenuse
 		
-		if( (moveVector[2]/getSpeed()) > 0 )
+		if( (vector[2]/getSpeed(vector)) > 0 )
 			direction += 2*(180-direction);
 			
 		return direction;
@@ -106,9 +118,12 @@ float ObjectBall::getDirection() const
 		return 0;
 }	
 
-float ObjectBall::getSpeed() const
+float ObjectBall::getSpeed( float avector[] ) const
 {
-	return sqrt( pow(moveVector[0],2) + pow(moveVector[1],2) + pow(moveVector[2],2) );	
+	if( avector )
+		return sqrt( pow(avector[0],2) + pow(avector[1],2) + pow(avector[2],2) );	
+	else
+		return sqrt( pow(moveVector[0],2) + pow(moveVector[1],2) + pow(moveVector[2],2) );	
 }
 
 float ObjectBall::getFutureSpeed() const
@@ -129,6 +144,28 @@ float ObjectBall::getFutureY() const
 float ObjectBall::getFutureZ() const
 {
 	return getPosZ() + moveVector[2] / STATEUPDATES_PER_SEC;
+}
+
+float ObjectBall::getPastX() const
+{
+	return getPosX() - 5*moveVector[0] / STATEUPDATES_PER_SEC;
+}
+
+float ObjectBall::getPastY() const
+{
+	return getPosY() - 5*moveVector[1] / STATEUPDATES_PER_SEC;
+}
+
+float ObjectBall::getPastZ() const
+{
+	return getPosZ() - 5*moveVector[2] / STATEUPDATES_PER_SEC;
+}
+
+float ObjectBall::getFuturePos( float *futurePos[] ) const
+{
+	*futurePos[0] = getFutureX();
+	*futurePos[1] = getFutureY();
+	*futurePos[2] = getFutureZ();
 }
 
 void ObjectBall::setSize (GLfloat x, GLfloat y, GLfloat z)
@@ -209,7 +246,7 @@ void ObjectBall::drawBegin() const
 	glTranslated(getPosX(), getPosY(), getPosZ());
 	glScalef(getSizeX(), getSizeY(), getSizeZ());
 	
-	glMultMatrixd(*rotMat); 						//see updateRotateMatrix()
+	glMultMatrixd(rotMat); 						//see updateRotateMatrix()
 	    		
 	material.apply();	
 }
@@ -242,15 +279,13 @@ void ObjectBall::updateRotateMatrix()
    glRotatef (getRotX(), 1,0,0);
    glRotatef (getRotY(), 0,1,0);
    glRotatef (getRotZ(), 0,0,1);
-   glMultMatrixd (*rotMat);
-   glGetDoublev (GL_MODELVIEW_MATRIX, *rotMat);
+   glMultMatrixd (rotMat);
+   glGetDoublev (GL_MODELVIEW_MATRIX, rotMat);
 }
 
 void ObjectBall::resetRotateMatrix()
 {
-	static GLdouble rex[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-	*rotMat = rex;
-	/*rotMat[0]=1;
+	rotMat[0]=1;
 	rotMat[1]=0;
 	rotMat[2]=0;
 	rotMat[3]=0;
@@ -265,7 +300,7 @@ void ObjectBall::resetRotateMatrix()
 	rotMat[12]=0;
 	rotMat[13]=0;
 	rotMat[14]=0;
-	rotMat[15]=1;*/
+	rotMat[15]=1;
 }
 
 //--------------------------------------------------- POSITION DETECTION

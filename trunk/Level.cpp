@@ -28,16 +28,24 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	ball.setPos(0, TABLE_PLANE_Y+ball.getRadius(), 0);
 	
 	// ball2
-	static ObjectBall ball2("obj/poolball.obj");
+	static ObjectBall ball2("obj/poolball.obj"),
+					  ball3("obj/poolball.obj"),
+					  ball4("obj/poolball.obj"),
+					  ball5("obj/poolball.obj");
 	ball2.setRadius(10);
-	ball2.setPos(30, TABLE_PLANE_Y+ball2.getRadius(), 10);
-	// ball3
-	static ObjectBall ball3("obj/poolball.obj");
 	ball3.setRadius(10);
-	ball3.setPos(40, TABLE_PLANE_Y+ball2.getRadius(), 20);
+	ball4.setRadius(10);
+	ball5.setRadius(10);
+	
+	ball2.setPos(30, TABLE_PLANE_Y+ball2.getRadius(), 10);
+	ball3.setPos(30, TABLE_PLANE_Y+ball2.getRadius(), 20);
+	ball4.setPos(10, TABLE_PLANE_Y+ball2.getRadius(), 7);
+	ball5.setPos(10, TABLE_PLANE_Y+ball2.getRadius(), 0);
 		balls.push_back(&ball);
 		balls.push_back(&ball2);
 		balls.push_back(&ball3);
+		balls.push_back(&ball4);
+		balls.push_back(&ball5);
 	
 	// the stick
 	stick.setCenter(&ball);
@@ -216,12 +224,18 @@ void Level::testBallsCollision()
 			if(i!=j)
 				if( balls[i]->distanceFromObject(*balls[j]) < balls[i]->getRadius() + balls[j]->getRadius()) // is distance > sum of their radius
 				{
-					float impactv[3];
-					impactv[0] = balls[i]->getPosX() - balls[j]->getPosX();
-					impactv[1] = 0;
-					impactv[2] = balls[i]->getPosZ() - balls[j]->getPosZ();
+					float impactv[3] = { balls[i]->getPosX() - balls[j]->getPosX(),
+										 0,
+										 balls[i]->getPosZ() - balls[j]->getPosZ()};
 					
-					balls[i]->applyForce( balls[i]->getSpeed() + balls[j]->getSpeed(), 200 );
-					balls[j]->applyForce( balls[i]->getSpeed() + balls[j]->getSpeed(), -200 );
+					float impactAngle = balls[j]->getDirection(impactv);
+					
+					float impactForce = (balls[i]->getSpeed() + balls[j]->getSpeed())/2;
+					
+					//balls[i]->setPos( balls[i]->getPastX(), balls[i]->getPastY(), balls[i]->getPastZ() );
+					//balls[j]->setPos( balls[j]->getPastX(), balls[j]->getPastY(), balls[j]->getPastZ() );
+
+					balls[i]->applyForce( impactForce, impactAngle );
+					balls[j]->applyForce( impactForce, -impactAngle );
 				}
 }
