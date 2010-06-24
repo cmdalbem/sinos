@@ -42,6 +42,7 @@ const float default_shininess = 0;
 #define BALL_DECELERATION_N (0.965)
 #define BALL_ACCELERATION_G (1.2)
 #define NCAMERAMODES 3
+#define NPLAYERS 2
 //#define SHOW_TABLE_FRAME 1 //uncomment to apply
 
 // Table boundaries

@@ -36,6 +36,7 @@ class Level
 		ObjectBall	ball;
 		vector<ObjectBall*> balls;
 		Camera *camera, *camera2;
+		
 	//---------------------------- CONSTRUCTORS
 		Level(map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 			  Camera *_camera, Camera *_camera2,

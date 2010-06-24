@@ -19,6 +19,7 @@
 #include "Camera.h"
 #include "LightInfo.h"
 #include "Level.h"
+#include "Game.h"
 #include "constants.h"
 #include "utils.h"
 						 
@@ -33,6 +34,8 @@ Camera camera, camera2(2);
 Texture tigerTex, woodTex, tableTex, rockTex, starsTex, ballTex, stickTex;
 
 Level level(&objects, &theLights, &camera, &camera2, &ballTex, &stickTex);
+
+Game game(&level);
 
 // mouse-keyboard
 static int	xold, yold;		
@@ -459,8 +462,7 @@ void mouseMotionFunc(int x, int y) {
 		level.stick.changePower( (y-yold)/5. );
 		
 	    if( level.stick.getAttackStrenght()<level.ball.getRadius() ) {
-			level.ball.applyForce((yold-y),level.stick.getAngleInXZ()+90);  //some naughty magic numbers here
-			level.stick.attack();
+			game.attack(y, yold);
 		}
 	}
 	

@@ -2,7 +2,7 @@ CC = g++
 
 CFLAGS = -Wall
 
-OBJS = glm.o imageloader.o ObjectModel.o Object.o ObjectStick.o ObjectBall.o Material.o LightInfo.o Level.o Camera.o Texture.o utils.o
+OBJS = glm.o imageloader.o ObjectModel.o Object.o ObjectStick.o ObjectBall.o Material.o LightInfo.o Level.o Camera.o Game.o Texture.o utils.o
 
 LIBS = -lglut
 
@@ -37,6 +37,9 @@ Material.o: Material.cpp Material.h
 	$(CC) $(FLAGS) $< -c $(FLAGS) $(LIBS) 
 
 Camera.o: Camera.cpp Camera.h
+	$(CC) $(FLAGS) $< -c $(FLAGS) $(LIBS)
+
+Game.o: Game.cpp Game.h
 	$(CC) $(FLAGS) $< -c $(FLAGS) $(LIBS)
 
 LightInfo.o: LightInfo.cpp LightInfo.h

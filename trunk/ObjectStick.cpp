@@ -94,5 +94,5 @@ void ObjectStick::calculatePos()
 
 void ObjectStick::attack()
 {
-	setAttackStrenght(3);
+	setAttackStrenght(40);
 }
