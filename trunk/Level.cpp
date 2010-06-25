@@ -27,26 +27,19 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	ball.setRadius(10);
 	ball.setPos(0, TABLE_PLANE_Y+ball.getRadius(), 0);
 	
-	// ball2
+	// extra balls
 	static ObjectBall ball2("obj/poolball.obj"),
 					  ball3("obj/poolball.obj"),
 					  ball4("obj/poolball.obj"),
 					  ball5("obj/poolball.obj");
-	ball2.setRadius(10);
-	ball3.setRadius(10);
-	ball4.setRadius(10);
-	ball5.setRadius(10);
-	
+	balls.push_back(&ball); balls.push_back(&ball2); balls.push_back(&ball3); balls.push_back(&ball4); balls.push_back(&ball5);
+	ball2.setRadius(10); ball3.setRadius(10); ball4.setRadius(10); ball5.setRadius(10);
+	ball2.setTexture(ballTex); ball3.setTexture(ballTex); ball4.setTexture(ballTex); ball5.setTexture(ballTex);
 	ball2.setPos(30, TABLE_PLANE_Y+ball2.getRadius(), 10);
 	ball3.setPos(30, TABLE_PLANE_Y+ball2.getRadius(), 20);
 	ball4.setPos(10, TABLE_PLANE_Y+ball2.getRadius(), 7);
 	ball5.setPos(10, TABLE_PLANE_Y+ball2.getRadius(), 0);
-		balls.push_back(&ball);
-		balls.push_back(&ball2);
-		balls.push_back(&ball3);
-		balls.push_back(&ball4);
-		balls.push_back(&ball5);
-	
+
 	// the stick
 	stick.setCenter(&ball);
 	
@@ -77,15 +70,16 @@ void Level::drawObjects () {
 			
 	glEnable(GL_LIGHTING);
 	
-	ball.draw();
 	stick.draw();
 	
 	// draw all objects
 	map<string,Object*>::iterator it;
 	for( it = objects->begin(); it!=objects->end(); it++ )
-		if( (*it).first!="crypt" )
+		if( (*it).first!="crypt" &&
+			(*it).first!="tableShadow" )
 			(*it).second->draw();
 			
+	// draw balls
 	for( int i=0; i<balls.size(); i++ )
 		balls[i]->draw();
 	
@@ -97,13 +91,17 @@ void Level::drawObjects () {
 
 void Level::drawObjects_partial ()
 {
-	ball.draw();
 	stick.draw();
 	(*objects)["tableStruct"]->draw();
 	(*objects)["tableTop"]->draw();
-#ifdef SHOW_TABLE_FRAME
-	(*objects)["tableFrame"]->draw();
-#endif
+
+	// draw balls
+	for( int i=0; i<balls.size(); i++ )
+		balls[i]->draw();
+
+	#ifdef SHOW_TABLE_FRAME
+		(*objects)["tableFrame"]->draw();
+	#endif
 	
 }
 
@@ -131,7 +129,7 @@ void Level::castShadows() {
 		glShadowProjection(lightSource,floorPlane,planeNormal); //manipulates the matrix so everything will be projected in the FLOORPLANE
 			glClear( GL_STENCIL_BUFFER_BIT);
 			glStencilFunc(GL_EQUAL, 0, 1); 						//will let only one vertex be drawn on each position each time shadow
-				//tableShadow.draw(); 
+				(*objects)["tableShadow"]->draw();; 
 				stick.draw();
 	glPopMatrix();
 	
@@ -148,7 +146,6 @@ void Level::castShadows() {
 			glDepthMask(true); 
 			glStencilFunc(GL_EQUAL, 1, 1); 						//now the shadow is cast only where stencil buffer==1, i.e. the table
 				stick.draw();
-				ball.draw();
 				for(int i=0;i<balls.size();i++)
 					balls[i]->draw();
 				#ifdef SHOW_TABLE_FRAME
@@ -202,19 +199,23 @@ void Level::lights()
 
 void Level::updateVariables()
 {
-	bool	ballHasMoved = ball.updateState();
-	
-	for(int i=0; i<balls.size(); i++)
-		balls[i]->updateState();
-	
-	if(ballHasMoved)
+	bool changed = false;
+
+	for( int i=0; i<balls.size(); i++ )
+		changed = balls[i]->updateState() || changed;	
+
+	if(changed)
 	{
 		if(camera->getMode() == 1)
 			camera->setMode(1, &ball);
-		stick.setCenter(&ball);
+		
+		testBallsCollision();
 	}
-	
-	testBallsCollision();
+	else
+	{
+		stick.setCenter(&ball);
+		stick.show();	
+	}
 }
 
 void Level::testBallsCollision()
@@ -228,12 +229,12 @@ void Level::testBallsCollision()
 										 0,
 										 balls[i]->getPosZ() - balls[j]->getPosZ()};
 					
-					float impactAngle = balls[j]->getDirection(impactv);
+					float impactAngle = getVectorAngle(impactv);
 					
 					float impactForce = (balls[i]->getSpeed() + balls[j]->getSpeed())/2;
 					
-					//balls[i]->setPos( balls[i]->getPastX(), balls[i]->getPastY(), balls[i]->getPastZ() );
-					//balls[j]->setPos( balls[j]->getPastX(), balls[j]->getPastY(), balls[j]->getPastZ() );
+					//balls[i]->setPos( balls[i]->getPastX(), balls[i]->getPosY(), balls[i]->getPastZ() );
+					//balls[j]->setPos( balls[j]->getPastX(), balls[j]->getPosY(), balls[j]->getPastZ() );
 
 					balls[i]->applyForce( impactForce, impactAngle );
 					balls[j]->applyForce( impactForce, -impactAngle );

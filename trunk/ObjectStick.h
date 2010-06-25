@@ -23,6 +23,8 @@ class ObjectStick : public ObjectModel
 		float		angleInXZ;
 		
 	public:
+		bool		isHidden;
+	
 		//---------------------------- CONSTRUCTORS
 		ObjectStick();
 		ObjectStick(string filename, Object* objectCenter);
@@ -45,16 +47,17 @@ class ObjectStick : public ObjectModel
 		 * object "center" (the instance variable we have on ObjectStick
 		 * class).
 		 */
-		void	rotate( float rotation );
-
-		void	changePower( float var );
+		void			rotate( float rotation );
+		void			changePower( float var );
 		
 		/* CalculatePos()
 		 * 
 		 * After the movement, the new position of the Stick is calculated
 		 * and put in the position variables called pos ([0], [1] and [2]).
 		 */
-		void	calculatePos();
-		
-		void 	attack();
+		void			calculatePos();
+		void 			attack();
+		virtual void	draw() const;
+		void			hide();
+		void			show();
 };

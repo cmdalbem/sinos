@@ -14,6 +14,8 @@ ObjectStick::ObjectStick()
 	setRotY(-180);
 	setRotZ(0);
 	
+	isHidden = false;
+	
 	setAttackStrenght(1);
 }
 ObjectStick::ObjectStick(string filename, Object* objectCenter)
@@ -22,6 +24,8 @@ ObjectStick::ObjectStick(string filename, Object* objectCenter)
 	setRotX(25);
 	setRotY(-180);
 	setRotZ(0);
+	
+	isHidden = false;
 	
 	center = objectCenter;
 	
@@ -77,10 +81,12 @@ void ObjectStick::rotate( float rot )
 
 void ObjectStick::changePower( float var )
 {
-	setAttackStrenght(attackStrenght + var);
-	setRotX(25);
-	
-	calculatePos();
+	if( !isHidden )
+	{
+		setAttackStrenght(attackStrenght + var);
+		setRotX(25);
+		calculatePos();
+	}
 }
 
 void ObjectStick::calculatePos()
@@ -95,4 +101,21 @@ void ObjectStick::calculatePos()
 void ObjectStick::attack()
 {
 	setAttackStrenght(10);
+	hide();
+}
+
+void ObjectStick::draw() const
+{
+	if(!isHidden)
+		ObjectModel::draw();
+}
+
+void ObjectStick::hide()
+{
+	isHidden = true;
+}
+
+void ObjectStick::show()
+{
+	isHidden = false;
 }

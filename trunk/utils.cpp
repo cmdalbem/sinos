@@ -10,6 +10,25 @@ using namespace std;
 #include "utils.h"
 
 
+double getVectorNorma( const float v[3] )
+{
+	return sqrt( pow(v[0],2) + pow(v[1],2) + pow(v[2],2) );	
+}
+
+double getVectorAngle( const float v[3] )
+{
+	if( getVectorNorma(v) ) {
+		float direction = DEGREES(acosf(v[0]/getVectorNorma(v))); //angle of move vector = arc cos x/hypotenuse
+		
+		if( (v[2]/getVectorNorma(v)) > 0 )
+			direction += 2*(180-direction);
+			
+		return direction;
+	}
+	else
+		return 0;
+}	
+
 void glShadowProjection(float * l, float * e, float * n)
 /* This function was adapted from the Internet. There as so many sources that I can't tell the original author of this.*/
 {
@@ -104,30 +123,6 @@ void loadTexture(Texture *texVar, string texFile, bool makeMipmap)
 		cout << "Couldn't open TGA texture " << texFile << "." << endl;
 
 }
-
-void drawOsd( char osd[], Camera camera, long int fps )
-/* Draws On-Screen Display */
-/* Adapted from http://www.opengl.org/resources/code/samples/glut_examples/examples/bitfont.c */
-{
-  glDisable(GL_LIGHTING);
-  
-  // OSD configuration
-  sprintf(osd,"FPS: %li ",fps);
-  for( int i=0; i<NCAMERAMODES; i++ )
-	if( camera.getMode()==i )
-		sprintf(osd,"%s - [%s]",osd,camera.getModeName(i));
-	else
-		sprintf(osd,"%s -  %s ",osd,camera.getModeName(i));
-  
-  // OSD drawing
-  glColor3f(1.0f, 1.0f, 1.0f);
-  glRasterPos3f(-1, 0.5, -1);
-  for (int i = 0; i < (int)strlen(osd); i++) 
-    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, osd[i]);
-   
-  glEnable(GL_LIGHTING);
-}
-
 
 void drawPlane(int w, int h, float nx, float ny, float nz)
 /* Adapted from http://www.opengl.org/resources/code/samples/glut_examples/examples/spots.c */

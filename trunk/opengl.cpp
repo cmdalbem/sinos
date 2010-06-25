@@ -48,11 +48,7 @@ static bool heldShift = false;
 
 // !! The following globals aren't in their proper place. !!
 
-float 		posit=0;
-long int 	frameCounter, fps = 0;	//frames per second counter and register
-char 		osd[1024]; 				//text buffer for on-screen output
 int 		lensAngle = 60;
-float 		radius=2.3;
 
 
 //--------------------------------------------------------------------//
@@ -107,7 +103,7 @@ void initObjects ()
 		objects["tableTop"] = &tableTop;
 		objects["tableStruct"] = &tableStruct;
 	tableShadow.setSize(100,100,100);
-		//objects["tableShadow"] = &tableShadow;
+		objects["tableShadow"] = &tableShadow;
 
 	// table2
 	tableStructMat.setDiffuse(0.25,0.09,0.07);
@@ -179,12 +175,13 @@ void perspectiveViewport( int width, int height ) {
     					
     glMatrixMode(GL_MODELVIEW);
 	
-	level.ball.updateRotateMatrix(); //this MUST be called HERE
+	for(int i=0;i<level.balls.size();i++)
+		level.balls[i]->updateRotateMatrix();
 	
     glLoadIdentity ();
     
     // IMPORTANT: don't change the order of these calls
-		drawOsd(osd, camera,fps);
+		game.drawOsd();
 		level.camera->apply();
 		level.lights();
 		level.drawObjects();
@@ -227,7 +224,7 @@ void display () {
 	glDisable(GL_SCISSOR_TEST);
 		
     glutSwapBuffers();
-    frameCounter++;
+    game.frameCounter++;
 }
 
 void initLights () {
@@ -391,7 +388,10 @@ void keyboardFunc (unsigned char key, int x, int y) {
 	}
 		
     if( key=='c' )
+    {
+		game.updateOsd();
 		level.camera->nextMode(&(level.ball));
+	}
 	
     if ( key==K_ESC )
     {
@@ -402,13 +402,15 @@ void keyboardFunc (unsigned char key, int x, int y) {
 void specialFunc(int key, int x, int y)
 {
 	if( key == GLUT_KEY_F1 ) {
+		game.updateOsd();
 		level.camera->setMode(0);
 	}
 	if( key == GLUT_KEY_F2 ) {
-		
+		game.updateOsd();
 		level.camera->setMode(1,&(level.ball));
 	}
 	if( key == GLUT_KEY_F3 ) {
+		game.updateOsd();
 		level.camera->setMode(2);
 	}
 	
@@ -461,8 +463,8 @@ void mouseMotionFunc(int x, int y) {
 		// stick manual attack
 		level.stick.changePower( (y-yold)/5. );
 		
-	    if( level.stick.getAttackStrenght()<level.ball.getRadius() ) {
-			game.attack(y, yold);
+	    if( level.stick.getAttackStrenght() < level.ball.getRadius() ) {
+			game.attack( pow((yold-y),2)/3 );
 		}
 	}
 	
@@ -475,8 +477,9 @@ void mouseMotionFunc(int x, int y) {
 }
 
 void updateFPS(int value) {
-	fps = frameCounter;
-	frameCounter = 0;
+	game.fps = game.frameCounter;
+	game.frameCounter = 0;
+	game.updateOsd();
 	
 	glutTimerFunc(1000/*1sec*/, updateFPS, 0);
 }

@@ -23,7 +23,6 @@ using namespace std;
 #include "constants.h"
 #include "utils.h"
 
-//#include "opengl.cpp"
 
 class Level
 {

@@ -78,11 +78,6 @@ void ObjectBall::setSlices(GLint newSlices)
 	slices = newSlices;
 }
 
-void ObjectBall::setDirection( float newDir )
-{
-	applyForce(0, newDir);
-}
-
 void ObjectBall::resetSpeed()
 {
 	moveVector[0] = 0;
@@ -92,38 +87,14 @@ void ObjectBall::resetSpeed()
 	setRot(0,0,0);
 }
 
-float ObjectBall::getDirection( float avector[] ) const
+double ObjectBall::getDirection() const
 {
-	float vector[3];
-	if( avector ) {
-		vector[0] = avector[0];
-		vector[1] = avector[1];
-		vector[2] = avector[2];
-	}
-	else {
-		vector[0] = moveVector[0];
-		vector[1] = moveVector[1];
-		vector[2] = moveVector[2];
-	}
-	
-	if( getSpeed() ) {
-		float direction = DEGREES(acosf(vector[0]/getSpeed(vector))); //angle of move vector = arc cos x/hypotenuse
-		
-		if( (vector[2]/getSpeed(vector)) > 0 )
-			direction += 2*(180-direction);
-			
-		return direction;
-	}
-	else
-		return 0;
+	return getVectorAngle(moveVector);
 }	
 
-float ObjectBall::getSpeed( float avector[] ) const
+double ObjectBall::getSpeed() const
 {
-	if( avector )
-		return sqrt( pow(avector[0],2) + pow(avector[1],2) + pow(avector[2],2) );	
-	else
-		return sqrt( pow(moveVector[0],2) + pow(moveVector[1],2) + pow(moveVector[2],2) );	
+	return getVectorNorma(moveVector);
 }
 
 float ObjectBall::getFutureSpeed() const
@@ -148,17 +119,12 @@ float ObjectBall::getFutureZ() const
 
 float ObjectBall::getPastX() const
 {
-	return getPosX() - 5*moveVector[0] / STATEUPDATES_PER_SEC;
-}
-
-float ObjectBall::getPastY() const
-{
-	return getPosY() - 5*moveVector[1] / STATEUPDATES_PER_SEC;
+	return pastPosXZ[0];
 }
 
 float ObjectBall::getPastZ() const
 {
-	return getPosZ() - 5*moveVector[2] / STATEUPDATES_PER_SEC;
+	return pastPosXZ[2];
 }
 
 float ObjectBall::getFuturePos( float *futurePos[] ) const
@@ -181,13 +147,25 @@ bool ObjectBall::updateState()
 {
 	if( getSpeed() )
 	{
-		if( !moveVector[1] )
-		{
+		pastPosXZ[0] = getPosX();
+		pastPosXZ[1] = getPosZ(); 
+		
+		// rotation by movement
+		setRot( moveVector[2] ,0, -moveVector[0] );
+		
+		// update position
+		setPos( getFutureX(), getFutureY(), getFutureZ() );
+		
+		// test if ball is falling
+		if( !moveVector[1] ) { 
 			bool can_move_x = testHorizontalBound(),
 				 can_move_z = testVerticalBound();
 
 			if( hasSnooked() )
+			{
+				cout<<"point!"<<endl;
 				moveVector[1]=-30;
+			}
 			else {
 				if( !can_move_x ) { //invert x
 					moveVector[0] = -moveVector[0];
@@ -198,17 +176,11 @@ bool ObjectBall::updateState()
 					changeSpeed(BALL_DECELERATION_R);
 				}
 			}
-		}
-		
-		// rotation by movement
-		setRot( moveVector[2] ,0, -moveVector[0] );
-		
-		// update position
-		setPos( getFutureX(), getFutureY(), getFutureZ() );
-		
-		// update velocity
-		if( !moveVector[1] ) { //if is not falling
+						
 			changeSpeed(BALL_DECELERATION_N);
+			
+			if( getSpeed() < 0.3 )
+				resetSpeed();
 		}
 		else
 			if( getPosY() > 1 ) {
@@ -307,9 +279,9 @@ void ObjectBall::resetRotateMatrix()
 
 bool ObjectBall::hasSnooked()
 {
-	float posx = getFutureX(),
-		  posy = getFutureY(),
-		  posz = getFutureZ();
+	float posx = getPosX(),
+		  posy = getPosY(),
+		  posz = getPosZ();
 
 	for(int i=0; i<NHOLES; i++)
 		if( abs(posx-HC[i][0]) + abs(posz-HC[i][1]) <= HC[i][2] )
@@ -329,7 +301,7 @@ bool ObjectBall::hasSnooked()
 
 bool ObjectBall::testHorizontalBound()
 {
-	float posx = getFutureX();
+	float posx = getPosX();
 	
 	if( posx > RIGHTBOUND  ||  posx < LEFTBOUND )
 		return false;
@@ -339,7 +311,7 @@ bool ObjectBall::testHorizontalBound()
 
 bool ObjectBall::testVerticalBound()
 {
-	float posz = getFutureZ();
+	float posz = getPosZ();
 	
 	if( posz > TOPBOUND  ||  posz < BOTBOUND )
 		return false;

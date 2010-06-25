@@ -16,9 +16,11 @@ class ObjectBall: public ObjectModel
 private:
 	GLdouble radius;
 	GLint slices, stacks;
-	float moveVector[3]; //direction of movement
+	float pastPosXZ[2];
+	
 	
 public:
+	float moveVector[3]; //direction of movement
 	GLdouble rotMat[16];
 	
 	//---------------------------- CONSTRUCTORS
@@ -41,8 +43,8 @@ public:
 	void				setRadius(GLdouble newRadius);
 	
 	// BEHAVIOUR
-	float				getDirection( float avector[]=NULL ) const;
-	float				getSpeed( float avector[]=NULL ) const;
+	double				getDirection() const;
+	double				getSpeed() const;
 	float				getFutureSpeed() const;
 	float				getFutureX() const;
 	float				getFutureY() const;

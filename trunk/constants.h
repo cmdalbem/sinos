@@ -38,7 +38,7 @@ const float default_shininess = 0;
 #define STATEUPDATES_PER_SEC 50
 #define TABLE_PLANE_Y 28.5
 #define NHOLES 6
-#define BALL_DECELERATION_R (0.995)
+#define BALL_DECELERATION_R (0.996)
 #define BALL_DECELERATION_N (0.965)
 #define BALL_ACCELERATION_G (1.2)
 #define NCAMERAMODES 3

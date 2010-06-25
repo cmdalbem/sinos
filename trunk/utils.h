@@ -16,6 +16,10 @@ using namespace std;
 #include "constants.h"
 
 
+double getVectorNorma( const float v[3] );
+
+double getVectorAngle( const float v[3] );
+
 /* glShadowProjection()
  * Original documentation follows:
  * 
@@ -48,12 +52,6 @@ void glCircle3f ( GLfloat x, GLfloat y, GLfloat z, GLfloat radius );
  */
 void loadTexture(Texture *texVar, string texFile, bool makeMipmap=false);
 	
-/* drawOsd()
- * Draws On-Screen Display
- * 	Adapted from http://www.opengl.org/resources/code/samples/glut_examples/examples/bitfont.c
- */
-void drawOsd ( char osd[], Camera camera, long int fps );
-
 /* drawPlane()
  * 	Adapted from http://www.opengl.org/resources/code/samples/glut_examples/examples/spots.c
  */
