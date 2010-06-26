@@ -16,11 +16,11 @@ class ObjectBall: public ObjectModel
 private:
 	GLdouble radius;
 	GLint slices, stacks;
-	float pastPosXZ[2];
+	GLUquadricObj *quadricSphere;
 	
 	
 public:
-	float moveVector[3]; //direction of movement
+	double moveVector[3]; //direction of movement
 	GLdouble rotMat[16];
 	
 	//---------------------------- CONSTRUCTORS
@@ -38,6 +38,7 @@ public:
 	GLdouble			getRadius() const;
 	float				getPerimeter() const;
 
+	void				setProps(GLdouble newRadius, GLint newStacks, GLint newSlices);
 	void				setStacks(GLint newStacks);
 	void				setSlices(GLint newSlices);
 	void				setRadius(GLdouble newRadius);
@@ -45,16 +46,15 @@ public:
 	// BEHAVIOUR
 	double				getDirection() const;
 	double				getSpeed() const;
-	float				getFutureSpeed() const;
 	float				getFutureX() const;
 	float				getFutureY() const;
 	float				getFutureZ() const;
 	float				getFuturePos( float *futurePos[] ) const;
 	float				getPastX() const;
-	float				getPastY() const;
 	float				getPastZ() const;
 	
-	void				setDirection( float newDir );
+	void				backTrack( double v[3] );
+	
 	void 				resetSpeed();
 	
 	//---------------------------- OTHER METHODS
@@ -66,8 +66,8 @@ public:
 	void 				drawBegin() const;
 	virtual void 		draw() const;
 	bool 				updateState();
-	void				applyForce( float magnitude, float direction );
-	void				changeSpeed( float factor );
+	void				applyForce( float magnitude, float direction, bool reflectAngle=false );
+	void				changeSpeed( double factor );
 		
 	/* updateRotateMatrix()
 	 * 
@@ -86,10 +86,11 @@ public:
 	 * This will set primary values on the rotationMatrix.
 	 */
 	void				resetRotateMatrix();
+	void 				setQuad();
 	
 	//---------------------------- POSITION DETECTION
 	// TO DO: Study about moving these functions to an dedicated class.
 	bool				hasSnooked();
-	bool 				testHorizontalBound();
-	bool 				testVerticalBound();
+	bool 				canMoveHorizontal();
+	bool 				canMoveVertical();
 };

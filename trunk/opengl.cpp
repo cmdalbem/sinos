@@ -176,7 +176,7 @@ void perspectiveViewport( int width, int height ) {
     glMatrixMode(GL_MODELVIEW);
 	
 	for(int i=0;i<level.balls.size();i++)
-		level.balls[i]->updateRotateMatrix();
+		level.balls[i].updateRotateMatrix();
 	
     glLoadIdentity ();
     
@@ -211,20 +211,26 @@ void orthoViewport( int width, int height ) {
 }	
 
 void display () {
-
-	int width = glutGet(GLUT_WINDOW_WIDTH);
-    int height = glutGet(GLUT_WINDOW_HEIGHT);
-
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_SCISSOR_TEST);
 	
-		orthoViewport(width,height);
-		perspectiveViewport(width,height);
-				
-	glDisable(GL_SCISSOR_TEST);
+	static bool displayer=false;
+	displayer = !displayer;
+	
+	if( displayer )
+	{
+		int width = glutGet(GLUT_WINDOW_WIDTH);
+		int height = glutGet(GLUT_WINDOW_HEIGHT);
+
+		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_SCISSOR_TEST);
 		
-    glutSwapBuffers();
-    game.frameCounter++;
+			orthoViewport(width,height);
+			perspectiveViewport(width,height);
+					
+		glDisable(GL_SCISSOR_TEST);
+			
+		glutSwapBuffers();
+		game.frameCounter++;
+	}
 }
 
 void initLights () {
@@ -356,11 +362,15 @@ void init ()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	glEnable(GL_NORMALIZE);		//normalizes all normals
-	glEnable (GL_DEPTH_TEST);
-    glEnable (GL_LIGHTING);
+	glEnable(GL_TEXTURE_2D);	
+	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
     glShadeModel (GL_SMOOTH);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
+	for(int i=0; i<level.balls.size(); i++)
+		level.balls[i].setQuad();
+	
 	initLights();
 	glEnable (GL_LIGHT0); 	// sun
 	glEnable (GL_LIGHT1);   // spotlight
@@ -383,14 +393,14 @@ void init ()
 void keyboardFunc (unsigned char key, int x, int y) {
 			
 	if ( key==K_SPACE) {
-		level.ball.applyForce(level.stick.getAttackStrenght()*10,level.stick.getAngleInXZ()+90);  //some naughty magic numbers here
+		level.balls[0].applyForce(level.stick.getAttackStrenght()*10,level.stick.getAngleInXZ()+90);  //some naughty magic numbers here
 		level.stick.attack();
 	}
 		
     if( key=='c' )
     {
 		game.updateOsd();
-		level.camera->nextMode(&(level.ball));
+		level.camera->nextMode(&(level.balls[0]));
 	}
 	
     if ( key==K_ESC )
@@ -407,7 +417,7 @@ void specialFunc(int key, int x, int y)
 	}
 	if( key == GLUT_KEY_F2 ) {
 		game.updateOsd();
-		level.camera->setMode(1,&(level.ball));
+		level.camera->setMode(1,&(level.balls[0]));
 	}
 	if( key == GLUT_KEY_F3 ) {
 		game.updateOsd();
@@ -463,7 +473,7 @@ void mouseMotionFunc(int x, int y) {
 		// stick manual attack
 		level.stick.changePower( (y-yold)/5. );
 		
-	    if( level.stick.getAttackStrenght() < level.ball.getRadius() ) {
+	    if( level.stick.getAttackStrenght() < level.balls[0].getRadius() ) {
 			game.attack( pow((yold-y),2)/3 );
 		}
 	}
@@ -489,6 +499,11 @@ void updateState(int value) {
 	glutTimerFunc(1000/STATEUPDATES_PER_SEC, updateState, 0);
 }
 
+void displayCaller(int value) {
+	display();
+	glutTimerFunc(1000/STATEUPDATES_PER_SEC, displayCaller, 0);
+}
+
 
 
 
@@ -503,18 +518,18 @@ int main (int argc, char **argv) {
     //glutEnterGameMode();
     init();
     
-    glutDisplayFunc (display);
+    //glutDisplayFunc (display);
     
     
-    glutIdleFunc (display);							// update any variables in display, display can be changed to anyhing,
-                            						// as long as you move the variables to be updated, in this case, angle++;
+    glutIdleFunc (display);
     
     glutKeyboardFunc(keyboardFunc);
     glutSpecialFunc(specialFunc);
     glutMouseFunc(mouseFunc);
 	glutMotionFunc(mouseMotionFunc);
-	glutTimerFunc(1000/*1sec*/, updateFPS, 0);    
-	glutTimerFunc(1000/STATEUPDATES_PER_SEC , updateState, 0);
+	glutTimerFunc(0, updateFPS, 0);    
+	glutTimerFunc(0, updateState, 0);
+	//glutTimerFunc(0, displayCaller, 0);
 	
     glutMainLoop(); 
     

@@ -37,7 +37,7 @@ void Game::setLevel(Level *newLevel)
 void Game::attack( int yvar )
 {
 	if( !level->stick.isHidden ) {
-		level->ball.applyForce(yvar,level->stick.getAngleInXZ()+90);  //some naughty magic numbers here
+		level->balls[0].applyForce(yvar,level->stick.getAngleInXZ()+90);  //some naughty magic numbers here
 		level->stick.attack();
 		
 		currentPlayer = (currentPlayer+1) % NPLAYERS;

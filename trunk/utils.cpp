@@ -8,14 +8,42 @@ using namespace std;
 #include "Camera.h"
 #include "constants.h"
 #include "utils.h"
+#include "time.h"
 
 
-double getVectorNorma( const float v[3] )
+void drawGuideLine( double posx, double posy, double posz, double stickAngle)
+{
+	glColor4f(1.,1.,1.,1); 
+	glLineStipple(2, 0xAAAA);
+	glEnable(GL_LINE_STIPPLE);
+	glBegin(GL_LINES);
+		glVertex3f( posx, posy, posz);
+		glVertex3f( posx+100*cos(RAD(stickAngle+90)), posy, posz+100*sin(RAD(-(stickAngle+90))) );
+	glEnd();
+	glDisable(GL_LINE_STIPPLE);	
+}
+double getRandBetween(int a, int b)
+{
+	srand(time(0));
+	int d = abs(a) + abs(b) + 1;
+	return (rand() % d) + a;
+}
+
+double normalizeVector( double v[3] )
+{
+	double norma = getVectorNorma(v);
+	
+	v[0] = v[0] / norma;
+	v[1] = v[1] / norma;
+	v[2] = v[2] / norma;
+}
+
+double getVectorNorma( const double v[3] )
 {
 	return sqrt( pow(v[0],2) + pow(v[1],2) + pow(v[2],2) );	
 }
 
-double getVectorAngle( const float v[3] )
+double getVectorAngle( const double v[3] )
 {
 	if( getVectorNorma(v) ) {
 		float direction = DEGREES(acosf(v[0]/getVectorNorma(v))); //angle of move vector = arc cos x/hypotenuse
@@ -100,7 +128,7 @@ void loadTexture(Texture *texVar, string texFile, bool makeMipmap)
 
         if( makeMipmap ) {
 			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR_MIPMAP_LINEAR);			
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR_MIPMAP_LINEAR);
 			gluBuild2DMipmaps( GL_TEXTURE_2D, 3, texVar->width, texVar->height, GL_RGB, GL_UNSIGNED_BYTE, texVar->imageData ); 
 		}
 		else {
@@ -108,7 +136,6 @@ void loadTexture(Texture *texVar, string texFile, bool makeMipmap)
 			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);			
 		}
         
-        glEnable(GL_TEXTURE_2D);
         if (texVar->imageData)
         {
             // You can now free the image data that was allocated by LoadTGA

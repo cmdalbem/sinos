@@ -22,8 +22,8 @@ struct point
 // Macros
 #define RGB(x) (float)(x)/(255)
 #define VARNAME(x) #x
-#define RAD(x) ((x)*(M_PI))/(180)
-#define DEGREES(x) ((x)*(180))/(M_PI)
+#define RAD(x) ((x)*(M_PI))/(180.)
+#define DEGREES(x) ((x)*(180.))/(M_PI)
 
 // Default values for Materials Attributes
 const float default_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
@@ -35,12 +35,12 @@ const float default_shininess = 0;
 
 // Global variables
 #define NSTARS 1000
-#define STATEUPDATES_PER_SEC 50
+#define STATEUPDATES_PER_SEC (100.)
 #define TABLE_PLANE_Y 28.5
 #define NHOLES 6
-#define BALL_DECELERATION_R (0.996)
-#define BALL_DECELERATION_N (0.965)
-#define BALL_ACCELERATION_G (1.2)
+#define BALL_DECELERATION_R (0.01)
+#define BALL_DECELERATION_N (0.1)
+#define BALL_ACCELERATION_G (1.1)
 #define NCAMERAMODES 3
 #define NPLAYERS 2
 //#define SHOW_TABLE_FRAME 1 //uncomment to apply
@@ -74,10 +74,10 @@ const float B6P1[] = { 48  ,  24.5};
 const float B6P2[] = { 44.4,  28.1};
 // centers {x,z,radius}
 const float HC[6][3] ={{-48. ,-22.9, 2.7},
-				       {-0.3 ,-24.4, 2.5},
+				       {-0.3 ,-24.4, 2.4},
 				  	   { 47.4,-22.6, 2.7},
 				 	   {-48. , 27.8, 2.7},
-					   {-0.3 , 29.3, 2.5},
+					   {-0.3 , 29.3, 2.4},
 					   { 47.4, 27.5, 2.7}};
 
 // Keyboard keys

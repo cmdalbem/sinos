@@ -32,8 +32,7 @@ class Level
 		
 	public:
 		ObjectStick stick;
-		ObjectBall	ball;
-		vector<ObjectBall*> balls;
+		vector<ObjectBall> balls;
 		Camera *camera, *camera2;
 		
 	//---------------------------- CONSTRUCTORS

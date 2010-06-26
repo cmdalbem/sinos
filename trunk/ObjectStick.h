@@ -17,7 +17,7 @@ using namespace std;
 class ObjectStick : public ObjectModel
 {
 	private:
-		Object*		center;
+		ObjectBall*		center;
 		float 		attackStrenght;
 		
 		float		angleInXZ;
@@ -27,13 +27,13 @@ class ObjectStick : public ObjectModel
 	
 		//---------------------------- CONSTRUCTORS
 		ObjectStick();
-		ObjectStick(string filename, Object* objectCenter);
+		ObjectStick(string filename, ObjectBall* objectCenter);
 		
 		//---------------------------- DESTRUCTORS
 		
 		~ObjectStick();
 		//---------------------------- GETTERS & SETTERS
-		void	setCenter(Object* newCenter);
+		void	setCenter(ObjectBall* newCenter);
 		float 	getAngleInXZ();
 		void	setAngleInXZ(float newAngle);
 		

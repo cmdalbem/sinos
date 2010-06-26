@@ -16,32 +16,32 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	camera  = _camera;
 	camera2 = _camera2;
 	
-	// the ball
-	ball.loadFromFile("obj/poolball.obj");
-	ball.material.setShininess(120); 
-	ball.material.setAmbient(1,1,1); 
-	ball.material.setEmission(0.1,0.1,0.1); 
-	ball.material.setDiffuse(0.5, 0.5, 0.5);
-	ball.material.setSpecular(0.9, 0.9, 0.9);
-	ball.setTexture(ballTex);
-	ball.setRadius(10);
-	ball.setPos(0, TABLE_PLANE_Y+ball.getRadius(), 0);
-	
-	// extra balls
-	static ObjectBall ball2("obj/poolball.obj"),
-					  ball3("obj/poolball.obj"),
-					  ball4("obj/poolball.obj"),
-					  ball5("obj/poolball.obj");
-	balls.push_back(&ball); balls.push_back(&ball2); balls.push_back(&ball3); balls.push_back(&ball4); balls.push_back(&ball5);
-	ball2.setRadius(10); ball3.setRadius(10); ball4.setRadius(10); ball5.setRadius(10);
-	ball2.setTexture(ballTex); ball3.setTexture(ballTex); ball4.setTexture(ballTex); ball5.setTexture(ballTex);
-	ball2.setPos(30, TABLE_PLANE_Y+ball2.getRadius(), 10);
-	ball3.setPos(30, TABLE_PLANE_Y+ball2.getRadius(), 20);
-	ball4.setPos(10, TABLE_PLANE_Y+ball2.getRadius(), 7);
-	ball5.setPos(10, TABLE_PLANE_Y+ball2.getRadius(), 0);
+	// Balls
+	int nballs = 20 ;
+	Material ballMaterial;
+	ballMaterial.setShininess(120); 
+	ballMaterial.setAmbient(1,1,1); 
+	ballMaterial.setEmission(0.1,0.1,0.1); 
+	ballMaterial.setDiffuse(0.5, 0.5, 0.5);
+	ballMaterial.setSpecular(0.9, 0.9, 0.9);
+	balls.resize(nballs);
+	for(int i=0; i<nballs/2; i++)
+	{
+		balls[i].setProps(1,50,50);
+		balls[i].setTexture(ballTex);
+		balls[i].setMaterial(ballMaterial);
+		balls[i].setPos(3*i -30, TABLE_PLANE_Y+balls[i].getRadius(), 10);
+	}
+	for(int i=nballs/2; i<nballs; i++)
+	{
+		balls[i].setProps(1,50,50);
+		balls[i].setTexture(ballTex);
+		balls[i].setMaterial(ballMaterial);
+		balls[i].setPos(3*(i-nballs/2) -30, TABLE_PLANE_Y+balls[i].getRadius(), 0);
+	}
 
 	// the stick
-	stick.setCenter(&ball);
+	stick.setCenter(&balls[0]);
 	
 	stick.loadFromFile("obj/taco.obj");	
 	stick.calculatePos();	// This is needed to put the Stick on the right place
@@ -70,6 +70,8 @@ void Level::drawObjects () {
 			
 	glEnable(GL_LIGHTING);
 	
+	glCircle3f(-30,TABLE_PLANE_Y,6.71347,balls[0].getRadius());
+	
 	stick.draw();
 	
 	// draw all objects
@@ -81,7 +83,7 @@ void Level::drawObjects () {
 			
 	// draw balls
 	for( int i=0; i<balls.size(); i++ )
-		balls[i]->draw();
+		balls[i].draw();
 	
 	// TEMP: directional light only on crypt
 	glEnable (GL_LIGHT2);
@@ -97,7 +99,7 @@ void Level::drawObjects_partial ()
 
 	// draw balls
 	for( int i=0; i<balls.size(); i++ )
-		balls[i]->draw();
+		balls[i].draw();
 
 	#ifdef SHOW_TABLE_FRAME
 		(*objects)["tableFrame"]->draw();
@@ -147,7 +149,7 @@ void Level::castShadows() {
 			glStencilFunc(GL_EQUAL, 1, 1); 						//now the shadow is cast only where stencil buffer==1, i.e. the table
 				stick.draw();
 				for(int i=0;i<balls.size();i++)
-					balls[i]->draw();
+					balls[i].draw();
 				#ifdef SHOW_TABLE_FRAME
 					tableFrame.draw();
 				#endif
@@ -202,41 +204,53 @@ void Level::updateVariables()
 	bool changed = false;
 
 	for( int i=0; i<balls.size(); i++ )
-		changed = balls[i]->updateState() || changed;	
+		changed = balls[i].updateState() || changed;	
 
 	if(changed)
 	{
 		if(camera->getMode() == 1)
-			camera->setMode(1, &ball);
+			camera->setMode(1, &balls[0]);
 		
 		testBallsCollision();
 	}
 	else
 	{
-		stick.setCenter(&ball);
+		stick.setCenter(&balls[0]);
 		stick.show();	
 	}
 }
 
 void Level::testBallsCollision()
 {
+	
 	for(int i=0; i<balls.size(); i++)
 		for(int j=0; j<balls.size(); j++)
 			if(i!=j)
-				if( balls[i]->distanceFromObject(*balls[j]) < balls[i]->getRadius() + balls[j]->getRadius()) // is distance > sum of their radius
+				if( balls[i].distanceFromObject(balls[j]) < balls[i].getRadius() + balls[j].getRadius()) // is distance > sum of their radius
 				{
-					float impactv[3] = { balls[i]->getPosX() - balls[j]->getPosX(),
+					double impactv[3] = { balls[i].getPosX() - balls[j].getPosX(), //impactVector = balls[i] - balls[j]
 										 0,
-										 balls[i]->getPosZ() - balls[j]->getPosZ()};
-					
+										 balls[i].getPosZ() - balls[j].getPosZ()};
+					normalizeVector(impactv);
+										
 					float impactAngle = getVectorAngle(impactv);
 					
-					float impactForce = (balls[i]->getSpeed() + balls[j]->getSpeed())/2;
+					float impactForce = 0.8*((balls[i].getSpeed() + balls[j].getSpeed())/2);
 					
-					//balls[i]->setPos( balls[i]->getPastX(), balls[i]->getPosY(), balls[i]->getPastZ() );
-					//balls[j]->setPos( balls[j]->getPastX(), balls[j]->getPosY(), balls[j]->getPastZ() );
-
-					balls[i]->applyForce( impactForce, impactAngle );
-					balls[j]->applyForce( impactForce, -impactAngle );
+					int repetitions = 0;
+					
+					while( balls[i].distanceFromObject(balls[j]) < balls[i].getRadius() + balls[j].getRadius()
+						   && repetitions < 50)
+					{	
+						balls[i].setPosX( balls[i].getPosX() + impactv[0]/10.);
+						balls[i].setPosZ( balls[i].getPosZ() + impactv[2]/10.);
+						
+						balls[j].setPosX( balls[j].getPosX() - impactv[0]/10.);
+						balls[j].setPosZ( balls[j].getPosZ() - impactv[2]/10.);
+						
+						repetitions++;
+					}
+					balls[i].applyForce( impactForce, impactAngle );
+					balls[j].applyForce( impactForce, impactAngle, true );
 				}
 }

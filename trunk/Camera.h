@@ -27,13 +27,13 @@ private:
 			xrot2, yrot2, zoom,		//
 			xorig, yorig, zorig,	//
 			
-			zoomTop;				// variable used in the Top View mode
+			centerx, centerz,		// variable used in the Top View mode
+			zoomTop;				// 
 
 public:
 	//---------------------------- CONSTRUCTORS
 	Camera( int cameraMode=0 );
-	/*Camera( GLfloat newXPos, GLfloat newYPos, GLfloat newZPos,
-			GLfloat newXRot, GLfloat newYRot, int newCameraMode);*/
+
 	//---------------------------- DESTRUCTORS
 	~Camera();
 	

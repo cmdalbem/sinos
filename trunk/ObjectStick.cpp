@@ -18,7 +18,7 @@ ObjectStick::ObjectStick()
 	
 	setAttackStrenght(1);
 }
-ObjectStick::ObjectStick(string filename, Object* objectCenter)
+ObjectStick::ObjectStick(string filename, ObjectBall* objectCenter)
 :	ObjectModel(filename)
 {
 	setRotX(25);
@@ -29,7 +29,7 @@ ObjectStick::ObjectStick(string filename, Object* objectCenter)
 	
 	center = objectCenter;
 	
-	setAttackStrenght(5);
+	setAttackStrenght(center->getRadius()+1);
 	calculatePos();
 }
 
@@ -37,7 +37,7 @@ ObjectStick::ObjectStick(string filename, Object* objectCenter)
 ObjectStick::~ObjectStick()	{ }
 
 //------------------------------------------------------------ GETTERS & SETTERS
-void ObjectStick::setCenter(Object* newCenter)
+void ObjectStick::setCenter(ObjectBall* newCenter)
 {
 	center = newCenter;
 	calculatePos();
@@ -63,8 +63,8 @@ float ObjectStick::getAttackStrenght()
 
 void ObjectStick::setAttackStrenght(float newForce)
 {
-	if ( newForce > 40 )
-		attackStrenght = 40;
+	if ( newForce > 25 )
+		attackStrenght = 25;
 	else
 		attackStrenght = newForce;
 }
@@ -100,7 +100,7 @@ void ObjectStick::calculatePos()
 
 void ObjectStick::attack()
 {
-	setAttackStrenght(10);
+	setAttackStrenght(center->getRadius()+1);
 	hide();
 }
 

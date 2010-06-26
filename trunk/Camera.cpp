@@ -18,32 +18,6 @@ Camera::Camera( int _cameraMode )
 	setCamera(_cameraMode);
 }
 
-// These constructors implementations has very low modularity
-/*Camera::Camera( GLfloat newXPos, GLfloat newYPos, GLfloat newZPos,
-				GLfloat newXRot, GLfloat newYRot, int newCameraMode)
-{
-	setXPos(newXPos);
-	setYPos(newYPos);
-	setZPos(newZPos);
-	
-	setXRot(newXRot);
-	setYRot(newYRot);
-	
-	cameraMode = newCameraMode;
-	
-	xrot2 = 45;		//
-	yrot2 = 20;		//
-	zoom = 50;		// Default values to these elements
-	posit=0;		//
-	
-	xorig = 0;
-	yorig = 29.5;
-	zorig = 0;
-	
-	setPos2();
-}*/
-
-
 //------------------------------------------------------------ DESTRUCTORS
 
 Camera::~Camera() { }
@@ -70,6 +44,9 @@ void Camera::setCamera(int _cameraMode)
 	zorig = 0;
 	
 	zoomTop = 100;
+	
+	centerx = 0;
+	centerz = 0;
 	
 	setPos2();
 }
@@ -149,20 +126,22 @@ void Camera::action1 (int movex, int movey)
 	switch( cameraMode )
 	{
 		case 0:
-			yrot = yrot + movey / 5.f;
-			xrot = xrot + movex / 5.f;
+			yrot = yrot + movey /5.;
+			xrot = xrot + movex /5.;
 			break;		
 		case 1:
-			yrot2 = yrot2 + movey / 5.f;
-			xrot2 = xrot2 + movex / 5.f;
+			yrot2 = yrot2 + movey /5.;
+			xrot2 = xrot2 + movex /5.;
 			
-			if(yrot2<0.5) yrot2=0.5;	// do not let reverse
-			if(yrot2>62.5) yrot2=62.5;	// the rotation
+			if(yrot2<0.5) yrot2=0.5;	// don't let reverse the rotation
+			if(yrot2>31.5) yrot2=31.5;		// don't let se below the table
 			
 			setPos2();
 					
 			break;
 		case 2:
+			centerx += movex /5.;
+			centerz += movey /5.;
 			break;
 		case 3:
 			break;
@@ -231,7 +210,7 @@ void Camera::apply( int forceAMode )
 		{
 			// top view
 			glRotatef(90, 1.,0.,0.);
-			glTranslated(0,-zoomTop,0);
+			glTranslated(centerx,-zoomTop,centerz);
 			break;
 		}
 		case 3:

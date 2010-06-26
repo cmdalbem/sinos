@@ -75,10 +75,8 @@ void ObjectModel::draw() const
 		drawBegin();		// Move, scale and rotate the object to the right place
 		if( texture!=NULL )
 		{
-			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, texture->texID);
 			glmDraw(modelPointer, GLM_SMOOTH | GLM_TEXTURE);
-			glDisable(GL_TEXTURE_2D);
 		}
 		else
 			glmDraw(modelPointer, GLM_SMOOTH);

@@ -50,6 +50,13 @@ ObjectBall::~ObjectBall() { }
 
 //------------------------------------------------------------ GETTERS & SETTERS
 
+void ObjectBall::setSize (GLfloat x, GLfloat y, GLfloat z)
+{
+	Object::setSize(x,y,z);
+	if(x==z && z==y)
+		radius = x/10;
+}
+
 GLdouble ObjectBall::getRadius() const
 {
 	return radius;
@@ -60,6 +67,12 @@ float ObjectBall::getPerimeter() const
 	return 2*M_PI*radius;
 }
 
+void ObjectBall::setProps(GLdouble newRadius, GLint newStacks, GLint newSlices)
+{
+	setStacks(newStacks);
+	setSlices(newSlices);
+	setRadius(newRadius);	
+}
 
 void ObjectBall::setStacks(GLint newStacks)
 {
@@ -69,8 +82,6 @@ void ObjectBall::setStacks(GLint newStacks)
 void ObjectBall::setRadius(GLdouble newRadius)
 {
 	radius = newRadius;
-	
-	setSize(newRadius,newRadius,newRadius);
 }
 
 void ObjectBall::setSlices(GLint newSlices)
@@ -97,14 +108,9 @@ double ObjectBall::getSpeed() const
 	return getVectorNorma(moveVector);
 }
 
-float ObjectBall::getFutureSpeed() const
-{
-	return sqrt( pow(moveVector[0]*BALL_DECELERATION_N,2) + pow(moveVector[1]*BALL_DECELERATION_N,2) + pow(moveVector[2]*BALL_DECELERATION_N,2) );	
-}
-
 float ObjectBall::getFutureX() const
 {
-	return getPosX() + moveVector[0] / STATEUPDATES_PER_SEC;
+	return getPosX() + moveVector[0] / STATEUPDATES_PER_SEC; 
 }
 
 float ObjectBall::getFutureY() const
@@ -117,16 +123,6 @@ float ObjectBall::getFutureZ() const
 	return getPosZ() + moveVector[2] / STATEUPDATES_PER_SEC;
 }
 
-float ObjectBall::getPastX() const
-{
-	return pastPosXZ[0];
-}
-
-float ObjectBall::getPastZ() const
-{
-	return pastPosXZ[2];
-}
-
 float ObjectBall::getFuturePos( float *futurePos[] ) const
 {
 	*futurePos[0] = getFutureX();
@@ -134,44 +130,64 @@ float ObjectBall::getFuturePos( float *futurePos[] ) const
 	*futurePos[2] = getFutureZ();
 }
 
-void ObjectBall::setSize (GLfloat x, GLfloat y, GLfloat z)
+float ObjectBall::getPastX() const
 {
-	Object::setSize(x,y,z);
-	if(x==z && z==y)
-		radius = x/10;
+	return getPosX() - moveVector[0] / STATEUPDATES_PER_SEC; 
+}
+
+float ObjectBall::getPastZ() const
+{
+	return getPosX() - moveVector[2] / STATEUPDATES_PER_SEC; 
+}
+
+void ObjectBall::backTrack( double v[3] )
+{
+	double tempv[3];
+	tempv[0] = v[0];
+	tempv[1] = v[1];
+	tempv[2] = v[2];
+	
+	normalizeVector(v);
+	
+	setPosX( getPosX() - v[0]/10.);
+	setPosZ( getPosZ() - v[2]/10.); 
+	
+	v[0] = tempv[0];
+	v[1] = tempv[1];
+	v[2] = tempv[2];
 }
 
 //------------------------------------------------------------ OTHER METHODS
 
 bool ObjectBall::updateState()
-{
+{ 
 	if( getSpeed() )
 	{
-		pastPosXZ[0] = getPosX();
-		pastPosXZ[1] = getPosZ(); 
-		
 		// rotation by movement
-		setRot( moveVector[2] ,0, -moveVector[0] );
+		setRot( (((moveVector[2]/STATEUPDATES_PER_SEC)*180.)/(M_PI*radius)),
+			    0,
+			    (-((moveVector[0]/STATEUPDATES_PER_SEC)*180.)/(M_PI*radius)) );
 		
 		// update position
 		setPos( getFutureX(), getFutureY(), getFutureZ() );
 		
 		// test if ball is falling
 		if( !moveVector[1] ) { 
-			bool can_move_x = testHorizontalBound(),
-				 can_move_z = testVerticalBound();
-
 			if( hasSnooked() )
 			{
-				cout<<"point!"<<endl;
+				cout<<"point!"<<endl; 
 				moveVector[1]=-30;
 			}
 			else {
-				if( !can_move_x ) { //invert x
+				if( !canMoveHorizontal() ) { //invert x
+					while( !canMoveHorizontal() )
+						backTrack(moveVector);
 					moveVector[0] = -moveVector[0];
 					changeSpeed(BALL_DECELERATION_R);
 				}
-				if( !can_move_z ) { //invert z
+				if( !canMoveVertical() ) { //invert z
+					while( !canMoveVertical() )
+						backTrack(moveVector);
 					moveVector[2] = -moveVector[2];
 					changeSpeed(BALL_DECELERATION_R);
 				}
@@ -190,21 +206,29 @@ bool ObjectBall::updateState()
 			}
 			else { //fell to the ground
 				resetSpeed();
-				setPos(0,TABLE_PLANE_Y+radius,0);
+				setPos(getRandBetween(-10,10),TABLE_PLANE_Y+radius,getRandBetween(-10,10));
 			}
 		return true;
 	}
 	return false;
 }
 
-void ObjectBall::applyForce( float magnitude, float direction )
+void ObjectBall::applyForce( float magnitude, float direction, bool reflectAngle )
 {
-	moveVector[0] += magnitude * cos( RAD(direction) );
-	moveVector[2] += -magnitude * sin( RAD(direction) );
+	if(reflectAngle) {
+		moveVector[0] += magnitude * -1 * cos( RAD(direction) );
+		moveVector[2] += -magnitude * -1 * sin( RAD(direction) );
+	}
+	else {
+		moveVector[0] += magnitude * cos( RAD(direction) );	
+		moveVector[2] += -magnitude * sin( RAD(direction) );
+	}
 }
 	
-void ObjectBall::changeSpeed( float factor )
-{
+void ObjectBall::changeSpeed( double factor ) 
+{ 
+	factor = pow(factor,1./STATEUPDATES_PER_SEC); 
+	
 	moveVector[0] *= factor;
 	moveVector[1] *= factor;
 	moveVector[2] *= factor;
@@ -216,7 +240,6 @@ void ObjectBall::drawBegin() const
 	glPushMatrix();
 	
 	glTranslated(getPosX(), getPosY(), getPosZ());
-	glScalef(getSizeX(), getSizeY(), getSizeZ());
 	
 	glMultMatrixd(rotMat); 						//see updateRotateMatrix()
 	    		
@@ -232,15 +255,30 @@ void ObjectBall::draw() const
 		ObjectBall::drawBegin();
 		if( texture!=NULL )
 		{
-			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, texture->texID);
 			glmDraw(modelPointer, GLM_SMOOTH | GLM_TEXTURE);
-			glDisable(GL_TEXTURE_2D);
 		}
 		else
 			glmDraw(modelPointer, GLM_SMOOTH);
 		Object::drawEnd();
 	}
+    else
+    {
+		glEnable(GL_TEXTURE_GEN_S);
+		glEnable(GL_TEXTURE_GEN_T);
+		
+		ObjectBall::drawBegin();  
+		glBindTexture(GL_TEXTURE_2D, texture->texID);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+		gluSphere(quadricSphere,radius,slices,stacks);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_REPEAT);
+		Object::drawEnd();
+		
+		glDisable(GL_TEXTURE_GEN_S);
+		glDisable(GL_TEXTURE_GEN_T);
+     }	
 
 }
 
@@ -275,6 +313,15 @@ void ObjectBall::resetRotateMatrix()
 	rotMat[15]=1;
 }
 
+void ObjectBall::setQuad()
+{
+	quadricSphere = gluNewQuadric();
+	gluQuadricNormals(quadricSphere, GL_SMOOTH);
+	gluQuadricTexture(quadricSphere, GL_TRUE);
+	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+}
+
 //--------------------------------------------------- POSITION DETECTION
 
 bool ObjectBall::hasSnooked()
@@ -299,7 +346,7 @@ bool ObjectBall::hasSnooked()
 	
 }
 
-bool ObjectBall::testHorizontalBound()
+bool ObjectBall::canMoveHorizontal()
 {
 	float posx = getPosX();
 	
@@ -309,7 +356,7 @@ bool ObjectBall::testHorizontalBound()
 		return true;
 }
 
-bool ObjectBall::testVerticalBound()
+bool ObjectBall::canMoveVertical()
 {
 	float posz = getPosZ();
 	
