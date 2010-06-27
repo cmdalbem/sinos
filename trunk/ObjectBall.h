@@ -15,7 +15,7 @@ class ObjectBall: public ObjectModel
 {
 private:
 	GLdouble radius;
-	GLint slices, stacks;
+	int res;
 	GLUquadricObj *quadricSphere;
 	GLdouble rotMat[16];
 	
@@ -30,7 +30,7 @@ public:
 	
 	//---------------------------- CONSTRUCTORS
 	ObjectBall();
-	ObjectBall(GLdouble radius, GLint slices, GLint stacks);
+	ObjectBall(GLdouble radius, int resolution);
 	ObjectBall(string filename);
 
 	//---------------------------- DESTRUCTORS
@@ -43,9 +43,8 @@ public:
 	GLdouble			getRadius() const;
 	float				getPerimeter() const;
 
-	void				setProps(GLdouble newRadius, GLint newStacks, GLint newSlices);
-	void				setStacks(GLint newStacks);
-	void				setSlices(GLint newSlices);
+	void				setProps( GLdouble newRadius, int newRes );
+	void				setResolution( int newRes );
 	void				setRadius(GLdouble newRadius);
 	
 	// BEHAVIOUR

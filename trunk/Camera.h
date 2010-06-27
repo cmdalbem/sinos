@@ -27,8 +27,7 @@ private:
 			xrot2, yrot2, zoom,		//
 			xorig, yorig, zorig,	//
 			
-			centerx, centerz,		// variable used in the Top View mode
-			zoomTop;				// 
+			xpos3, ypos3, zpos3;	// variables used in the Top View mode
 
 public:
 	//---------------------------- CONSTRUCTORS
@@ -53,6 +52,9 @@ public:
 	void			setPos2();
 	const char* 	getModeName( int mode=-1 ) const; //name of the current camera mode
 	int 			getMode() const;
+	double			getPosX() const;
+	double			getPosY() const;
+	double			getPosZ() const;
 	
 	//---------------------------- OTHER METHODS
 	void 			apply( int forceAMode=-1 ); 					// main method

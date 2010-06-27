@@ -33,21 +33,26 @@ const float default_emission[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 const float default_shininess = 0;
 
 
+// Global constants
+#define TABLE_PLANE_Y 28.5
+#define NHOLES 6
+#define NCAMERAMODES 3
+#define OSD_LINES 3
+#define BALL_RADIUS 1
+#define BALL_MAX_RES 100
+#define BALL_MIN_RES 5
+
 // Global variables
 #define NSTARS 1000
 #define STATEUPDATES_PER_SEC (100.)
-#define TABLE_PLANE_Y 28.5
-#define NHOLES 6
 #define BALL_DECELERATION_R (0.01) //table wall friction
 #define BALL_DECELERATION_N (0.2)  //table plane friction
 #define BALL_ACCELERATION_G (1.1)  //gravitational acceleration
-#define NCAMERAMODES 3
 #define NPLAYERS 2
-#define STICK_MAX_STR 20
+#define STICK_MAX_STR 30
 #define BALL_MIN_SPEED 0.5
-#define BALL_RADIUS 1
-#define BALL_RADIUS_REAL BALL_RADIUS*1.5
-//#define SHOW_TABLE_FRAME 1 //uncomment to apply
+#define BALL_MAX_SPEED 300
+#define SHOW_TABLE_FRAME 1 //uncomment to apply
 
 // Table boundaries
 #ifdef SHOW_TABLE_FRAME

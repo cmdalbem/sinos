@@ -33,9 +33,8 @@ Camera camera, camera2(2);
 // Texture files
 Texture tigerTex, woodTex, tableTex, rockTex, starsTex, ballTex, stickTex;
 
-Level level(&objects, &theLights, &camera, &camera2, &ballTex, &stickTex);
-
-Game game(&level);
+// Mother class
+Game game;
 
 // mouse-keyboard
 static int	xold, yold;		
@@ -57,13 +56,12 @@ int 		lensAngle = 60;
 
 void initObjects ()
 {
-	static ObjectModel tableStruct("obj/pooltable_struct_noframe.obj");
+	static ObjectModel tableMiddle("obj/pooltable_middle.obj");
+	static ObjectModel tableBottom("obj/pooltable_bottom.obj");
 	static ObjectModel tableTop("obj/pooltable_table.obj");
 	static ObjectModel tableFrame("obj/pooltable_frame.obj");
 	static ObjectModel scenario("obj/crypt.obj");
 	static ObjectModel globe("obj/globe.obj");
-	static ObjectBall  cursor(1,100,100);
-	static ObjectModel tableShadow("obj/pooltable_shadow.obj");
 	static ObjectModel light("obj/light1.obj");
 	static ObjectModel tableStruct2("obj/pooltable_struct.obj");
 	static ObjectModel tableTop2("obj/pooltable_table.obj");
@@ -71,7 +69,6 @@ void initObjects ()
 	static ObjectModel tableTop3("obj/pooltable_table.obj");
 	static ObjectModel tableStruct4("obj/pooltable_struct.obj");
 	static ObjectModel tableTop4("obj/pooltable_table.obj");
-	cursor.setPos(0,TABLE_PLANE_Y,2);
 	
 	// crypt scenario
 	scenario.setPos(0,-30,0);
@@ -91,19 +88,28 @@ void initObjects ()
 	tableTopMat.setShininess(40);
 	
 	// main table 
-	tableStruct.setMaterial(tableStructMat);
+	//materials
+	tableBottom.setMaterial(tableStructMat);
+	tableMiddle.setMaterial(tableStructMat);
 	tableTop.setMaterial(tableTopMat);
 	tableFrame.setMaterial(tableTopMat);
-	tableStruct.setTexture(&woodTex);
+	//textures
+	tableMiddle.setTexture(&woodTex);
+	tableBottom.setTexture(&woodTex);
 	tableTop.setTexture(&tableTex);
 	tableFrame.setTexture(&tableTex);
-	tableStruct.setSize(100,100,100); 
+	//scaling
+	tableBottom.setSize(100,100,100); 
+	tableMiddle.setSize(100,100,100); 
 	tableTop.setSize(100,100,100);
 	tableFrame.setSize(100,100,100);
-		objects["tableTop"] = &tableTop;
-		objects["tableStruct"] = &tableStruct;
-	tableShadow.setSize(100,100,100);
-		objects["tableShadow"] = &tableShadow;
+	//pipelining
+	objects["tableTop"] = &tableTop;
+	objects["tableBottom"] = &tableBottom;
+	objects["tableMiddle"] = &tableMiddle;
+	#ifdef SHOW_TABLE_FRAME
+		objects["tableFrame"] = &tableFrame;
+	#endif
 
 	// table2
 	tableStructMat.setDiffuse(0.25,0.09,0.07);
@@ -129,12 +135,12 @@ void initObjects ()
 	tableTop4.setSize(100,100,100);
 	tableStruct4.setPos(0,0,600);
 	tableTop4.setPos(0,0,600);
-		objects["tableStruct2"] = &tableStruct2;
-		objects["tableTop2"] = &tableTop2;	 //objects[4]
-		objects["tableStruct3"] = &tableStruct3;//objects[5]
-		objects["tableTop3"] = &tableTop3;	 //objects[6]
-		objects["tableStruct4"] = &tableStruct4;//objects[7]
-		objects["tableTop4"] = &tableTop4;	 //objects[8]
+		//objects["tableStruct2"] = &tableStruct2;
+		//objects["tableTop2"] = &tableTop2;
+		//objects["tableStruct3"] = &tableStruct3;
+		//objects["tableTop3"] = &tableTop3;
+		//objects["tableStruct4"] = &tableStruct4;
+		//objects["tableTop4"] = &tableTop4;
 	
 	// ceiling lamp
 	light.setPos(0,120,0);
@@ -143,18 +149,14 @@ void initObjects ()
 	light.material.setSpecular(1,1,1);
 	light.material.setShininess(120);
 	//light.material.setEmission(RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4);
-		objects["lamp"] = &light;
+		//objects["lamp"] = &light;
 
 	
 	// infinite scenario globe
 	globe.setSize(500,500,500);
 	globe.material.setEmission(1,1,1);
 	globe.setTexture(&starsTex);
-		objects["globe"] = &globe;		 //objects[10]
-	
-	#ifdef SHOW_TABLE_FRAME
-		objects["tableFrame"] = &tableFrame;  //objects[11]
-	#endif
+		objects["globe"] = &globe;
 
     for (int i=0;i<NSTARS;i++)
     {
@@ -176,17 +178,17 @@ void perspectiveViewport( int width, int height ) {
 	
     glMatrixMode(GL_MODELVIEW);
 	
-	for(int i=0;i<level.balls.size();i++)
-		level.balls[i].updateRotateMatrix();
+	for(int i=0;i<game.level->balls.size();i++)
+		game.level->balls[i].updateRotateMatrix();
 	
     glLoadIdentity ();
     
     // IMPORTANT: don't change the order of these calls
 		game.drawOsd();
-		level.camera->apply();
-		level.lights();
-		level.drawObjects();
-		level.castShadows();
+		game.level->camera->apply();
+		game.level->lights();
+		game.level->drawObjects();
+		game.level->castShadows();
 }	
 
 void orthoViewport( int width, int height ) {
@@ -204,34 +206,28 @@ void orthoViewport( int width, int height ) {
     glLoadIdentity();
     
 	// IMPORTANT: don't change the order of these calls
-		level.camera2->apply();
-		level.lights();
-		level.drawObjects_partial();
+		game.level->camera2->apply();
+		game.level->lights();
+		game.level->drawObjects_partial();
 		
 	glDisable(GL_SCISSOR_TEST);
 }	
 
 void display () {
 	
-	static bool displayer=false;
-	displayer = !displayer;
-	
-	if( displayer )
-	{
-		int width = glutGet(GLUT_WINDOW_WIDTH);
-		int height = glutGet(GLUT_WINDOW_HEIGHT);
+	int width = glutGet(GLUT_WINDOW_WIDTH);
+	int height = glutGet(GLUT_WINDOW_HEIGHT);
 
-		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_SCISSOR_TEST);
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_SCISSOR_TEST);
+	
+		orthoViewport(width,height);
+		perspectiveViewport(width,height);
+				
+	glDisable(GL_SCISSOR_TEST);
 		
-			orthoViewport(width,height);
-			perspectiveViewport(width,height);
-					
-		glDisable(GL_SCISSOR_TEST);
-			
-		glutSwapBuffers();
-		game.frameCounter++;
-	}
+	glutSwapBuffers();
+	game.frameCounter++;
 }
 
 void initLights () {
@@ -355,10 +351,6 @@ void initLights () {
 
 void init ()
 {
-	cout << "Loading models...";
-	initObjects();
-	cout << "Done.\n";
-	
     glClearColor(0, 0, 0, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
@@ -369,16 +361,22 @@ void init ()
     glShadeModel (GL_SMOOTH);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-	for(int i=0; i<level.balls.size(); i++)
-		level.balls[i].setQuad(); //these calls depends on the previous OPENGL initializations
+	//for(int i=0; i<level.balls.size(); i++)
+		//level.balls[i].setQuad(); //these calls depends on the previous OPENGL initializations
 	
 	initLights();
 	glEnable (GL_LIGHT0); 	// sun
 	glEnable (GL_LIGHT1);   // spotlight
-	glEnable (GL_LIGHT2); 	// directional
+	//glEnable (GL_LIGHT2); 	// directional
 	glEnable (GL_LIGHT3); // extra spotlight1
 	glEnable (GL_LIGHT4); // extra spotlight2
 	glEnable (GL_LIGHT5); // extra spotlight3
+    
+    cout << "Initializing objects...";
+    static Level level(&objects, &theLights, &camera, &camera2, &ballTex, &stickTex);
+	game.setLevel(&level);
+	initObjects();
+	cout << "Done.\n";
     
     cout << "Loading textures..."; 
     loadTexture(&woodTex, "textures/wood.tga");
@@ -386,21 +384,24 @@ void init ()
     loadTexture(&rockTex, "textures/rock.tga");//set true to use mipmapping
     loadTexture(&starsTex, "textures/stars3.tga");
     loadTexture(&stickTex, "textures/stick.tga");
-    loadTexture(&ballTex,  "textures/poolball.tga");
+    loadTexture(&ballTex,  "textures/poolball2.tga");
     cout << "Done.\n"; 
+    
+    game.updateOsd();
 }
 
 //--------------------------- KEYBOARD ---------------------------//
 void keyboardFunc (unsigned char key, int x, int y) {
 			
 	if ( key==K_SPACE) {
-		level.balls[0].applyForce(level.stick.getAttackStrenght()*10,level.stick.getAngleInXZ()+90);  //some naughty magic numbers here
-		level.stick.attack();
+		game.level->balls[0].applyForce( game.level->stick.getAttackStrenght()*10,   //some naughty magic numbers here
+										 game.level->stick.getAngleInXZ()+90); //
+		game.level->stick.attack();
 	}
 		
     if( key=='c' ) {
 		game.updateOsd();
-		level.camera->nextMode(&(level.balls[0]));
+		game.level->camera->nextMode( &(game.level->balls[0]) );
 	}
 	
     if ( key==K_ESC )
@@ -413,31 +414,31 @@ void specialFunc(int key, int x, int y)
 {
 	if( key == GLUT_KEY_F1 ) {
 		game.updateOsd();
-		level.camera->setMode(0);
+		game.level->camera->setMode( 0 );
 	}
 	if( key == GLUT_KEY_F2 ) {
 		game.updateOsd();
-		level.camera->setMode(1,&(level.balls[0]));
+		game.level->camera->setMode( 1, &(game.level->balls[0]) );
 	}
 	if( key == GLUT_KEY_F3 ) {
 		game.updateOsd();
-		level.camera->setMode(2);
+		game.level->camera->setMode( 2 );
 	}
 	
 	if( key == GLUT_KEY_LEFT ) {
-		level.stick.rotate( -5 );
+		game.level->stick.rotate( -5 );
 	}
 	
 	if( key == GLUT_KEY_RIGHT ) {
-		level.stick.rotate( 5 );
+		game.level->stick.rotate( 5 );
 	}
 	
 	if( key == GLUT_KEY_DOWN ) {
-		level.stick.changePower(0.1);
+		game.level->stick.changePower(0.1);
 	}
 	
 	if( key == GLUT_KEY_UP ) {
-		level.stick.changePower(-0.1);
+		game.level->stick.changePower(-0.1);
 	}
 }
 
@@ -452,9 +453,9 @@ void mouseFunc(int button, int state, int x, int y) {
 	if( button == GLUT_WHEEL_MIDDLE )
 		middle_click = state;
 	if( button == GLUT_WHEEL_DOWN )
-		level.camera->action2(0,5);
+		game.level->camera->action2(0,5);
 	if( button == GLUT_WHEEL_UP )
-		level.camera->action2(0,-5);
+		game.level->camera->action2(0,-5);
 		
 	xold = x;
 	yold = y;
@@ -466,21 +467,21 @@ void mouseFunc(int button, int state, int x, int y) {
 void mouseMotionFunc(int x, int y) {
 	
 	if ( left_click == GLUT_DOWN ) {
-		level.stick.rotate( (x-xold)/5. );			
+		game.level->stick.rotate( (x-xold)/5. );			
     }
 	
 	if ( right_click == GLUT_DOWN ) {
 		// stick manual attack
-		level.stick.changePower( (y-yold)/5. );
+		game.level->stick.changePower( (y-yold)/5. );
 		
-	    if( level.stick.getAttackStrenght() < level.balls[0].getRadius() ) {
+	    if( game.level->stick.getAttackStrenght() < game.level->balls[0].getRadius() ) {
 			//game.attack( pow((yold-y),2)/3. ); //naughty magic equation
-			game.attack( 5*(yold-y) );
+			game.attack( 10*(yold-y) );
 		}
 	}
 	
 	if ( middle_click ==GLUT_DOWN  ) {
-		level.camera->action1(x - xold, y - yold);
+		game.level->camera->action1(x - xold, y - yold);
 	}
 
 	xold = x;
@@ -496,7 +497,7 @@ void updateFPS(int value) {
 }
 
 void updateState(int value) {
-	level.updateVariables();
+	game.updateState();
 	glutTimerFunc(1000/STATEUPDATES_PER_SEC, updateState, 0);
 }
 
@@ -520,8 +521,6 @@ int main (int argc, char **argv) {
     init();
     
     //glutDisplayFunc (display);
-    
-    
     glutIdleFunc (display);
     
     glutKeyboardFunc(keyboardFunc);

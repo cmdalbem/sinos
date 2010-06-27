@@ -12,12 +12,13 @@ using namespace std;
 class Game
 {
 	private:
-		char osd[2][1024];
+		char osd[OSD_LINES][1024];
 		
 	public:
-		int		scorePlayer1, scorePlayer2;
-		bool	currentPlayer;
+		int		points[NPLAYERS];
+		int		currentPlayer;
 		Level	*level;
+		bool 	hasControl;
 		
 		long int 	frameCounter, fps;	//frames per second counter and register
 	
@@ -30,10 +31,13 @@ class Game
 		
 		//----------------------------------------------- GETTERS & SETTERS
 		void	setLevel(Level *newLevel);
+		void	resetPoints();
+		void	giveControl();
 		
 		//----------------------------------------------- OTHER METHODS
 		void	attack( int yvar );
-
+		void	updateState();
+		void	nextPlayer();
 		/* drawOsd()
 		 * Draws On-Screen Display
 		 * 	Adapted from http://www.opengl.org/resources/code/samples/glut_examples/examples/bitfont.c

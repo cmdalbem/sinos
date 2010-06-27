@@ -34,10 +34,10 @@ class ObjectStick : public ObjectModel
 		~ObjectStick();
 		//---------------------------- GETTERS & SETTERS
 		void	setCenter(ObjectBall* newCenter);
-		float 	getAngleInXZ();
+		float 	getAngleInXZ() const;
 		void	setAngleInXZ(float newAngle);
 		
-		float	getAttackStrenght();
+		float	getAttackStrenght() const;
 		void	setAttackStrenght(float newForce);
 		
 		//---------------------------- OTHER METHODS
@@ -58,6 +58,4 @@ class ObjectStick : public ObjectModel
 		void			calculatePos();
 		void 			attack();
 		virtual void	draw() const;
-		void			hide();
-		void			show();
 };

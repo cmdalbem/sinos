@@ -15,25 +15,29 @@ using namespace std;
  * 
  * ((x-x0)² + (y-y0)² + (z-z0)²)^1/2,
  */
+
+double getDistance( double x1, double y1, double z1, double x2, double y2, double z2 )
+{
+	return sqrt(  pow(x1-x2, 2)
+				+ pow(y1-y2, 2)
+				+ pow(z1-z2, 2));
+}	
+
 double getDistance( Object &object1, Object &object2 )
 {
-	/*return (  abs(object1.getPosX() - object2.getPosX())
-			+ abs(object1.getPosY() - object2.getPosY())
-			+ abs(object1.getPosZ() - object2.getPosZ()));*/
-			
 	return sqrt(  pow(object1.getPosX() - object2.getPosX(), 2)
 				+ pow(object1.getPosY() - object2.getPosY(), 2)
 				+ pow(object1.getPosZ() - object2.getPosZ(), 2));
 }
 
-void drawGuideLine( double posx, double posy, double posz, double stickAngle)
+void drawGuideLine( double xo, double yo, double zo, double stickAngle)
 {
-	glColor4f(1.,1.,1.,1); 
+	//glColor4f(1.,1.,1.,1); 
 	glLineStipple(2, 0xAAAA);
 	glEnable(GL_LINE_STIPPLE);
 	glBegin(GL_LINES);
-		glVertex3f( posx, posy, posz);
-		glVertex3f( posx+100*cos(RAD(stickAngle+90)), posy, posz+100*sin(RAD(-(stickAngle+90))) );
+		glVertex3f( xo, yo, zo);
+		glVertex3f( xo+100*cos(RAD(stickAngle+90)), yo, zo+100*sin(RAD(-(stickAngle+90))) );
 	glEnd();
 	glDisable(GL_LINE_STIPPLE);	
 }

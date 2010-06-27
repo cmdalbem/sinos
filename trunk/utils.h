@@ -20,6 +20,7 @@ using namespace std;
  * Returns the euclidian norma of the vector starting on object1 and 
  * ending on object2.
  */
+double getDistance( double x1, double y1, double z1, double x2, double y2, double z2 );
 double getDistance( Object &object1, Object &object2 );
 
 /* drawGuideLine()

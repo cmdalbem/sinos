@@ -43,10 +43,9 @@ void Camera::setCamera(int _cameraMode)
 	yorig = 29.5;
 	zorig = 0;
 	
-	zoomTop = 100;
-	
-	centerx = 0;
-	centerz = 0;
+	ypos3 = 100;
+	xpos3 = 0;
+	zpos3 = 0;
 	
 	setPos2();
 }
@@ -112,6 +111,46 @@ int Camera::getMode () const
 	return cameraMode;
 }
 
+double Camera::getPosX() const
+{
+	switch(cameraMode)
+	{
+		case 0: return xpos;
+				break;
+		case 1: return xpos2;
+				break;
+		case 2: return xpos3;
+				break;
+	}
+}
+
+double Camera::getPosY() const
+{
+	switch(cameraMode)
+	{
+		case 0: return ypos;
+				break;
+		case 1: return ypos2;
+				break;
+		case 2: return ypos3;
+				break;
+	}
+}
+
+double Camera::getPosZ() const
+{
+	switch(cameraMode)
+	{
+		case 0: return zpos;
+				break;
+		case 1: return zpos2;
+				break;
+		case 2: return zpos3;
+				break;
+	}
+}
+
+
 void Camera::setPos2 ()
 {
 	xpos2 = xorig + sin(yrot2*0.05)*sin(xrot2*0.05)*zoom;
@@ -139,8 +178,8 @@ void Camera::action1 (int movex, int movey)
 					
 			break;
 		case 2:
-			centerx += movex /5.;
-			centerz += movey /5.;
+			xpos3 += movex /5.;
+			zpos3 += movey /5.;
 			break;
 		case 3:
 			break;
@@ -169,9 +208,9 @@ void Camera::action2 (int movex, int movey)
 			
 			break;
 		case 2:
-			zoomTop += movey / 5.f;
-			if( zoomTop < 40 )
-				zoomTop = 40;		// do not let reverse the camera
+			ypos3 += movey / 5.f;
+			if( ypos3 < 40 )
+				ypos3 = 40;		// do not let reverse the camera
 			break;
 		case 3:
 			break;
@@ -209,7 +248,7 @@ void Camera::apply( int forceAMode )
 		{
 			// top view
 			glRotatef(90, 1.,0.,0.);
-			glTranslated(centerx,-zoomTop,centerz);
+			glTranslated(xpos3,-ypos3,zpos3);
 			break;
 		}
 		case 3:

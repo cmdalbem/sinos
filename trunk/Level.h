@@ -46,16 +46,16 @@ class Level
 	//---------------------------- GETTERS & SETTERS
 
 	//---------------------------- OTHER METHODS
-		void init();
-		void initObjects();
-		void initLights();
+		void 			init();
+		void 			initObjects();
+		void 			initLights();
 	
-		void drawObjects();
-		void drawObjects_partial();	
-		void lights();
-		void castShadows();
+		void 			drawObjects();
+		void 			drawObjects_partial();	
+		void 			lights();
+		void 			castShadows();
 		
-		void updateVariables();
-		void testBallsCollision();
+		pair<int,bool>  updateState();
+		void 			testBallsCollision();
 				
 };

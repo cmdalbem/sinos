@@ -26,7 +26,7 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	ballMaterial.setSpecular(0.9, 0.9, 0.9);
 	balls.resize(nballs);
 	
-	balls[0].setProps(BALL_RADIUS,100,100);
+	balls[0].setRadius(BALL_RADIUS);
 	balls[0].setTexture(ballTex);
 	balls[0].setMaterial(ballMaterial);
 	balls[0].setPos(-20, TABLE_PLANE_Y+balls[0].getRadius(), 0);
@@ -37,7 +37,7 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 			double r = getRandBetween(0,60),
 				   g = getRandBetween(0,60),
 				   b = getRandBetween(0,60);
-			balls[i].setProps(BALL_RADIUS,50,50);
+			balls[i].setRadius(BALL_RADIUS);
 			balls[i].setTexture(ballTex);
 			balls[i].setMaterial(ballMaterial);
 			balls[i].material.setDiffuse(r/100.,g/100.,b/100.);
@@ -69,34 +69,37 @@ Level::~Level()	{ }
 
 void Level::drawObjects () {
     // drawing of not-lit objects
-    glDisable(GL_LIGHTING);
-		// Holes delimiters
+    /*glDisable(GL_LIGHTING);
+		//// Holes delimiters
 		for(int i=0; i<NHOLES; i++)
 			glCircle3f(HC[i][0],TABLE_PLANE_Y+1,HC[i][1],HC[i][2]);
-			
-	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHTING);*/
 		
 	stick.draw();
 	
 	// draw all objects
 	map<string,Object*>::iterator it;
 	for( it = objects->begin(); it!=objects->end(); it++ )
-		if( (*it).first!="crypt" &&
-			(*it).first!="tableShadow" )
+		if( (*it).first!="crypt" )
 			(*it).second->draw();
 			
 	// draw balls
-	for( int i=0; i<balls.size(); i++ )
-	{
+	for( int i=0; i<balls.size(); i++ ) {
+		// Linear tesselation
+		double res = 1000. / getDistance(camera->getPosX(), camera->getPosY(), camera->getPosZ(),
+										 balls[i].getPosX(), balls[i].getPosY(), balls[i].getPosZ());
+		if( res<BALL_MIN_RES )	res=BALL_MIN_RES; 
+		else if( res>BALL_MAX_RES) res=BALL_MAX_RES;
+		balls[i].setResolution(res);
+		
 		balls[i].draw();
-		glCircle3f(balls[i].getPosX(),TABLE_PLANE_Y,balls[i].getPosZ(),balls[i].getRadius());
 	}
 	
-	// TEMP: directional light only on crypt
 	glEnable (GL_LIGHT2);
 		(*objects)["crypt"]->draw();
 	glDisable (GL_LIGHT2);
 	
+	/*//DEBUG
 	for( int i=0; i<balls.size(); i++ )
 		if(balls[i].trouble)
 		{
@@ -105,18 +108,24 @@ void Level::drawObjects () {
 			glCircle3f(balls[i].troublePos[0],balls[i].troublePos[1],balls[i].troublePos[2], 3);
 			balls[i].trouble = 0;
 			glutPostRedisplay();
-		}
+		}*/
 }
 
 void Level::drawObjects_partial ()
 {
 	stick.draw();
-	(*objects)["tableStruct"]->draw();
+	if( !stick.isHidden )
+		drawGuideLine( balls[0].getPosX(), balls[0].getPosY(), balls[0].getPosZ(), stick.getAngleInXZ() );
+	
+	(*objects)["tableMiddle"]->draw();
+	(*objects)["tableBottom"]->draw();
 	(*objects)["tableTop"]->draw();
 
 	// draw balls
-	for( int i=0; i<balls.size(); i++ )
+	for( int i=0; i<balls.size(); i++ ) {
+		balls[i].setResolution(20);
 		balls[i].draw();
+	}
 
 	#ifdef SHOW_TABLE_FRAME
 		(*objects)["tableFrame"]->draw();
@@ -148,7 +157,8 @@ void Level::castShadows() {
 		glShadowProjection(lightSource,floorPlane,planeNormal); //manipulates the matrix so everything will be projected in the FLOORPLANE
 			glClear( GL_STENCIL_BUFFER_BIT);
 			glStencilFunc(GL_EQUAL, 0, 1); 						//will let only one vertex be drawn on each position each time shadow
-				(*objects)["tableShadow"]->draw();; 
+				(*objects)["tableMiddle"]->draw();
+				(*objects)["tableTop"]->draw(); 
 				stick.draw();
 	glPopMatrix();
 	
@@ -163,12 +173,13 @@ void Level::castShadows() {
 			
 			glColorMask(true,true,true,true);
 			glDepthMask(true); 
-			glStencilFunc(GL_EQUAL, 1, 1); 						//now the shadow is cast only where stencil buffer==1, i.e. the table
+			glStencilFunc(GL_EQUAL, 1, 1); 						//now the shadow is cast only where stencil buffer==1, i.e. the table plane
 				stick.draw();
 				for(int i=0;i<balls.size();i++)
-					balls[i].draw();
+					if( !balls[i].hasFallen )
+						balls[i].draw();
 				#ifdef SHOW_TABLE_FRAME
-					tableFrame.draw();
+					(*objects)["tableFrame"]->draw();
 				#endif
 	glPopMatrix();
 	
@@ -216,25 +227,29 @@ void Level::lights()
 	glLightfv(GL_LIGHT2, GL_POSITION, direction);
 }
 
-void Level::updateVariables()
+pair<int,bool> Level::updateState()
+/* returns points the player has done */
 {
-	bool changed = false;
+	pair<bool,bool> retValue;
+	bool hasChanged = false;
+	int points=0;
+	
+	for( int i=0; i<balls.size(); i++ ) {
+		retValue = balls[i].updateState();
+	
+		hasChanged = retValue.first || hasChanged;	
+		if(retValue.second)
+			points++;
+	}
 
-	for( int i=0; i<balls.size(); i++ )
-		changed = balls[i].updateState().first || changed;	
-
-	if(changed)
-	{
+	if( hasChanged ) {
+		testBallsCollision();
+		
 		if(camera->getMode() == 1)
 			camera->setMode(1, &balls[0]);
 	}
-	else
-	{
-		stick.setCenter(&balls[0]);
-		stick.show();	
-	}
-	
-	testBallsCollision();
+		
+	return pair<int,bool>::pair(points,hasChanged);
 }
 
 void Level::testBallsCollision()

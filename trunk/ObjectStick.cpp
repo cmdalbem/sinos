@@ -43,7 +43,7 @@ void ObjectStick::setCenter(ObjectBall* newCenter)
 	calculatePos();
 }
 
-float ObjectStick::getAngleInXZ()
+float ObjectStick::getAngleInXZ() const
 {
 	return angleInXZ;
 }
@@ -56,7 +56,7 @@ void ObjectStick::setAngleInXZ(float newAngle)
 		angleInXZ = (int)angleInXZ % 360;
 }
 
-float ObjectStick::getAttackStrenght()
+float ObjectStick::getAttackStrenght() const
 {
 	return attackStrenght;
 }
@@ -101,21 +101,11 @@ void ObjectStick::calculatePos()
 void ObjectStick::attack()
 {
 	setAttackStrenght(center->getRadius()+1);
-	hide();
+	isHidden = true;
 }
 
 void ObjectStick::draw() const
 {
 	if(!isHidden)
 		ObjectModel::draw();
-}
-
-void ObjectStick::hide()
-{
-	isHidden = true;
-}
-
-void ObjectStick::show()
-{
-	isHidden = false;
 }
