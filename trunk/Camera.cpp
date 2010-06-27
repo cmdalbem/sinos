@@ -97,7 +97,6 @@ void Camera::setMode (int mode, Object* object)
 			}
 			else
 			{
-				cout << "Warning: setting camera to " << getModeName() << " with object=NULL." << endl;
 				xorig = 0;		// If no object is passed, then the "orig"
 				yorig = 29.5;	// variables receive default values.
 				zorig = 0;		//
@@ -227,33 +226,5 @@ void Camera::apply( int forceAMode )
 void Camera::nextMode(Object* object)
 {
 	setMode( (getMode()+1)%NCAMERAMODES, object);
-}
-
-/* The euclidian norma is calculated as:
- * 
- * ((x-x0)² + (y-y0)² + (z-z0)²)^1/2,
- * 
- * where x, y, and z are the position of the camera, and;
- * where x-, y0 and z0 are the position of the theObject Object.
- * 
- * Since we have differente camera modes for which we have different
- * variables used in each case, the position of the camera is composed
- * by (obviously) different variables in each "case" of the switch
- */
-float Camera::distanceFromObject(Object &theObject) const
-{
-	switch ( getMode() )
-	{
-		case 0:
-			return sqrt(pow(xpos - theObject.getPosX(), 2) +	// use "pow" because it has
-						pow(ypos - theObject.getPosY(), 2) +	// log(n) complexity instead
-						pow(zpos - theObject.getPosZ(), 2));	// of n
-			break;
-		case 1:
-			return sqrt(pow(xpos2 - theObject.getPosX(), 2) +
-						pow(ypos2 - theObject.getPosY(), 2) +
-						pow(zpos2 - theObject.getPosZ(), 2));
-			break;
-	}
 }
 

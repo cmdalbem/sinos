@@ -63,8 +63,8 @@ float ObjectStick::getAttackStrenght()
 
 void ObjectStick::setAttackStrenght(float newForce)
 {
-	if ( newForce > 25 )
-		attackStrenght = 25;
+	if ( newForce > STICK_MAX_STR )
+		attackStrenght = STICK_MAX_STR;
 	else
 		attackStrenght = newForce;
 }

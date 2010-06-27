@@ -19,6 +19,7 @@ ObjectBall::ObjectBall()
 	radius = 0;
 	slices = 0;
 	stacks = 0;	
+	hasFallen = false;
 	resetSpeed();
 	resetRotateMatrix();
 }
@@ -29,6 +30,7 @@ ObjectBall::ObjectBall(GLdouble _radius, GLint _slices, GLint _stacks)
 	radius = _radius;
 	slices = _slices;
 	stacks = _stacks;
+	hasFallen = false;
 	resetSpeed();
 	resetRotateMatrix();
 }
@@ -39,6 +41,7 @@ ObjectBall::ObjectBall(string filename)
 	radius = 0;
 	slices = 0;
 	stacks = 0;	
+	hasFallen = false;
 	resetSpeed();	
 	resetRotateMatrix();
 }
@@ -54,7 +57,7 @@ void ObjectBall::setSize (GLfloat x, GLfloat y, GLfloat z)
 {
 	Object::setSize(x,y,z);
 	if(x==z && z==y)
-		radius = x/10;
+		radius = x;
 }
 
 GLdouble ObjectBall::getRadius() const
@@ -64,7 +67,7 @@ GLdouble ObjectBall::getRadius() const
 
 float ObjectBall::getPerimeter() const
 {
-	return 2*M_PI*radius;
+	return 2*M_PI*getRadius();
 }
 
 void ObjectBall::setProps(GLdouble newRadius, GLint newStacks, GLint newSlices)
@@ -140,7 +143,7 @@ float ObjectBall::getPastZ() const
 	return getPosX() - moveVector[2] / STATEUPDATES_PER_SEC; 
 }
 
-void ObjectBall::backTrack( double v[3] )
+void ObjectBall::backTrack( double v[3], bool invert /*default=false*/ )
 {
 	double tempv[3];
 	tempv[0] = v[0];
@@ -149,8 +152,14 @@ void ObjectBall::backTrack( double v[3] )
 	
 	normalizeVector(v);
 	
-	setPosX( getPosX() - v[0]/10.);
-	setPosZ( getPosZ() - v[2]/10.); 
+	if(invert) {
+		setPosX( getPosX() + v[0]/20.);
+		setPosZ( getPosZ() + v[2]/20.); 
+	}
+	else {
+		setPosX( getPosX() - v[0]/20.);
+		setPosZ( getPosZ() - v[2]/20.);
+	}
 	
 	v[0] = tempv[0];
 	v[1] = tempv[1];
@@ -159,35 +168,67 @@ void ObjectBall::backTrack( double v[3] )
 
 //------------------------------------------------------------ OTHER METHODS
 
-bool ObjectBall::updateState()
+pair<bool,bool> ObjectBall::updateState()
+/* Return: first  = if ball has moved
+ *         second = if ball has been snooked
+ */
 { 
-	if( getSpeed() )
+	bool hasMoved = getSpeed() > 0.;
+	
+	if( hasMoved )
 	{
 		// rotation by movement
-		setRot( (((moveVector[2]/STATEUPDATES_PER_SEC)*180.)/(M_PI*radius)),
+		setRot( (((moveVector[2]/STATEUPDATES_PER_SEC)*360.)/getPerimeter()),
 			    0,
-			    (-((moveVector[0]/STATEUPDATES_PER_SEC)*180.)/(M_PI*radius)) );
+			    (-((moveVector[0]/STATEUPDATES_PER_SEC)*180.)/getPerimeter()));
 		
 		// update position
 		setPos( getFutureX(), getFutureY(), getFutureZ() );
 		
 		// test if ball is falling
-		if( !moveVector[1] ) { 
+		if( !hasFallen ) { 
 			if( hasSnooked() )
 			{
 				cout<<"point!"<<endl; 
 				moveVector[1]=-30;
+				hasFallen = true;
 			}
 			else {
 				if( !canMoveHorizontal() ) { //invert x
-					while( !canMoveHorizontal() )
+					int rep=0;
+					while( !canMoveHorizontal() ) {
+						rep++;
+						if(rep>10000){
+							trouble=1;
+							troublePos[0] = getPosX();
+							troublePos[1] = getPosY();
+							troublePos[2] = getPosZ();
+							glutPostRedisplay();							
+							getchar();
+							cout<<"horizontal trouble: "<<moveVector[0]<<" "<<moveVector[2]<<endl;
+						}
+							
 						backTrack(moveVector);
+					}
 					moveVector[0] = -moveVector[0];
 					changeSpeed(BALL_DECELERATION_R);
 				}
 				if( !canMoveVertical() ) { //invert z
-					while( !canMoveVertical() )
+					int rep=0;
+					while( !canMoveVertical() ) {
+						rep++;
+						if(rep>10000){
+							trouble=1;
+							troublePos[0] = getPosX();
+							troublePos[1] = getPosY();
+							troublePos[2] = getPosZ();
+							glutPostRedisplay();								
+							getchar();
+							cout<<"vertical trouble: "<<moveVector[0]<<" "<<moveVector[2]<<endl;
+						}
+						
 						backTrack(moveVector);
+					}
 					moveVector[2] = -moveVector[2];
 					changeSpeed(BALL_DECELERATION_R);
 				}
@@ -195,7 +236,7 @@ bool ObjectBall::updateState()
 						
 			changeSpeed(BALL_DECELERATION_N);
 			
-			if( getSpeed() < 0.3 )
+			if( getSpeed() < BALL_MIN_SPEED )
 				resetSpeed();
 		}
 		else
@@ -205,12 +246,13 @@ bool ObjectBall::updateState()
 				moveVector[2] *= BALL_DECELERATION_N;
 			}
 			else { //fell to the ground
+				hasFallen = false;
 				resetSpeed();
-				setPos(getRandBetween(-10,10),TABLE_PLANE_Y+radius,getRandBetween(-10,10));
+				setPos(getRandBetween(-10,10),TABLE_PLANE_Y+getRadius(),getRandBetween(-10,10));
 			}
-		return true;
 	}
-	return false;
+	
+	return pair<bool,bool>::pair(hasMoved,hasFallen);
 }
 
 void ObjectBall::applyForce( float magnitude, float direction, bool reflectAngle )
@@ -232,6 +274,14 @@ void ObjectBall::changeSpeed( double factor )
 	moveVector[0] *= factor;
 	moveVector[1] *= factor;
 	moveVector[2] *= factor;
+	
+	int l = 500;
+	if(moveVector[0]>l)
+		moveVector[0]=l;
+	if(moveVector[1]>l)
+		moveVector[1]=l;
+	if(moveVector[2]>l)
+		moveVector[2]=l;
 }
 
 void ObjectBall::drawBegin() const
@@ -253,31 +303,36 @@ void ObjectBall::draw() const
 	if( modelPointer )
 	{
 		ObjectBall::drawBegin();
-		if( texture!=NULL )
-		{
-			glBindTexture(GL_TEXTURE_2D, texture->texID);
-			glmDraw(modelPointer, GLM_SMOOTH | GLM_TEXTURE);
-		}
-		else
-			glmDraw(modelPointer, GLM_SMOOTH);
+			if( texture==NULL )
+				glmDraw(modelPointer, GLM_SMOOTH);
+			else
+			{
+				glBindTexture(GL_TEXTURE_2D, texture->texID);
+				glmDraw(modelPointer, GLM_SMOOTH | GLM_TEXTURE);
+			}
 		Object::drawEnd();
 	}
     else
     {
-		glEnable(GL_TEXTURE_GEN_S);
-		glEnable(GL_TEXTURE_GEN_T);
-		
 		ObjectBall::drawBegin();  
-		glBindTexture(GL_TEXTURE_2D, texture->texID);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-		gluSphere(quadricSphere,radius,slices,stacks);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_REPEAT);
+		if( texture==NULL )
+			gluSphere(quadricSphere,radius,slices,stacks);
+		else
+		{
+			glEnable(GL_TEXTURE_GEN_S);
+			glEnable(GL_TEXTURE_GEN_T);
+			
+			glBindTexture(GL_TEXTURE_2D, texture->texID);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+			gluSphere(quadricSphere,radius,slices,stacks);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_REPEAT);
+			
+			glDisable(GL_TEXTURE_GEN_S);
+			glDisable(GL_TEXTURE_GEN_T);				
+		}
 		Object::drawEnd();
-		
-		glDisable(GL_TEXTURE_GEN_S);
-		glDisable(GL_TEXTURE_GEN_T);
      }	
 
 }

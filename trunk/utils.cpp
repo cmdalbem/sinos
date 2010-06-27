@@ -11,6 +11,21 @@ using namespace std;
 #include "time.h"
 
 
+/* The euclidian norma is calculated as:
+ * 
+ * ((x-x0)² + (y-y0)² + (z-z0)²)^1/2,
+ */
+double getDistance( Object &object1, Object &object2 )
+{
+	/*return (  abs(object1.getPosX() - object2.getPosX())
+			+ abs(object1.getPosY() - object2.getPosY())
+			+ abs(object1.getPosZ() - object2.getPosZ()));*/
+			
+	return sqrt(  pow(object1.getPosX() - object2.getPosX(), 2)
+				+ pow(object1.getPosY() - object2.getPosY(), 2)
+				+ pow(object1.getPosZ() - object2.getPosZ(), 2));
+}
+
 void drawGuideLine( double posx, double posy, double posz, double stickAngle)
 {
 	glColor4f(1.,1.,1.,1); 
@@ -22,9 +37,15 @@ void drawGuideLine( double posx, double posy, double posz, double stickAngle)
 	glEnd();
 	glDisable(GL_LINE_STIPPLE);	
 }
+
 double getRandBetween(int a, int b)
 {
-	srand(time(0));
+	static bool init=true;
+	if(init){
+		srand(time(0));
+		init=false;
+	}
+
 	int d = abs(a) + abs(b) + 1;
 	return (rand() % d) + a;
 }

@@ -17,27 +17,33 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	camera2 = _camera2;
 	
 	// Balls
-	int nballs = 20 ;
+	int nballs = 22 ;
 	Material ballMaterial;
-	ballMaterial.setShininess(120); 
+	ballMaterial.setShininess(128); 
 	ballMaterial.setAmbient(1,1,1); 
 	ballMaterial.setEmission(0.1,0.1,0.1); 
 	ballMaterial.setDiffuse(0.5, 0.5, 0.5);
 	ballMaterial.setSpecular(0.9, 0.9, 0.9);
 	balls.resize(nballs);
-	for(int i=0; i<nballs/2; i++)
+	
+	balls[0].setProps(BALL_RADIUS,100,100);
+	balls[0].setTexture(ballTex);
+	balls[0].setMaterial(ballMaterial);
+	balls[0].setPos(-20, TABLE_PLANE_Y+balls[0].getRadius(), 0);
+	for( int line=1, i=1; i<nballs; )
 	{
-		balls[i].setProps(1,50,50);
-		balls[i].setTexture(ballTex);
-		balls[i].setMaterial(ballMaterial);
-		balls[i].setPos(3*i -30, TABLE_PLANE_Y+balls[i].getRadius(), 10);
-	}
-	for(int i=nballs/2; i<nballs; i++)
-	{
-		balls[i].setProps(1,50,50);
-		balls[i].setTexture(ballTex);
-		balls[i].setMaterial(ballMaterial);
-		balls[i].setPos(3*(i-nballs/2) -30, TABLE_PLANE_Y+balls[i].getRadius(), 0);
+		for( int j=0; j<line && i<nballs; j++, i++ )
+		{
+			double r = getRandBetween(0,60),
+				   g = getRandBetween(0,60),
+				   b = getRandBetween(0,60);
+			balls[i].setProps(BALL_RADIUS,50,50);
+			balls[i].setTexture(ballTex);
+			balls[i].setMaterial(ballMaterial);
+			balls[i].material.setDiffuse(r/100.,g/100.,b/100.);
+			balls[i].setPos((BALL_RADIUS*2.1)*line +20, TABLE_PLANE_Y+balls[i].getRadius(), (BALL_RADIUS*2.1)*j - (line-1) );
+		}
+		line++;
 	}
 
 	// the stick
@@ -69,9 +75,7 @@ void Level::drawObjects () {
 			glCircle3f(HC[i][0],TABLE_PLANE_Y+1,HC[i][1],HC[i][2]);
 			
 	glEnable(GL_LIGHTING);
-	
-	glCircle3f(-30,TABLE_PLANE_Y,6.71347,balls[0].getRadius());
-	
+		
 	stick.draw();
 	
 	// draw all objects
@@ -83,12 +87,25 @@ void Level::drawObjects () {
 			
 	// draw balls
 	for( int i=0; i<balls.size(); i++ )
+	{
 		balls[i].draw();
+		glCircle3f(balls[i].getPosX(),TABLE_PLANE_Y,balls[i].getPosZ(),balls[i].getRadius());
+	}
 	
 	// TEMP: directional light only on crypt
 	glEnable (GL_LIGHT2);
 		(*objects)["crypt"]->draw();
 	glDisable (GL_LIGHT2);
+	
+	for( int i=0; i<balls.size(); i++ )
+		if(balls[i].trouble)
+		{
+			glCircle3f(balls[i].troublePos[0],balls[i].troublePos[1],balls[i].troublePos[2], 1);
+			glCircle3f(balls[i].troublePos[0],balls[i].troublePos[1],balls[i].troublePos[2], 2);
+			glCircle3f(balls[i].troublePos[0],balls[i].troublePos[1],balls[i].troublePos[2], 3);
+			balls[i].trouble = 0;
+			glutPostRedisplay();
+		}
 }
 
 void Level::drawObjects_partial ()
@@ -204,53 +221,71 @@ void Level::updateVariables()
 	bool changed = false;
 
 	for( int i=0; i<balls.size(); i++ )
-		changed = balls[i].updateState() || changed;	
+		changed = balls[i].updateState().first || changed;	
 
 	if(changed)
 	{
 		if(camera->getMode() == 1)
 			camera->setMode(1, &balls[0]);
-		
-		testBallsCollision();
 	}
 	else
 	{
 		stick.setCenter(&balls[0]);
 		stick.show();	
 	}
+	
+	testBallsCollision();
 }
 
 void Level::testBallsCollision()
 {
-	
 	for(int i=0; i<balls.size(); i++)
+		
 		for(int j=0; j<balls.size(); j++)
-			if(i!=j)
-				if( balls[i].distanceFromObject(balls[j]) < balls[i].getRadius() + balls[j].getRadius()) // is distance > sum of their radius
+		
+			if(i!=j && !balls[i].hasFallen && !balls[j].hasFallen)
+		
+				if( getDistance(balls[i],balls[j]) < balls[i].getRadius() + balls[j].getRadius()) // is distance > sum of their radius
 				{
 					double impactv[3] = { balls[i].getPosX() - balls[j].getPosX(), //impactVector = balls[i] - balls[j]
 										 0,
 										 balls[i].getPosZ() - balls[j].getPosZ()};
+					
 					normalizeVector(impactv);
-										
+					
+					// consistency for backtracking
+					if(impactv[0]==0 && impactv[2]==0) {
+						impactv[0]=1;
+						impactv[2]=1;
+					}										
+					// "backtracking"
+					while( getDistance(balls[i],balls[j]) < balls[i].getRadius() + balls[j].getRadius() ) {	
+						balls[i].backTrack( impactv, true );
+						balls[j].backTrack( impactv);
+					}
+					
 					float impactAngle = getVectorAngle(impactv);
 					
-					float impactForce = 0.8*((balls[i].getSpeed() + balls[j].getSpeed())/2);
+					float impactForce = 0.9*(balls[i].getSpeed() + balls[j].getSpeed())/2.;
 					
-					int repetitions = 0;
-					
-					while( balls[i].distanceFromObject(balls[j]) < balls[i].getRadius() + balls[j].getRadius()
-						   && repetitions < 50)
-					{	
-						balls[i].setPosX( balls[i].getPosX() + impactv[0]/10.);
-						balls[i].setPosZ( balls[i].getPosZ() + impactv[2]/10.);
-						
-						balls[j].setPosX( balls[j].getPosX() - impactv[0]/10.);
-						balls[j].setPosZ( balls[j].getPosZ() - impactv[2]/10.);
-						
-						repetitions++;
-					}
 					balls[i].applyForce( impactForce, impactAngle );
 					balls[j].applyForce( impactForce, impactAngle, true );
+					
+					// prototype
+					/*double angle = getVectorAngle(impactv);
+					if(angle>270)
+						angle=360-angle;
+					else if(angle>180)
+							angle=270-angle;
+					else if(angle>90)
+							angle=angle;
+						 else
+							angle=angle;
+					double initForce = balls[i].getSpeed();
+					
+					balls[i].resetSpeed();
+					balls[j].resetSpeed();
+					balls[i].applyForce( sin(angle)*initForce, getVectorAngle(impactv) );
+					balls[j].applyForce( cos(angle)*initForce, getVectorAngle(impactv)+90 );*/
 				}
 }

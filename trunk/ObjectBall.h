@@ -17,11 +17,16 @@ private:
 	GLdouble radius;
 	GLint slices, stacks;
 	GLUquadricObj *quadricSphere;
+	GLdouble rotMat[16];
 	
 	
 public:
 	double moveVector[3]; //direction of movement
-	GLdouble rotMat[16];
+	bool hasFallen;
+	
+	// DEBUG
+	int trouble;
+	double troublePos[3];
 	
 	//---------------------------- CONSTRUCTORS
 	ObjectBall();
@@ -53,7 +58,7 @@ public:
 	float				getPastX() const;
 	float				getPastZ() const;
 	
-	void				backTrack( double v[3] );
+	void				backTrack( double v[3], bool invertMovement=false );
 	
 	void 				resetSpeed();
 	
@@ -65,7 +70,7 @@ public:
 	 */
 	void 				drawBegin() const;
 	virtual void 		draw() const;
-	bool 				updateState();
+	pair<bool,bool>		updateState();
 	void				applyForce( float magnitude, float direction, bool reflectAngle=false );
 	void				changeSpeed( double factor );
 		

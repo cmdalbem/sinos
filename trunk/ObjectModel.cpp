@@ -81,6 +81,5 @@ void ObjectModel::draw() const
 		else
 			glmDraw(modelPointer, GLM_SMOOTH);
 		drawEnd();
-		
 	}
 }

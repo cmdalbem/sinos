@@ -172,7 +172,8 @@ void perspectiveViewport( int width, int height ) {
     glScissor(0, 0, width, height);
     
 	gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 10000.0);
-    					
+	//glOrtho(-65, 65, -35, 35, 5, 500);    					
+	
     glMatrixMode(GL_MODELVIEW);
 	
 	for(int i=0;i<level.balls.size();i++)
@@ -369,7 +370,7 @@ void init ()
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
 	for(int i=0; i<level.balls.size(); i++)
-		level.balls[i].setQuad();
+		level.balls[i].setQuad(); //these calls depends on the previous OPENGL initializations
 	
 	initLights();
 	glEnable (GL_LIGHT0); 	// sun
@@ -397,8 +398,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		level.stick.attack();
 	}
 		
-    if( key=='c' )
-    {
+    if( key=='c' ) {
 		game.updateOsd();
 		level.camera->nextMode(&(level.balls[0]));
 	}
@@ -474,7 +474,8 @@ void mouseMotionFunc(int x, int y) {
 		level.stick.changePower( (y-yold)/5. );
 		
 	    if( level.stick.getAttackStrenght() < level.balls[0].getRadius() ) {
-			game.attack( pow((yold-y),2)/3 );
+			//game.attack( pow((yold-y),2)/3. ); //naughty magic equation
+			game.attack( 5*(yold-y) );
 		}
 	}
 	

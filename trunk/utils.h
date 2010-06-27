@@ -16,6 +16,12 @@ using namespace std;
 #include "constants.h"
 
 
+/* getDistance()
+ * Returns the euclidian norma of the vector starting on object1 and 
+ * ending on object2.
+ */
+double getDistance( Object &object1, Object &object2 );
+
 /* drawGuideLine()
  * Draws a stipped line which represents the trajectory of the ball if
  * the player attacks with the present configuration.

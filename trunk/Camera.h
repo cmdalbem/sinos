@@ -64,10 +64,4 @@ public:
 	 * of the default value, which is the center of the main table.
 	 */
 	void 			nextMode(Object* object=NULL);
-	
-	/* Returns the euclidian norma of the vector starting on the camera and 
-	*  end on the "position" of the Object (each Object has an array which
-	*  has its position).
-	*/
-	float			distanceFromObject(Object &theObject) const;
 };
