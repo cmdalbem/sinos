@@ -172,10 +172,16 @@ pair<bool,bool> ObjectBall::updateState()
 	
 	if( hasMoved )
 	{
+		// Update speed			
+		changeSpeed(BALL_DECELERATION_N);
+			
 		// rotation by movement
-		setRot( (((moveVector[2]/STATEUPDATES_PER_SEC)*360.)/getPerimeter()),
+		/*setRot( (((moveVector[2]/STATEUPDATES_PER_SEC)*360.)/getPerimeter()),
 			    0,
-			    (-((moveVector[0]/STATEUPDATES_PER_SEC)*360.)/getPerimeter()));
+			    (-((moveVector[0]/STATEUPDATES_PER_SEC)*360.)/getPerimeter()));*/
+		setRot( (((moveVector[2]/STATEUPDATES_PER_SEC)*180.)/M_PI*1.0),
+			    0,
+			    (-((moveVector[0]/STATEUPDATES_PER_SEC)*180.)/M_PI*1.0));			    
 		
 		// update position
 		setPos( getFutureX(), getFutureY(), getFutureZ() );
@@ -232,9 +238,6 @@ pair<bool,bool> ObjectBall::updateState()
 					changeSpeed(BALL_DECELERATION_R);
 				}
 			}
-						
-			// Update speed			
-			changeSpeed(BALL_DECELERATION_N);
 		}
 		else
 			if( getPosY() > 1 ) {
@@ -272,12 +275,13 @@ void ObjectBall::changeSpeed( double factor )
 	moveVector[1] *= factor;
 	moveVector[2] *= factor;
 	
-	if(moveVector[0]>BALL_MAX_SPEED)
-		moveVector[0]=BALL_MAX_SPEED;
-	if(moveVector[1]>BALL_MAX_SPEED)
-		moveVector[1]=BALL_MAX_SPEED;
-	if(moveVector[2]>BALL_MAX_SPEED)
-		moveVector[2]=BALL_MAX_SPEED;
+	if( getSpeed() > BALL_MAX_SPEED) {
+		factor = (BALL_MAX_SPEED-1)/getSpeed();
+		
+		moveVector[0] *= factor;
+		moveVector[1] *= factor;
+		moveVector[2] *= factor;
+	}
 		
 	if( getSpeed() < BALL_MIN_SPEED )
 		resetSpeed();

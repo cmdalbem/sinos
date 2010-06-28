@@ -215,19 +215,27 @@ void orthoViewport( int width, int height ) {
 
 void display () {
 	
-	int width = glutGet(GLUT_WINDOW_WIDTH);
-	int height = glutGet(GLUT_WINDOW_HEIGHT);
-
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_SCISSOR_TEST);
+	// POG to reduce display rate and priorize variables updating
+	static int displayController=0;
+    ++displayController;
+    if( displayController==UPDATE_PRIORITY_FACTOR )
+    {
+		displayController=0;
 	
-		orthoViewport(width,height);
-		perspectiveViewport(width,height);
-				
-	glDisable(GL_SCISSOR_TEST);
+		int width = glutGet(GLUT_WINDOW_WIDTH);
+		int height = glutGet(GLUT_WINDOW_HEIGHT);
+
+		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_SCISSOR_TEST);
 		
-	glutSwapBuffers();
-	game.frameCounter++;
+			orthoViewport(width,height);
+			perspectiveViewport(width,height);
+					
+		glDisable(GL_SCISSOR_TEST);
+			
+		glutSwapBuffers();
+		game.frameCounter++;
+	}
 }
 
 void initLights () {
@@ -394,9 +402,9 @@ void init ()
 void keyboardFunc (unsigned char key, int x, int y) {
 			
 	if ( key==K_SPACE) {
-		game.level->balls[0].applyForce( game.level->stick.getAttackStrenght()*10,   //some naughty magic numbers here
-										 game.level->stick.getAngleInXZ()+90); //
-		game.level->stick.attack();
+		//game.level->balls[0].applyForce( game.level->stick.getAttackStrenght()*10,   //some naughty magic numbers here
+										 //game.level->stick.getAngleInXZ()+90); //
+		game.attack( game.level->stick.getAttackStrenght() );
 	}
 		
     if( key=='c' ) {

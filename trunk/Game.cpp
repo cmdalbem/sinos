@@ -41,7 +41,7 @@ void Game::resetPoints()
 
 void Game::giveControl()
 {
-	if( !hasControl )
+	if( hasControl == false )
 	{
 		hasControl = true;
 		nextPlayer();
@@ -71,7 +71,9 @@ void Game::updateState()
 	}
 	
 	if( !returnValue.second ) //if nothing moved
+	{
 		giveControl();
+	}
 }
 
 void Game::nextPlayer()

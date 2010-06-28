@@ -39,20 +39,21 @@ const float default_shininess = 0;
 #define NCAMERAMODES 3
 #define OSD_LINES 3
 #define BALL_RADIUS 1
-#define BALL_MAX_RES 100
+#define BALL_MAX_RES 80
 #define BALL_MIN_RES 5
 
 // Global variables
 #define NSTARS 1000
-#define STATEUPDATES_PER_SEC (100.)
-#define BALL_DECELERATION_R (0.01) //table wall friction
-#define BALL_DECELERATION_N (0.2)  //table plane friction
-#define BALL_ACCELERATION_G (1.1)  //gravitational acceleration
+#define STATEUPDATES_PER_SEC (200.)
+#define UPDATE_PRIORITY_FACTOR 2000 //game will re-render again after aprox. each N updates
+#define BALL_DECELERATION_R (0.01)  //table wall friction
+#define BALL_DECELERATION_N (0.2)   //table plane friction
+#define BALL_ACCELERATION_G (1.1)   //gravitational acceleration
 #define NPLAYERS 2
 #define STICK_MAX_STR 30
-#define BALL_MIN_SPEED 0.5
-#define BALL_MAX_SPEED 300
-#define SHOW_TABLE_FRAME 1 //uncomment to apply
+#define BALL_MIN_SPEED (0.5)
+#define BALL_MAX_SPEED BALL_RADIUS*STATEUPDATES_PER_SEC
+//#define SHOW_TABLE_FRAME 1 //comment to hide
 
 // Table boundaries
 #ifdef SHOW_TABLE_FRAME
