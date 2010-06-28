@@ -1,0 +1,11 @@
+ * improve guideline (include reflection on table walls, maybe collision with balls)
+
+ * more realistic way to calculate collision vectors (theres a prototype based on http://en.wikipedia.org/wiki/File:Elastischer_sto%C3%9F_2D.gif)
+
+ * map texture on a quadric sphere
+
+ * make Display be called only when possible (and not every time variables are updated).
+
+ * sounds and music (suggestion: irrKlang lib)
+
+ * collision detection with Table Frame (idea: use table's normals on reflection calculation of ball's vector)
