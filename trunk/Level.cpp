@@ -17,10 +17,11 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	camera2 = _camera2;
 	
 	// Balls
-	int nballs = 22 ;
+	int nballs = 16 ;
+	//int nballs = 29 ;
 	Material ballMaterial;
 	ballMaterial.setShininess(128); 
-	ballMaterial.setAmbient(1,1,1); 
+	ballMaterial.setAmbient(0.7,0.7,0.7); 
 	ballMaterial.setEmission(0.1,0.1,0.1); 
 	ballMaterial.setDiffuse(0.5, 0.5, 0.5);
 	ballMaterial.setSpecular(0.9, 0.9, 0.9);
@@ -30,6 +31,7 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	balls[0].setTexture(ballTex);
 	balls[0].setMaterial(ballMaterial);
 	balls[0].setPos(-20, TABLE_PLANE_Y+balls[0].getRadius(), 0);
+	// triangular disposition
 	for( int line=1, i=1; i<nballs; )
 	{
 		for( int j=0; j<line && i<nballs; j++, i++ )
@@ -45,6 +47,18 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 		}
 		line++;
 	}
+	/*// linear disposition
+	for( int i=1; i<nballs; i++ )
+	{
+		double r = getRandBetween(0,60),
+			   g = getRandBetween(0,60),
+			   b = getRandBetween(0,60);
+		balls[i].setRadius(BALL_RADIUS);
+		balls[i].setTexture(ballTex);
+		balls[i].setMaterial(ballMaterial);
+		balls[i].material.setDiffuse(r/100.,g/100.,b/100.);
+		balls[i].setPos((BALL_RADIUS*2.1)*i +20, TABLE_PLANE_Y+balls[i].getRadius(), 30 );
+	}*/
 
 	// the stick
 	stick.setCenter(&balls[0]);
@@ -85,9 +99,9 @@ void Level::drawObjects () {
 			
 	// draw balls
 	for( int i=0; i<balls.size(); i++ ) {
-		// Linear tesselation
-		double res = 1000. / getDistance(camera->getPosX(), camera->getPosY(), camera->getPosZ(),
-										 balls[i].getPosX(), balls[i].getPosY(), balls[i].getPosZ());
+		// Linear variation over Level of Detail
+		double res = LOD_FACTOR / getDistance(camera->getPosX(), camera->getPosY(), camera->getPosZ(),
+											  balls[i].getPosX(), balls[i].getPosY(), balls[i].getPosZ());
 		if( res<BALL_MIN_RES )	res=BALL_MIN_RES; 
 		else if( res>BALL_MAX_RES) res=BALL_MAX_RES;
 		balls[i].setResolution(res);
@@ -274,7 +288,9 @@ void Level::testBallsCollision()
 						impactv[2]=1;
 					}										
 					// "backtracking"
-					while( getDistance(balls[i],balls[j]) < balls[i].getRadius() + balls[j].getRadius() ) {	
+					int repetitions=0;
+					while( getDistance(balls[i],balls[j]) < balls[i].getRadius() + balls[j].getRadius() // lower limit
+						  && repetitions++ < MAX_BACKTRACK ) {											// upper limit
 						balls[i].backTrack( impactv, true );
 						balls[j].backTrack( impactv);
 					}
@@ -286,7 +302,8 @@ void Level::testBallsCollision()
 					balls[i].applyForce( impactForce, impactAngle );
 					balls[j].applyForce( impactForce, impactAngle, true );
 					
-					// prototype
+					
+					// prototype for realistic elastic collision
 					/*double angle = getVectorAngle(impactv);
 					if(angle>270)
 						angle=360-angle;

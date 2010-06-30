@@ -175,13 +175,13 @@ pair<bool,bool> ObjectBall::updateState()
 		// Update speed			
 		changeSpeed(BALL_DECELERATION_N);
 			
-		// rotation by movement
+		// rotation by movement 
 		/*setRot( (((moveVector[2]/STATEUPDATES_PER_SEC)*360.)/getPerimeter()),
 			    0,
 			    (-((moveVector[0]/STATEUPDATES_PER_SEC)*360.)/getPerimeter()));*/
-		setRot( (((moveVector[2]/STATEUPDATES_PER_SEC)*180.)/M_PI*1.0),
+		setRot( RAD((moveVector[2]*180.)/M_PI*1.),
 			    0,
-			    (-((moveVector[0]/STATEUPDATES_PER_SEC)*180.)/M_PI*1.0));			    
+			    RAD(-(moveVector[0]*180.)/M_PI*1.));
 		
 		// update position
 		setPos( getFutureX(), getFutureY(), getFutureZ() );
@@ -199,9 +199,9 @@ pair<bool,bool> ObjectBall::updateState()
 				if( !canMoveHorizontal() ) { //invert x
 					
 					int rep=0;
-					while( !canMoveHorizontal() ) {
-						rep++;
-						if(rep>10000){
+					while( !canMoveHorizontal() && rep++ < MAX_BACKTRACK ) {
+						backTrack(moveVector);
+						/*if(rep>10000){
 							trouble=1;
 							troublePos[0] = getPosX();
 							troublePos[1] = getPosY();
@@ -209,20 +209,18 @@ pair<bool,bool> ObjectBall::updateState()
 							glutPostRedisplay();							
 							getchar();
 							cout<<"horizontal trouble: "<<moveVector[0]<<" "<<moveVector[2]<<endl;
-						}
-							
-						backTrack(moveVector);
+						}*/
 					}
-					moveVector[0] = -moveVector[0];
-					changeSpeed(BALL_DECELERATION_R);
+					moveVector[0] = -moveVector[0];   //reflection
+					changeSpeed(BALL_DECELERATION_R); //absortion of energy by the wall
 				}
 				
 				if( !canMoveVertical() ) { //invert z
 					
 					int rep=0;
-					while( !canMoveVertical() ) {
-						rep++;
-						if(rep>10000){
+					while( !canMoveVertical() && rep++ < MAX_BACKTRACK ) {
+						backTrack(moveVector);
+						/*if(rep>10000){
 							trouble=1;
 							troublePos[0] = getPosX();
 							troublePos[1] = getPosY();
@@ -230,22 +228,20 @@ pair<bool,bool> ObjectBall::updateState()
 							glutPostRedisplay();								
 							getchar();
 							cout<<"vertical trouble: "<<moveVector[0]<<" "<<moveVector[2]<<endl;
-						}
-						
-						backTrack(moveVector);
+						}*/
 					}
-					moveVector[2] = -moveVector[2];
-					changeSpeed(BALL_DECELERATION_R);
+					moveVector[2] = -moveVector[2];   //reflection
+					changeSpeed(BALL_DECELERATION_R); //absortion of energy by the wall
 				}
 			}
 		}
 		else
-			if( getPosY() > 1 ) {
+			if( getPosY() > 1 ) { //until is over the ground
 				moveVector[1] *= BALL_ACCELERATION_G;
 				moveVector[0] *= BALL_DECELERATION_N;
 				moveVector[2] *= BALL_DECELERATION_N;
 			}
-			else { //fell to the ground
+			else {
 				hasFallen = false;
 				setPos(getRandBetween(-10,10),TABLE_PLANE_Y+getRadius(),getRandBetween(-10,10));
 				resetSpeed();

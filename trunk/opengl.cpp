@@ -135,12 +135,12 @@ void initObjects ()
 	tableTop4.setSize(100,100,100);
 	tableStruct4.setPos(0,0,600);
 	tableTop4.setPos(0,0,600);
-		//objects["tableStruct2"] = &tableStruct2;
-		//objects["tableTop2"] = &tableTop2;
-		//objects["tableStruct3"] = &tableStruct3;
-		//objects["tableTop3"] = &tableTop3;
-		//objects["tableStruct4"] = &tableStruct4;
-		//objects["tableTop4"] = &tableTop4;
+		/*objects["tableStruct2"] = &tableStruct2;
+		objects["tableTop2"] = &tableTop2;
+		objects["tableStruct3"] = &tableStruct3;
+		objects["tableTop3"] = &tableTop3;
+		objects["tableStruct4"] = &tableStruct4;
+		objects["tableTop4"] = &tableTop4;*/
 	
 	// ceiling lamp
 	light.setPos(0,120,0);
@@ -215,10 +215,12 @@ void orthoViewport( int width, int height ) {
 
 void display () {
 	
+	game.updateState();
+	
 	// POG to reduce display rate and priorize variables updating
 	static int displayController=0;
     ++displayController;
-    if( displayController==UPDATE_PRIORITY_FACTOR )
+    if( displayController==UPDATE_PRIORITY_FACTOR )   
     {
 		displayController=0;
 	
@@ -411,7 +413,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		game.updateOsd();
 		game.level->camera->nextMode( &(game.level->balls[0]) );
 	}
-	
+		
     if ( key==K_ESC )
     {
 	    exit(0);
@@ -433,6 +435,15 @@ void specialFunc(int key, int x, int y)
 		game.level->camera->setMode( 2 );
 	}
 	
+	
+	if( key == GLUT_KEY_F11 ) {
+		static bool fullscreen = false;
+		if( !fullscreen ) glutEnterGameMode();
+		else 			  glutLeaveGameMode();
+		fullscreen = !fullscreen;
+	}
+	
+	/*
 	if( key == GLUT_KEY_LEFT ) {
 		game.level->stick.rotate( -5 );
 	}
@@ -447,7 +458,7 @@ void specialFunc(int key, int x, int y)
 	
 	if( key == GLUT_KEY_UP ) {
 		game.level->stick.changePower(-0.1);
-	}
+	}*/
 }
 
 //--------------------------- MOUSE ---------------------------//
@@ -480,11 +491,12 @@ void mouseMotionFunc(int x, int y) {
 	
 	if ( right_click == GLUT_DOWN ) {
 		// stick manual attack
-		game.level->stick.changePower( (y-yold)/5. );
+		game.level->stick.changePower( (y-yold)/6. );
+		//game.level->stick.rotate( (x-xold)/5. );			
 		
 	    if( game.level->stick.getAttackStrenght() < game.level->balls[0].getRadius() ) {
 			//game.attack( pow((yold-y),2)/3. ); //naughty magic equation
-			game.attack( 10*(yold-y) );
+			game.attack( 6*(yold-y) );
 		}
 	}
 	
@@ -521,11 +533,17 @@ int main (int argc, char **argv) {
     cout << "Initializing...\n";
     glutInit (&argc, argv);
     glutInitDisplayMode ( GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL ); //set the display to Double buffer, with depth and stencil buffers
-    glutInitWindowSize (1280, 720);
-    glutInitWindowPosition (400, 0);              					 //set the position of the window
-    glutCreateWindow ("SiNoS - middleButton/c: camera  mouse: stick  spacebar: attack!");
-    //glutGameModeString("1920x1080:16@60");			//Full Screen Mode (adjust resolution for your full resolution values)
-    //glutEnterGameMode();
+    
+    if( FULLSCREEN_ON ) {
+		glutGameModeString("1920x1080:16@60");			//Full Screen Mode (adjust resolution for your full resolution values)
+		glutEnterGameMode();
+	}
+	else {
+		glutInitWindowSize (1280, 720);
+		glutInitWindowPosition (400, 0);              					 //set the position of the window
+		glutCreateWindow ("SiNoS - middleButton/c: camera  mouse: stick  spacebar: attack!");
+	}
+	
     init();
     
     //glutDisplayFunc (display);
@@ -536,7 +554,7 @@ int main (int argc, char **argv) {
     glutMouseFunc(mouseFunc);
 	glutMotionFunc(mouseMotionFunc);
 	glutTimerFunc(0, updateFPS, 0);    
-	glutTimerFunc(0, updateState, 0);
+	//glutTimerFunc(0, updateState, 0);
 	//glutTimerFunc(0, displayCaller, 0);
 	
     glutMainLoop(); 

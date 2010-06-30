@@ -41,18 +41,27 @@ const float default_shininess = 0;
 #define BALL_RADIUS 1
 #define BALL_MAX_RES 80
 #define BALL_MIN_RES 5
+#define NPLAYERS 2
 
 // Global variables
-#define NSTARS 1000
-#define STATEUPDATES_PER_SEC (200.)
-#define UPDATE_PRIORITY_FACTOR 2000 //game will re-render again after aprox. each N updates
-#define BALL_DECELERATION_R (0.01)  //table wall friction
-#define BALL_DECELERATION_N (0.2)   //table plane friction
-#define BALL_ACCELERATION_G (1.1)   //gravitational acceleration
-#define NPLAYERS 2
-#define STICK_MAX_STR 30
+#define STATEUPDATES_PER_SEC (2000.) /* the semantics of this constant is confuse without glutTimer
+									  * actually, it works like the game clock. Increase to make the game slower.
+									  */
+#define UPDATE_PRIORITY_FACTOR 20    /* game will re-render again after N updates
+									  * increase and rendering will get laggy.
+									  */
+
+#define BALL_DECELERATION_R (0.05)   // table wall friction
+#define BALL_DECELERATION_N (0.2)    // table plane friction
+#define BALL_ACCELERATION_G (1.1)    // gravitational acceleration
 #define BALL_MIN_SPEED (0.5)
 #define BALL_MAX_SPEED BALL_RADIUS*STATEUPDATES_PER_SEC
+#define STICK_MAX_STR 30
+#define MAX_BACKTRACK 1000
+
+#define NSTARS 1000
+#define LOD_FACTOR (1500.) // increase and will increase the medium quality of balls
+#define FULLSCREEN_ON 0
 //#define SHOW_TABLE_FRAME 1 //comment to hide
 
 // Table boundaries
