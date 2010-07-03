@@ -46,6 +46,8 @@ public:
 	void				setProps( GLdouble newRadius, int newRes );
 	void				setResolution( int newRes );
 	void				setRadius(GLdouble newRadius);
+	void				setDirection( double angle );
+	void 				resetSpeed();
 	
 	// BEHAVIOUR
 	double				getDirection() const;
@@ -57,9 +59,9 @@ public:
 	float				getPastX() const;
 	float				getPastZ() const;
 	
-	void				backTrack( double v[3], bool invertMovement=false );
+	void				backTrack( const double v[3], bool invertMovement=false );
+	void				reflectAngle( double axisx, double axisy, double axisz );
 	
-	void 				resetSpeed();
 	
 	//---------------------------- OTHER METHODS
 	/*
@@ -69,6 +71,7 @@ public:
 	 */
 	void 				drawBegin() const;
 	virtual void 		draw() const;
+	void				drawVectors() const;
 	pair<bool,bool>		updateState();
 	void				applyForce( float magnitude, float direction, bool reflectAngle=false );
 	void				changeSpeed( double factor );

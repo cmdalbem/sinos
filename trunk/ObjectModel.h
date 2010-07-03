@@ -34,4 +34,5 @@ public:
 	void			loadFromFile(string file);
 	void			calculateNormals();
 	virtual void	draw() const;
+	void			drawNormals() const;
 };

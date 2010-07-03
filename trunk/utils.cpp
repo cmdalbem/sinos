@@ -68,19 +68,37 @@ double getVectorNorma( const double v[3] )
 	return sqrt( pow(v[0],2) + pow(v[1],2) + pow(v[2],2) );	
 }
 
+double getVectorNorma( const double x, const double y )
+{
+	return sqrt( pow(x,2) + pow(y,2) );	
+}
+
 double getVectorAngle( const double v[3] )
 {
-	if( getVectorNorma(v) ) {
-		float direction = DEGREES(acosf(v[0]/getVectorNorma(v))); //angle of move vector = arc cos x/hypotenuse
+	return getVectorAngle( v[0], v[2] );
+}	
+
+double getVectorAngle( const double x, const double y )
+{
+	double magnitude = getVectorNorma(x,y);
+	if( magnitude ) {
+		float direction = DEGREES(acosf(x/magnitude)); //angle of move vector = arc cos x/hypotenuse
 		
-		if( (v[2]/getVectorNorma(v)) > 0 )
+		if( (y/magnitude) > 0 )
 			direction += 2*(180-direction);
 			
 		return direction;
 	}
 	else
 		return 0;
-}	
+}
+
+double dotProduct( const double v[3], const double u[3] )
+{
+       return v[0]*u[0] + v[2]*u[2];
+}
+
+
 
 void glShadowProjection(float * l, float * e, float * n)
 /* This function was adapted from the Internet. There as so many sources that I can't tell the original author of this.*/

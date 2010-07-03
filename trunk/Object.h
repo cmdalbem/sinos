@@ -18,11 +18,13 @@
 class Object
 {
 private:
+
+					
+public:
 	GLfloat pos[3],		// position x, y and z of the Object
 			rot[3],		// rotation arguments on Rotatefs functions called on Draw
 			size[3];	// scale arguments on Scalefs functions called on Draw
-					
-public:
+			
 	//---------------------------- ATTRIBUTES
 	Material material;
 	Texture *texture;

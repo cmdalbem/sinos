@@ -53,12 +53,12 @@ ObjectBall::~ObjectBall() { }
 
 //------------------------------------------------------------ GETTERS & SETTERS
 
-void ObjectBall::setSize (GLfloat x, GLfloat y, GLfloat z)
+/*void ObjectBall::setSize (GLfloat x, GLfloat y, GLfloat z)
 {
 	Object::setSize(x,y,z);
 	if(x==z && z==y)
 		radius = x;
-}
+}*/
 
 GLdouble ObjectBall::getRadius() const
 {
@@ -84,6 +84,15 @@ void ObjectBall::setResolution( int newRes )
 void ObjectBall::setRadius(GLdouble newRadius)
 {
 	radius = newRadius;
+}
+
+void ObjectBall::setDirection( double angle )
+{
+	double speed = getSpeed();
+	
+	resetSpeed();
+	
+	applyForce(speed,angle+90);
 }
 
 void ObjectBall::resetSpeed()
@@ -137,30 +146,49 @@ float ObjectBall::getPastZ() const
 	return getPosX() - moveVector[2] / STATEUPDATES_PER_SEC; 
 }
 
-void ObjectBall::backTrack( double v[3], bool invert /*default=false*/ )
+//------------------------------------------------------------ OTHER METHODS
+
+void ObjectBall::backTrack( const double origv[3], bool invert /*default=false*/ )
 {
-	double tempv[3];
-	tempv[0] = v[0];
-	tempv[1] = v[1];
-	tempv[2] = v[2];
-	
+	double v[3] = {origv[0],origv[1],origv[2]};
+		
 	normalizeVector(v);
 	
 	if(invert) {
-		setPosX( getPosX() + v[0]/20.);
-		setPosZ( getPosZ() + v[2]/20.); 
+		setPosX( getPosX() + v[0]/50.);
+		setPosZ( getPosZ() + v[2]/50.); 
 	}
 	else {
-		setPosX( getPosX() - v[0]/20.);
-		setPosZ( getPosZ() - v[2]/20.);
+		setPosX( getPosX() - v[0]/50.);
+		setPosZ( getPosZ() - v[2]/50.);
 	}
-	
-	v[0] = tempv[0];
-	v[1] = tempv[1];
-	v[2] = tempv[2];
 }
 
-//------------------------------------------------------------ OTHER METHODS
+void ObjectBall::reflectAngle( double axisx, double axisy, double axisz )
+{
+	/* Formula for reflected angle is: 2*N(V.N)-V */
+	
+	double axis[3] = {axisx, axisy, axisz};
+	double dot = dotProduct(axis,moveVector);
+
+	double final[3] = {axisx, axisy, axisz};
+	
+	final[0] *= 2;
+	//final[1] *= 2; //lets ignore the y reflection
+	final[2] *= 2;
+	
+	final[0] *= dot;
+	//final[1] *= dot;
+	final[2] *= dot;
+	
+	final[0] -= moveVector[0];
+	//final[1] -= moveVector[1];
+	final[2] -= moveVector[2];
+	
+	moveVector[0] = -final[0];
+	//moveVector[1] = -final[1];
+	moveVector[2] = -final[2];
+}
 
 pair<bool,bool> ObjectBall::updateState()
 /* Return: first  = if ball has moved
@@ -176,12 +204,9 @@ pair<bool,bool> ObjectBall::updateState()
 		changeSpeed(BALL_DECELERATION_N);
 			
 		// rotation by movement 
-		/*setRot( (((moveVector[2]/STATEUPDATES_PER_SEC)*360.)/getPerimeter()),
+		setRot( RAD(((moveVector[2])*180.)/M_PI*BALL_RADIUS),
 			    0,
-			    (-((moveVector[0]/STATEUPDATES_PER_SEC)*360.)/getPerimeter()));*/
-		setRot( RAD((moveVector[2]*180.)/M_PI*1.),
-			    0,
-			    RAD(-(moveVector[0]*180.)/M_PI*1.));
+			    RAD(-((moveVector[0])*180.)/M_PI*BALL_RADIUS));
 		
 		// update position
 		setPos( getFutureX(), getFutureY(), getFutureZ() );
@@ -289,7 +314,7 @@ void ObjectBall::drawBegin() const
 	glPushMatrix();
 	
 	glTranslated(getPosX(), getPosY(), getPosZ());
-	
+	glScalef(getSizeX(), getSizeX(), getSizeX());
 	glMultMatrixd(rotMat); 						//see updateRotateMatrix()
 	    		
 	material.apply();	
@@ -318,22 +343,48 @@ void ObjectBall::draw() const
 			gluSphere(quadricSphere,radius,res,res);
 		else
 		{
-			glEnable(GL_TEXTURE_GEN_S);
-			glEnable(GL_TEXTURE_GEN_T);
-			
+			gluQuadricTexture(quadricSphere, GL_TRUE);
+			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+				
+			glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+			glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
 			glBindTexture(GL_TEXTURE_2D, texture->texID);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
 			gluSphere(quadricSphere,radius,res,res);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_REPEAT);
 			
-			glDisable(GL_TEXTURE_GEN_S);
-			glDisable(GL_TEXTURE_GEN_T);				
+			gluQuadricTexture(quadricSphere, GL_FALSE);			
 		}
 		Object::drawEnd();
      }	
 
+}
+
+void ObjectBall::drawVectors() const
+{
+	glDisable(GL_LIGHTING);
+	
+		glBegin(GL_LINES);
+			glVertex3f(pos[0],pos[1],pos[2]);
+			glVertex3f(pos[0] + moveVector[0],
+					   pos[1],
+					   pos[2] );
+		glEnd();
+		glBegin(GL_LINES);
+			glVertex3f(pos[0],pos[1],pos[2]);
+			glVertex3f(pos[0],
+					   pos[1],
+					   pos[2]+ moveVector[2] );
+		glEnd();
+		
+
+		glBegin(GL_LINES);
+			glVertex3f(pos[0],pos[1],pos[2]);
+			glVertex3f(pos[0]+ getSpeed()*cos(RAD(getDirection())),
+					   pos[1],
+					   pos[2]+ -getSpeed()*sin(RAD(getDirection())) );
+		glEnd();	
+	
+	glEnable(GL_LIGHTING);
 }
 
 void ObjectBall::updateRotateMatrix()
@@ -371,15 +422,16 @@ void ObjectBall::setQuad()
 {
 	quadricSphere = gluNewQuadric();
 	gluQuadricNormals(quadricSphere, GL_SMOOTH);
-	gluQuadricTexture(quadricSphere, GL_TRUE);
-	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+	gluQuadricDrawStyle( quadricSphere, GLU_FILL);
+    gluQuadricOrientation( quadricSphere, GLU_OUTSIDE);
 }
 
 //--------------------------------------------------- POSITION DETECTION
 
 bool ObjectBall::hasSnooked()
 {
+	//return false;	//temp
+	
 	float posx = getPosX(),
 		  posy = getPosY(),
 		  posz = getPosZ();
@@ -387,21 +439,12 @@ bool ObjectBall::hasSnooked()
 	for(int i=0; i<NHOLES; i++)
 		if( abs(posx-HC[i][0]) + abs(posz-HC[i][1]) <= HC[i][2] )
 			return true;
-	return false;
-	
-	/*// Limit Boundaries Test
-	if( posx>B2P1[0] && posx<B2P2[0] &&
-		posy>B2P1[1] )
-		return true;
-	else if( posx>B5P1[0] && posx<B5P2[0] &&
-			 posy<B5P1[1] )
-			return true;
-	else return false;*/
-	
+	return false;	
 }
 
 bool ObjectBall::canMoveHorizontal()
 {
+	//return true; //temp
 	float posx = getPosX();
 	
 	if( posx > RIGHTBOUND  ||  posx < LEFTBOUND )
@@ -412,6 +455,8 @@ bool ObjectBall::canMoveHorizontal()
 
 bool ObjectBall::canMoveVertical()
 {
+	//return true; //temp
+	
 	float posz = getPosZ();
 	
 	if( posz > TOPBOUND  ||  posz < BOTBOUND )

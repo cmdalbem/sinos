@@ -83,3 +83,28 @@ void ObjectModel::draw() const
 		drawEnd();
 	}
 }
+
+void ObjectModel::drawNormals() const
+{
+	double x2 = pos[0],
+		   y2 = pos[1],
+		   z2 = pos[2];
+	double sx = size[0],
+		   sy = size[1],
+		   sz = size[2];
+	double truex, truey, truez;
+	
+	for(int v=0; v<modelPointer->numvertices; v++)
+	{
+		truex = x2 + sx*modelPointer->vertices[3*v + 0];
+		truey = y2 + sy*modelPointer->vertices[3*v + 1];
+		truez = z2 + sz*modelPointer->vertices[3*v + 2];
+		
+		glBegin(GL_LINES);
+			glVertex3f(truex,truey,truez);
+			glVertex3f(x2 + (truex + modelPointer->normals[3*v + 0]),
+					   y2 + (truey + modelPointer->normals[3*v + 1]),
+					   z2 + (truez + modelPointer->normals[3*v + 2]) );
+		glEnd();
+	}
+}

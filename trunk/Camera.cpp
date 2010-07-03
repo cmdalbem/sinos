@@ -35,7 +35,7 @@ void Camera::setCamera(int _cameraMode)
 	xrot = -45;
 	yrot = 45;
 		
-	xrot2 = 45;
+	xrot2 = 0;
 	yrot2 = 20;
 	zoom = 5;
 	
@@ -153,40 +153,40 @@ double Camera::getPosZ() const
 
 void Camera::setPos2 ()
 {
-	xpos2 = xorig + sin(yrot2*0.05)*sin(xrot2*0.05)*zoom;
-	ypos2 = yorig + cos(yrot2*0.05)*zoom;
-	zpos2 = zorig + cos(xrot2*0.05)*sin(yrot2*0.05)*zoom;
+	xpos2 = xorig + sin(yrot2*0.0175)*sin(xrot2*0.0175)*zoom;
+	ypos2 = yorig + cos(yrot2*0.0175)*zoom;
+	zpos2 = zorig + cos(xrot2*0.0175)*sin(yrot2*0.0175)*zoom;
 }
 
-void Camera::action1 (int movex, int movey)
+void Camera::action1 (double movex, double movey)
 /* Usually, rotating the view. */
 {
 	switch( cameraMode )
 	{
 		case 0:
-			yrot = yrot + movey /5.;
-			xrot = xrot + movex /5.;
+			yrot = yrot + movey;
+			xrot = xrot + movex;
 			break;		
 		case 1:
-			yrot2 = yrot2 + movey /5.;
-			xrot2 = xrot2 + movex /5.;
+			yrot2 = yrot2 + movey;
+			xrot2 = xrot2 + movex;
 			
-			if(yrot2<0.5) yrot2=0.5;	// don't let reverse the rotation
-			if(yrot2>31.5) yrot2=31.5;		// don't let se below the table
+			if(yrot2<1) yrot2=1;	// don't let reverse the rotation
+			if(yrot2>85) yrot2=85;		// don't let se below the table
 			
 			setPos2();
 					
 			break;
 		case 2:
-			xpos3 += movex /5.;
-			zpos3 += movey /5.;
+			xpos3 += movex;
+			zpos3 += movey;
 			break;
 		case 3:
 			break;
 	}
 }
 
-void Camera::action2 (int movex, int movey)
+void Camera::action2 (double movex, double movey)
 /* Usually, zooming. */
 {
 	switch( cameraMode )
@@ -200,7 +200,7 @@ void Camera::action2 (int movex, int movey)
 			zpos -= -movey/2. * float(cos(yrotrad)) ;	
 			break;
 		case 1:
-			zoom += movey / 5.f;
+			zoom += movey;
 			if( zoom < 2 )
 				zoom = 2;		// do not let reverse the camera
 			
@@ -208,7 +208,7 @@ void Camera::action2 (int movex, int movey)
 			
 			break;
 		case 2:
-			ypos3 += movey / 5.f;
+			ypos3 += movey;
 			if( ypos3 < 40 )
 				ypos3 = 40;		// do not let reverse the camera
 			break;

@@ -38,19 +38,20 @@ const float default_shininess = 0;
 #define NHOLES 6
 #define NCAMERAMODES 3
 #define OSD_LINES 3
-#define BALL_RADIUS 1
+#define BALL_RADIUS (1.)
 #define BALL_MAX_RES 80
 #define BALL_MIN_RES 5
 #define NPLAYERS 2
 
 // Global variables
-#define STATEUPDATES_PER_SEC (2000.) /* the semantics of this constant is confuse without glutTimer
+#define STATEUPDATES_PER_SEC (4000.) /* the semantics of this constant is confuse without glutTimer
 									  * actually, it works like the game clock. Increase to make the game slower.
 									  */
-#define UPDATE_PRIORITY_FACTOR 20    /* game will re-render again after N updates
+#define UPDATE_PRIORITY_FACTOR 100    /* game will re-render again after N updates
 									  * increase and rendering will get laggy.
 									  */
 
+#define TIME_STEP (1000.)/STATEUPDATES_PER_SEC
 #define BALL_DECELERATION_R (0.05)   // table wall friction
 #define BALL_DECELERATION_N (0.2)    // table plane friction
 #define BALL_ACCELERATION_G (1.1)    // gravitational acceleration
@@ -58,11 +59,10 @@ const float default_shininess = 0;
 #define BALL_MAX_SPEED BALL_RADIUS*STATEUPDATES_PER_SEC
 #define STICK_MAX_STR 30
 #define MAX_BACKTRACK 1000
-
 #define NSTARS 1000
 #define LOD_FACTOR (1500.) // increase and will increase the medium quality of balls
 #define FULLSCREEN_ON 0
-//#define SHOW_TABLE_FRAME 1 //comment to hide
+#define SHOW_TABLE_FRAME 1 //comment to hide
 
 // Table boundaries
 #ifdef SHOW_TABLE_FRAME
@@ -78,7 +78,7 @@ const float default_shininess = 0;
 #endif
 
 // Holes
-// limit boundaries {x,y}
+// holes entrances limits {x,y}
 const float B1P1[] = {-48.3, -19.9};
 const float B1P2[] = {-45  , -23.5};
 const float B2P1[] = {-2.4 , -23.5};
@@ -91,7 +91,7 @@ const float B5P1[] = {-2.4 ,  28.1};
 const float B5P2[] = { 1.8 ,  28.1};
 const float B6P1[] = { 48  ,  24.5};
 const float B6P2[] = { 44.4,  28.1};
-// centers {x,z,radius}
+// holes centers {x,z,radius}
 const float HC[6][3] ={{-48. ,-22.9, 2.7},
 				       {-0.3 ,-24.4, 2.4},
 				  	   { 47.4,-22.6, 2.7},

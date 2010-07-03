@@ -43,11 +43,10 @@ static int	right_click = GLUT_UP;
 static int	middle_click = GLUT_UP;
 static bool heldCtrl = false;
 static bool heldShift = false;
+static int timeBase = 0;
+static int timeAct; 
 						  
 
-// !! The following globals aren't in their proper place. !!
-
-int 		lensAngle = 60;
 
 
 //--------------------------------------------------------------------//
@@ -60,6 +59,9 @@ void initObjects ()
 	static ObjectModel tableBottom("obj/pooltable_bottom.obj");
 	static ObjectModel tableTop("obj/pooltable_table.obj");
 	static ObjectModel tableFrame("obj/pooltable_frame.obj");
+	static ObjectModel tableFrameBound("obj/pooltable_frame_bound.obj");
+						glmFacetNormals(tableFrameBound.getModelPointer());
+						glmVertexNormals(tableFrameBound.getModelPointer(), -90.0);
 	static ObjectModel scenario("obj/crypt.obj");
 	static ObjectModel globe("obj/globe.obj");
 	static ObjectModel light("obj/light1.obj");
@@ -93,6 +95,7 @@ void initObjects ()
 	tableMiddle.setMaterial(tableStructMat);
 	tableTop.setMaterial(tableTopMat);
 	tableFrame.setMaterial(tableTopMat);
+	//tableFrame.material.setEmission(0.1,0.1,0.1);
 	//textures
 	tableMiddle.setTexture(&woodTex);
 	tableBottom.setTexture(&woodTex);
@@ -109,6 +112,7 @@ void initObjects ()
 	objects["tableMiddle"] = &tableMiddle;
 	#ifdef SHOW_TABLE_FRAME
 		objects["tableFrame"] = &tableFrame;
+		objects["tableFrameBound"] = &tableFrameBound;
 	#endif
 
 	// table2
@@ -173,7 +177,7 @@ void perspectiveViewport( int width, int height ) {
     glViewport (0, 0, (GLsizei)width, (GLfloat)height);
     glScissor(0, 0, width, height);
     
-	gluPerspective (lensAngle, (GLfloat)width / (GLfloat)height, 0.1, 10000.0);
+	gluPerspective (60, (GLfloat)width / (GLfloat)height, 0.1, 10000.0);
 	//glOrtho(-65, 65, -35, 35, 5, 500);    					
 	
     glMatrixMode(GL_MODELVIEW);
@@ -217,27 +221,35 @@ void display () {
 	
 	game.updateState();
 	
-	// POG to reduce display rate and priorize variables updating
-	static int displayController=0;
-    ++displayController;
-    if( displayController==UPDATE_PRIORITY_FACTOR )   
-    {
-		displayController=0;
-	
-		int width = glutGet(GLUT_WINDOW_WIDTH);
-		int height = glutGet(GLUT_WINDOW_HEIGHT);
-
-		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_SCISSOR_TEST);
-		
-			orthoViewport(width,height);
-			perspectiveViewport(width,height);
-					
-		glDisable(GL_SCISSOR_TEST);
-			
-		glutSwapBuffers();
-		game.frameCounter++;
+	/*timeAct = glutGet(GLUT_ELAPSED_TIME);
+	if( timeAct - timeBase > TIME_STEP ) {
+		timeBase = timeAct; 
+		game.updateState();
 	}
+	else
+	{*/
+		// POG to reduce display rate and priorize variables updating
+		static int displayController=0;
+		++displayController;
+		if( displayController==UPDATE_PRIORITY_FACTOR )
+		{
+			displayController=0;
+		
+			int width = glutGet(GLUT_WINDOW_WIDTH);
+			int height = glutGet(GLUT_WINDOW_HEIGHT);
+
+			glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_SCISSOR_TEST);
+			
+				orthoViewport(width,height);
+				perspectiveViewport(width,height);
+						
+			glDisable(GL_SCISSOR_TEST);
+				
+			glutSwapBuffers();
+			game.frameCounter++;
+		}
+	//}
 }
 
 void initLights () {
@@ -394,7 +406,7 @@ void init ()
     loadTexture(&rockTex, "textures/rock.tga");//set true to use mipmapping
     loadTexture(&starsTex, "textures/stars3.tga");
     loadTexture(&stickTex, "textures/stick.tga");
-    loadTexture(&ballTex,  "textures/poolball2.tga");
+    loadTexture(&ballTex,  "textures/poolball.tga");
     cout << "Done.\n"; 
     
     game.updateOsd();
@@ -404,8 +416,6 @@ void init ()
 void keyboardFunc (unsigned char key, int x, int y) {
 			
 	if ( key==K_SPACE) {
-		//game.level->balls[0].applyForce( game.level->stick.getAttackStrenght()*10,   //some naughty magic numbers here
-										 //game.level->stick.getAngleInXZ()+90); //
 		game.attack( game.level->stick.getAttackStrenght() );
 	}
 		
@@ -443,22 +453,27 @@ void specialFunc(int key, int x, int y)
 		fullscreen = !fullscreen;
 	}
 	
-	/*
+	int var=1;
+	
 	if( key == GLUT_KEY_LEFT ) {
-		game.level->stick.rotate( -5 );
+		//game.level->balls[0].setPosX( game.level->balls[0].getPosX()-1 );
+		game.level->balls[0].moveVector[0] += -var;
 	}
 	
 	if( key == GLUT_KEY_RIGHT ) {
-		game.level->stick.rotate( 5 );
+		//game.level->balls[0].setPosX( game.level->balls[0].getPosX()+1 );
+		game.level->balls[0].moveVector[0] += var;
 	}
 	
 	if( key == GLUT_KEY_DOWN ) {
-		game.level->stick.changePower(0.1);
+		//game.level->balls[0].setPosZ( game.level->balls[0].getPosZ()+1 );
+		game.level->balls[0].moveVector[2] += var;
 	}
 	
 	if( key == GLUT_KEY_UP ) {
-		game.level->stick.changePower(-0.1);
-	}*/
+		//game.level->balls[0].setPosZ( game.level->balls[0].getPosZ()-1 );
+		game.level->balls[0].moveVector[2] += -var;
+	}
 }
 
 //--------------------------- MOUSE ---------------------------//
@@ -472,9 +487,9 @@ void mouseFunc(int button, int state, int x, int y) {
 	if( button == GLUT_WHEEL_MIDDLE )
 		middle_click = state;
 	if( button == GLUT_WHEEL_DOWN )
-		game.level->camera->action2(0,5);
+		game.level->camera->action2(0,1);
 	if( button == GLUT_WHEEL_UP )
-		game.level->camera->action2(0,-5);
+		game.level->camera->action2(0,-1);
 		
 	xold = x;
 	yold = y;
@@ -486,22 +501,30 @@ void mouseFunc(int button, int state, int x, int y) {
 void mouseMotionFunc(int x, int y) {
 	
 	if ( left_click == GLUT_DOWN ) {
-		game.level->stick.rotate( (x-xold)/5. );			
+		game.level->stick.rotate( (x-xold)/5. );	
+		game.level->camera->action1( (x-xold)/5.,0);				
     }
 	
 	if ( right_click == GLUT_DOWN ) {
-		// stick manual attack
-		game.level->stick.changePower( (y-yold)/6. );
-		//game.level->stick.rotate( (x-xold)/5. );			
-		
-	    if( game.level->stick.getAttackStrenght() < game.level->balls[0].getRadius() ) {
-			//game.attack( pow((yold-y),2)/3. ); //naughty magic equation
-			game.attack( 6*(yold-y) );
+		if( game.hasControl ) {
+			//game.level->camera->action1( (x-xold)/5.,0);  // hard mode ON!!
+			//game.level->stick.rotate( (x-xold)/5. );		//
+			
+			game.level->stick.changePower( (y-yold)/6. );
+		    if( game.level->stick.getAttackStrenght() < game.level->balls[0].getRadius() ) {
+				game.attack( 6*(yold-y) );
+			}
 		}
 	}
 	
 	if ( middle_click ==GLUT_DOWN  ) {
-		game.level->camera->action1(x - xold, y - yold);
+		if( game.hasControl )
+			game.level->camera->action1((x-xold)/5., (y-yold)/5.);
+		else {
+			game.level->stick.rotate( (x-xold)/5. );	
+			game.level->camera->action1( (x-xold)/5., (y-yold)/5.);	
+		}
+		
 	}
 
 	xold = x;

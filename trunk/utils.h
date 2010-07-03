@@ -37,8 +37,12 @@ double getRandBetween(int a, int b);
 double normalizeVector( double v[3] );
 
 double getVectorNorma( const double v[3] );
+double getVectorNorma( const double x, const double z );
 
 double getVectorAngle( const double v[3] );
+double getVectorAngle( double x, double z );
+
+double dotProduct( const double v[3], const double u[3] );
 
 /* glShadowProjection()
  * Original documentation follows:

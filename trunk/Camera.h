@@ -20,14 +20,14 @@ private:
 
 	int cameraMode;
 	int posit;
-	GLfloat xpos,  ypos,  zpos,		// variables used in the Manual mode
-			xrot,  yrot,			// 
+	double xpos,  ypos,  zpos,		// variables used in the Manual mode
+		   xrot,  yrot,			// 
 			
-			xpos2, ypos2, zpos2,	// variables used in the Ball Centered mode
-			xrot2, yrot2, zoom,		//
-			xorig, yorig, zorig,	//
+		   xpos2, ypos2, zpos2,	// variables used in the Ball Centered mode
+		   xrot2, yrot2, zoom,		//
+		   xorig, yorig, zorig,	//
 			
-			xpos3, ypos3, zpos3;	// variables used in the Top View mode
+		   xpos3, ypos3, zpos3;	// variables used in the Top View mode
 
 public:
 	//---------------------------- CONSTRUCTORS
@@ -58,8 +58,8 @@ public:
 	
 	//---------------------------- OTHER METHODS
 	void 			apply( int forceAMode=-1 ); 					// main method
-	void 			action1 (int movex, int movey);					// usually, rotating the view
-	void 			action2 (int movex, int movey);					// usually, zooming
+	void 			action1 ( double movex, double movey);					// usually, rotating the view
+	void 			action2 ( double movex, double movey);					// usually, zooming
 	
 	/* If an object is passed, then it will make difference when using the
 	 * "camera mode 1". The camera will center on the object passed, instead
