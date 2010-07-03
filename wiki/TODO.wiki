@@ -1,7 +1,11 @@
- * improve guideline (include reflection on table walls, maybe collision with balls)
+Ordered by importance:
 
- * more realistic way to calculate collision vectors (theres a prototype based on http://en.wikipedia.org/wiki/File:Elastischer_sto%C3%9F_2D.gif)
+ * friction as a vector, and not as a constant multiplicating the speed
 
  * sound effects and music (for both, suggestion: irrKlang lib)
 
+ * more realistic way to calculate collision vectors (theres a prototype based on http://en.wikipedia.org/wiki/File:Elastischer_sto%C3%9F_2D.gif)
+
  * more game styles and more levels
+
+ * improve guideline (include reflection on table walls, maybe collision with balls)
