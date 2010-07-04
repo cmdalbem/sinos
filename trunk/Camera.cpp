@@ -50,18 +50,17 @@ void Camera::setCamera(int _cameraMode)
 	setPos2();
 }
 
-void Camera::setXPos(GLfloat newValue)
+void Camera::setPosX(GLfloat newValue)
 {	xpos = newValue;	}
-void Camera::setYPos(GLfloat newValue)
+void Camera::setPosY(GLfloat newValue)
 {	ypos = newValue;	}
-void Camera::setZPos(GLfloat newValue)
+void Camera::setPosZ(GLfloat newValue)
 {	zpos = newValue;	}
 	
-void Camera::setXRot(GLfloat newValue)
-{	xrot = newValue;	}	// if newValue is greater than 360, then we take
-							// the rest of the division (the module)
-void Camera::setYRot(GLfloat newValue)
-{	yrot = newValue;	}
+void Camera::setRotX2(GLfloat newValue)
+{	xrot2 = newValue;	}
+void Camera::setRotY2(GLfloat newValue)
+{	yrot2 = newValue;	}
 
 
 
@@ -81,29 +80,22 @@ const char* Camera::getModeName ( int mode ) const
 }
 
 
-void Camera::setMode (int mode, Object* object)
+void Camera::setMode (int mode)
 {
-	if ( cameraMode < NCAMERAMODES )
-	{		
+	if ( cameraMode < NCAMERAMODES )		
 		cameraMode = mode;
-		if ( mode = 1 )
-		{
-			if( object!=NULL )
-			{
-				xorig = object->getPosX();	// Saves the position of the object
-				yorig = object->getPosY();	// the camera is looking at.
-				zorig = object->getPosZ();	//
-			}
-			else
-			{
-				xorig = 0;		// If no object is passed, then the "orig"
-				yorig = 29.5;	// variables receive default values.
-				zorig = 0;		//
-			}	
-		}
-	}
 	else
 		cout << "error: CameraMode " << mode << "doesnt exists." << endl;
+}
+
+void Camera::setCenter( Object* object )
+{
+	if( object )
+	{
+		xorig = object->getPosX();	// Saves the position of the object
+		yorig = object->getPosY();	// the camera is looking at.
+		zorig = object->getPosZ();	//	
+	}
 }
 
 int Camera::getMode () const
@@ -247,7 +239,7 @@ void Camera::apply( int forceAMode )
 		case 2:
 		{
 			// top view
-			glRotatef(90, 1.,0.,0.);
+			glRotatef(90, 1,0,0);
 			glTranslated(xpos3,-ypos3,zpos3);
 			break;
 		}
@@ -264,6 +256,7 @@ void Camera::apply( int forceAMode )
 
 void Camera::nextMode(Object* object)
 {
-	setMode( (getMode()+1)%NCAMERAMODES, object);
+	setMode( (getMode()+1)%NCAMERAMODES);
+	setCenter(object);
 }
 

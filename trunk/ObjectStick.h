@@ -17,10 +17,8 @@ using namespace std;
 class ObjectStick : public ObjectModel
 {
 	private:
-		ObjectBall*		center;
+		ObjectBall*	center;
 		float 		attackStrenght;
-		
-		float		angleInXZ;
 		
 	public:
 		bool		isHidden;
@@ -34,8 +32,6 @@ class ObjectStick : public ObjectModel
 		~ObjectStick();
 		//---------------------------- GETTERS & SETTERS
 		void	setCenter(ObjectBall* newCenter);
-		float 	getAngleInXZ() const;
-		void	setAngleInXZ(float newAngle);
 		
 		float	getAttackStrenght() const;
 		void	setAttackStrenght(float newForce);
@@ -57,5 +53,6 @@ class ObjectStick : public ObjectModel
 		 */
 		void			calculatePos();
 		void 			attack();
+		void  			drawBegin() const;
 		virtual void	draw() const;
 };

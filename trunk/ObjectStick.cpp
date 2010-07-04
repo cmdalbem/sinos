@@ -10,26 +10,17 @@
 ObjectStick::ObjectStick()
 : ObjectModel()
 {
-	setRotX(25);
-	setRotY(-180);
-	setRotZ(0);
-	
+	rot[0] = -10;
 	isHidden = false;
-	
 	setAttackStrenght(1);
 }
 
 ObjectStick::ObjectStick(string filename, ObjectBall* objectCenter)
 :	ObjectModel(filename)
 {
-	setRotX(25);
-	setRotY(-180);
-	setRotZ(0);
-	
+	rot[0] = -10;
 	isHidden = false;
-	
 	center = objectCenter;
-	
 	setAttackStrenght(center->getRadius()+1);
 	calculatePos();
 }
@@ -42,19 +33,6 @@ void ObjectStick::setCenter(ObjectBall* newCenter)
 {
 	center = newCenter;
 	calculatePos();
-}
-
-float ObjectStick::getAngleInXZ() const
-{
-	return angleInXZ;
-}
-
-void ObjectStick::setAngleInXZ(float newAngle)
-{
-	angleInXZ = newAngle;
-	
-	if(angleInXZ>360)
-		angleInXZ = angleInXZ - 360;
 }
 
 float ObjectStick::getAttackStrenght() const
@@ -72,11 +50,9 @@ void ObjectStick::setAttackStrenght(float newForce)
 
 //------------------------------------------------------------ OTHER METHODS
 
-void ObjectStick::rotate( float rot )
+void ObjectStick::rotate( float rotat )
 {
-	setAngleInXZ(getAngleInXZ() + rot);
-	setRotY(getRotY() + rot);
-	
+	rot[1] += rotat;	
 	calculatePos();
 }
 
@@ -85,21 +61,19 @@ void ObjectStick::changePower( float var )
 	if( !isHidden )
 	{
 		setAttackStrenght(attackStrenght + var);
-		setRotX(25);
 		calculatePos();
 	}
 }
 
 void ObjectStick::calculatePos()
 {
-	double degrees = RAD(getAngleInXZ());
+	double roty = RAD(rot[1]),
+		   rotx = RAD(rot[0]);
 	
-	setPosX(center->getPosX() + sin(degrees)*(getAttackStrenght()/2.));
-	setPosY(center->getPosY() + sin(RAD(25))*(getAttackStrenght()/2.));
-	setPosZ(center->getPosZ() + cos(degrees)*(getAttackStrenght()/2.));
+	setPosX(center->getPosX() + sin(roty)*(getAttackStrenght()/2.));
+	setPosY(center->getPosY() - sin(rotx)*(getAttackStrenght()/2.));
+	setPosZ(center->getPosZ() + cos(roty)*(getAttackStrenght()/2.));
 }
-
-
 
 void ObjectStick::attack()
 {
@@ -107,8 +81,34 @@ void ObjectStick::attack()
 	isHidden = true;
 }
 
+void ObjectStick::drawBegin() const
+/* Overloading of original Object::drawBegin() */
+{
+	glPushMatrix();
+	
+	glTranslated(getPosX(), getPosY(), getPosZ());
+	glScalef(getSizeX(), getSizeX(), getSizeX());
+	glRotatef (rot[1], 0,1,0);
+    glRotatef (rot[0], 1,0,0);
+	    		
+	material.apply();	
+}
+
 void ObjectStick::draw() const
 {
 	if(!isHidden)
-		ObjectModel::draw();
+	{
+		if(getModelPointer())
+		{
+			ObjectStick::drawBegin();
+			if( texture!=NULL )
+			{
+				glBindTexture(GL_TEXTURE_2D, texture->texID);
+				glmDraw(getModelPointer(), GLM_SMOOTH | GLM_TEXTURE);
+			}
+			else
+				glmDraw(getModelPointer(), GLM_SMOOTH);
+			drawEnd();
+		}
+	}
 }

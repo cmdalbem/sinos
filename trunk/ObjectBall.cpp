@@ -233,8 +233,8 @@ pair<bool,bool> ObjectBall::updateState()
 				moveVector[2] *= BALL_DECELERATION_N;
 			}
 			else {
-				hasFallen = false;
-				setPos(getRandBetween(-10,10),TABLE_PLANE_Y+getRadius(),getRandBetween(-10,10));
+				//hasFallen = false;
+				//setPos(getRandBetween(-10,10),TABLE_PLANE_Y+getRadius(),getRandBetween(-10,10));
 				resetSpeed();
 			}
 	}
@@ -397,7 +397,7 @@ void ObjectBall::setQuad()
 bool ObjectBall::hasSnooked()
 {
 	for(int i=0; i<NHOLES; i++)
-		if( abs(pos[0]-HC[i][0]) + abs(pos[2]-HC[i][1]) <= HC[i][2] )
+		if( abs(pos[0]-HC[i][0]) + abs(pos[2]-HC[i][1]) < HC[i][2] )
 			return true;
 	return false;	
 }

@@ -25,13 +25,12 @@
 						 
 
 // Objects
-point star[NSTARS];
 map<string,Object*> objects;
 vector<LightInfo*> theLights;
 Camera camera, camera2(2);
 
 // Texture files
-Texture tigerTex, woodTex, tableTex, rockTex, starsTex, ballTex, stickTex;
+Texture tigerTex, woodTex, tableTex, rockTex, starsTex, ballTex[BALL_TEXTURES_NUM], stickTex;
 
 // Mother class
 Game game;
@@ -161,13 +160,6 @@ void initObjects ()
 	globe.material.setEmission(1,1,1);
 	globe.setTexture(&starsTex);
 		objects["globe"] = &globe;
-
-    for (int i=0;i<NSTARS;i++)
-    {
-    	star[i].x = rand()%500 - 250;
-    	star[i].y = rand()%500 - 250;
-    	star[i].z = rand()%500 - 250;
-    }
 }
 
 void perspectiveViewport( int width, int height ) {
@@ -221,35 +213,27 @@ void display () {
 	
 	game.updateState();
 	
-	/*timeAct = glutGet(GLUT_ELAPSED_TIME);
-	if( timeAct - timeBase > TIME_STEP ) {
-		timeBase = timeAct; 
-		game.updateState();
-	}
-	else
-	{*/
-		// POG to reduce display rate and priorize variables updating
-		static int displayController=0;
-		++displayController;
-		if( displayController==UPDATE_PRIORITY_FACTOR )
-		{
-			displayController=0;
-		
-			int width = glutGet(GLUT_WINDOW_WIDTH);
-			int height = glutGet(GLUT_WINDOW_HEIGHT);
+	// POG to reduce display rate and priorize variables updating
+	static int displayController=0;
+	++displayController;
+	if( displayController==UPDATE_PRIORITY_FACTOR )
+	{
+		displayController=0;
+	
+		int width = glutGet(GLUT_WINDOW_WIDTH);
+		int height = glutGet(GLUT_WINDOW_HEIGHT);
 
-			glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glEnable(GL_SCISSOR_TEST);
+		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_SCISSOR_TEST);
+		
+			orthoViewport(width,height);
+			perspectiveViewport(width,height);
+					
+		glDisable(GL_SCISSOR_TEST);
 			
-				orthoViewport(width,height);
-				perspectiveViewport(width,height);
-						
-			glDisable(GL_SCISSOR_TEST);
-				
-			glutSwapBuffers();
-			game.frameCounter++;
-		}
-	//}
+		glutSwapBuffers();
+		game.frameCounter++;
+	}
 }
 
 void initLights () {
@@ -261,7 +245,7 @@ void initLights () {
 	
 	// position light (sun)
 	GLfloat ambientLight[] = { 0.0, 0.0, 0.0, 1.0f };
-	GLfloat diffuseLight[] = { 0.9f, 0.5f, 0.5f, 1.0f };
+	GLfloat diffuseLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
 	GLfloat specularLight[] = { 1.0f, 0.6f, 0.6f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
@@ -395,7 +379,7 @@ void init ()
 	glEnable (GL_LIGHT5); // extra spotlight3
     
     cout << "Initializing objects...";
-    static Level level(&objects, &theLights, &camera, &camera2, &ballTex, &stickTex);
+    static Level level(&objects, &theLights, &camera, &camera2, ballTex, &stickTex);
 	game.setLevel(&level);
 	initObjects();
 	cout << "Done.\n";
@@ -406,7 +390,11 @@ void init ()
     loadTexture(&rockTex, "textures/rock.tga");//set true to use mipmapping
     loadTexture(&starsTex, "textures/stars3.tga");
     loadTexture(&stickTex, "textures/stick.tga");
-    loadTexture(&ballTex,  "textures/poolball.tga");
+    for(int i=0; i<BALL_TEXTURES_NUM; i++) {
+		char path[50];
+		sprintf(path,"textures/Ball%i.tga",i);
+		loadTexture(&ballTex[i], path);
+	}
     cout << "Done.\n"; 
     
     game.updateOsd();
@@ -438,7 +426,9 @@ void specialFunc(int key, int x, int y)
 	}
 	if( key == GLUT_KEY_F2 ) {
 		game.updateOsd();
-		game.level->camera->setMode( 1, &(game.level->balls[0]) );
+		game.level->camera->setCenter( &(game.level->balls[0]) );
+		game.level->camera->setRotX2( game.level->stick.rot[1] );
+		game.level->camera->setMode( 1 );
 	}
 	if( key == GLUT_KEY_F3 ) {
 		game.updateOsd();
@@ -502,7 +492,8 @@ void mouseMotionFunc(int x, int y) {
 	
 	if ( left_click == GLUT_DOWN ) {
 		game.level->stick.rotate( (x-xold)/5. );	
-		game.level->camera->action1( (x-xold)/5.,0);				
+		if( game.level->camera->getMode() == 1 )
+			game.level->camera->action1( (x-xold)/5.,0);				
     }
 	
 	if ( right_click == GLUT_DOWN ) {
@@ -519,9 +510,11 @@ void mouseMotionFunc(int x, int y) {
 	
 	if ( middle_click ==GLUT_DOWN  ) {
 		if( game.hasControl )
-			game.level->camera->action1((x-xold)/5., (y-yold)/5.);
+			if( game.level->camera->getMode() == 1 )
+				game.level->camera->action1( 0,(y-yold)/5.);
+			else
+				game.level->camera->action1((x-xold)/5., (y-yold)/5.);
 		else {
-			game.level->stick.rotate( (x-xold)/5. );	
 			game.level->camera->action1( (x-xold)/5., (y-yold)/5.);	
 		}
 		

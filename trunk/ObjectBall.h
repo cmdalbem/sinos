@@ -14,7 +14,7 @@
 class ObjectBall: public ObjectModel 
 {
 private:
-	GLdouble radius;
+	double radius;
 	int res;
 	GLUquadricObj *quadricSphere;
 	GLdouble rotMat[16];

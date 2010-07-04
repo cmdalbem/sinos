@@ -55,7 +55,7 @@ void Game::giveControl()
 void Game::attack( int yvar )
 {
 	if( hasControl ) {
-		level->balls[0].applyForce( yvar, level->stick.getAngleInXZ()+90 );  //some naughty magic numbers here
+		level->balls[0].applyForce( yvar, level->stick.rot[1]+90 );  //some naughty magic numbers here
 		level->stick.attack();
 		hasControl = false;
 	}

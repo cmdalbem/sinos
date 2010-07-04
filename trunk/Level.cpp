@@ -8,7 +8,7 @@
 //------------------------------------------------------------ CONSTRUCTORS
 Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 				Camera *_camera, Camera *_camera2,
-				Texture *ballTex, Texture *stickTex)
+				Texture ballTex[], Texture *stickTex)
 {	
 	objects   = _objects;
 	theLights = _theLights;
@@ -28,22 +28,21 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	balls.resize(nballs);
 	
 	balls[0].setRadius(BALL_RADIUS);
-	balls[0].setTexture(ballTex);
+	balls[0].setTexture(&ballTex[0]);
 	balls[0].setMaterial(ballMaterial);
 	balls[0].setPos(-20, TABLE_PLANE_Y+balls[0].getRadius(), 0);
-	//balls[0].loadFromFile( "obj/ball2x.obj" );
 	// triangular disposition
 	for( int line=1, i=1; i<nballs; )
 	{
 		for( int j=0; j<line && i<nballs; j++, i++ )
 		{
-			double r = getRandBetween(0,60),
-				   g = getRandBetween(0,60),
-				   b = getRandBetween(0,60);
+			//double r = getRandBetween(0,60),
+			//	   g = getRandBetween(0,60),
+			//	   b = getRandBetween(0,60);
 			balls[i].setRadius(BALL_RADIUS);
-			balls[i].setTexture(ballTex);
+			balls[i].setTexture(&ballTex[i]);
 			balls[i].setMaterial(ballMaterial);
-			balls[i].material.setDiffuse(r/100.,g/100.,b/100.);
+			//balls[i].material.setDiffuse(r/100.,g/100.,b/100.);
 			balls[i].setPos((BALL_RADIUS*2.1)*line +20, TABLE_PLANE_Y+balls[i].getRadius(), (BALL_RADIUS*2.1)*j - (line-1) );
 		}
 		line++;
@@ -63,7 +62,6 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 
 	// the stick
 	stick.setCenter(&balls[0]);
-	
 	stick.loadFromFile("obj/taco.obj");	
 	stick.calculatePos();	// This is needed to put the Stick on the right place
 							// since only now the ball is put its place.
@@ -86,29 +84,25 @@ void Level::drawObjects () {
     // drawing of not-lit objects
     glDisable(GL_LIGHTING);
 		glColor3f(1.0f, 1.0f, 1.0f);
-		/*
 		// Holes delimiters
 		for(int i=0; i<NHOLES; i++)
 			glCircle3f(HC[i][0],TABLE_PLANE_Y+1,HC[i][1],HC[i][2]);
 		// Table area delimiter
-		glBegin(GL_LINE_LOOP);
+		/*glBegin(GL_LINE_LOOP);
 			glVertex3f(RIGHTBOUND, TABLE_PLANE_Y, TOPBOUND);
 			glVertex3f(RIGHTBOUND, TABLE_PLANE_Y, BOTBOUND);
 			glVertex3f(LEFTBOUND, TABLE_PLANE_Y, BOTBOUND);
 			glVertex3f(LEFTBOUND, TABLE_PLANE_Y, TOPBOUND);
-		glEnd();
+		glEnd();*/
 		// table area
 		((ObjectModel*)(*objects)["tableFrameBound"])->drawNormals();
 		// holes entrances
-		static int what=0;
-		what++;
-		int i = (what/100)%6;
-		//for(int i=0; i<6; i++){  
+		for(int i=0; i<6; i++){  
 			glBegin(GL_LINES); 
 				glVertex3f(wallLimits[i][0][0], TABLE_PLANE_Y, wallLimits[i][0][1]);
 				glVertex3f(wallLimits[i][1][0], TABLE_PLANE_Y, wallLimits[i][1][1]);
 			glEnd();
-		// }*/
+		}
 	glEnable(GL_LIGHTING);
 		
 	stick.draw();
@@ -152,7 +146,7 @@ void Level::drawObjects_partial ()
 {
 	stick.draw();
 	if( !stick.isHidden )
-		drawGuideLine( balls[0].getPosX(), balls[0].getPosY(), balls[0].getPosZ(), stick.getAngleInXZ() );
+		drawGuideLine( balls[0].getPosX(), balls[0].getPosY(), balls[0].getPosZ(), stick.rot[1] );
 	
 	(*objects)["tableMiddle"]->draw();
 	(*objects)["tableBottom"]->draw();
@@ -282,8 +276,7 @@ pair<int,bool> Level::updateState()
 	if( hasChanged ) {
 		testBallsCollision();
 		
-		if(camera->getMode() == 1)
-			camera->setMode(1, &balls[0]);
+		camera->setCenter(&balls[0]);
 	}
 		
 	return pair<int,bool>::pair(points,hasChanged);
