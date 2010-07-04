@@ -2,8 +2,6 @@
 
  * fix stick rotation
 
- * find balls textures (for each number and for striped and not striped ones)
-
  * make camera mode 2 move along with stick movement (with the stick always at the bottom of the screen)
 
  * sound effects and music (for both, suggestion: irrKlang lib)
