@@ -1,6 +1,8 @@
-Ordered by importance:
+ * fix stick rotation
 
- * friction as a vector, and not as a constant multiplicating the speed
+ * find balls textures (for each number and for striped and not striped ones)
+
+ * make camera mode 2 move along with stick movement (with the stick always at the bottom of the screen)
 
  * sound effects and music (for both, suggestion: irrKlang lib)
 
@@ -8,4 +10,6 @@ Ordered by importance:
 
  * more game styles and more levels
 
- * improve guideline (include reflection on table walls, maybe collision with balls)
+ * improve guideline (include reflection on table walls and with balls)
+
+ * test, test and test (suggestion: include more balls)
