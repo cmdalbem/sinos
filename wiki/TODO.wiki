@@ -1,3 +1,5 @@
+ * implement the sinuca's game style
+
  * fix stick rotation
 
  * find balls textures (for each number and for striped and not striped ones)
