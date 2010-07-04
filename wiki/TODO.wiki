@@ -1,9 +1,5 @@
  * implement the sinuca's game style
 
- * fix stick rotation
-
- * make camera mode 2 move along with stick movement (with the stick always at the bottom of the screen)
-
  * sound effects and music (for both, suggestion: irrKlang lib)
 
  * more realistic way to calculate collision vectors (theres a prototype based on http://en.wikipedia.org/wiki/File:Elastischer_sto%C3%9F_2D.gif)
