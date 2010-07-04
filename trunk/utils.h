@@ -9,9 +9,11 @@
 using namespace std;
 #include <math.h>
 #include <string.h>
+#include <vector>
 
 #include <GL/gl.h>
 #include "lib/Texture.h"
+#include "ObjectBall.h"
 #include "Camera.h"
 #include "constants.h"
 
@@ -28,6 +30,7 @@ double getDistance( Object &object1, Object &object2 );
  * the player attacks with the present configuration.
  */
 void drawGuideLine( double posx, double posy, double posz, double stickAngle);
+void makeGuideLine( vector<ObjectBall> balls, double stickAngle);
 
 /* getRandBetween()
  * Returns a random number in the closed interval.

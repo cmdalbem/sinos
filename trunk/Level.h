@@ -51,6 +51,7 @@ class Level
 		void 			initObjects();
 		void 			initLights();
 	
+		void			drawGuides();
 		void 			drawObjects();
 		void 			drawObjects_partial();	
 		void 			lights();

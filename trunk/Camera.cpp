@@ -36,8 +36,8 @@ void Camera::setCamera(int _cameraMode)
 	yrot = 45;
 		
 	xrot2 = 0;
-	yrot2 = 20;
-	zoom = 5;
+	yrot2 = 50;
+	zoom = 20;
 	
 	xorig = 0;
 	yorig = 29.5;
@@ -50,11 +50,11 @@ void Camera::setCamera(int _cameraMode)
 	setPos2();
 }
 
-void Camera::setPosX(GLfloat newValue)
+void Camera::setPosX1(GLfloat newValue)
 {	xpos = newValue;	}
-void Camera::setPosY(GLfloat newValue)
+void Camera::setPosY1(GLfloat newValue)
 {	ypos = newValue;	}
-void Camera::setPosZ(GLfloat newValue)
+void Camera::setPosZ1(GLfloat newValue)
 {	zpos = newValue;	}
 	
 void Camera::setRotX2(GLfloat newValue)
@@ -92,9 +92,9 @@ void Camera::setCenter( Object* object )
 {
 	if( object )
 	{
-		xorig = object->getPosX();	// Saves the position of the object
-		yorig = object->getPosY();	// the camera is looking at.
-		zorig = object->getPosZ();	//	
+		xorig = object->pos[0];	// Saves the position of the object
+		yorig = object->pos[1];	// the camera is looking at.
+		zorig = object->pos[2];	//	
 	}
 }
 

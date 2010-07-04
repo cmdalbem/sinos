@@ -11,6 +11,7 @@ ObjectStick::ObjectStick()
 : ObjectModel()
 {
 	rot[0] = -10;
+	rot[1] = -90;
 	isHidden = false;
 	setAttackStrenght(1);
 }
@@ -19,6 +20,7 @@ ObjectStick::ObjectStick(string filename, ObjectBall* objectCenter)
 :	ObjectModel(filename)
 {
 	rot[0] = -10;
+	rot[1] = -90;
 	isHidden = false;
 	center = objectCenter;
 	setAttackStrenght(center->getRadius()+1);

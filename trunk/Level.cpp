@@ -31,7 +31,9 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	balls[0].setTexture(&ballTex[0]);
 	balls[0].setMaterial(ballMaterial);
 	balls[0].setPos(-20, TABLE_PLANE_Y+balls[0].getRadius(), 0);
-	// triangular disposition
+	camera->setCenter( &balls[0] );
+	camera->setRotX2( stick.rot[1] );
+	// Triangular disposition
 	for( int line=1, i=1; i<nballs; )
 	{
 		for( int j=0; j<line && i<nballs; j++, i++ )
@@ -47,7 +49,7 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 		}
 		line++;
 	}
-	/*// linear disposition
+	/*// Linear disposition
 	for( int i=1; i<nballs; i++ )
 	{
 		double r = getRandBetween(0,60),
@@ -80,30 +82,48 @@ Level::~Level()	{ }
 
 //------------------------------------------------------------ OTHER METHODS
 
-void Level::drawObjects () {
-    // drawing of not-lit objects
+void Level::drawGuides()
+{
     glDisable(GL_LIGHTING);
-		glColor3f(1.0f, 1.0f, 1.0f);
+	glEnable(GL_BLEND);
+		glColor4f(1.0f, 1.0f, 1.0f, 1);
+		
 		// Holes delimiters
 		for(int i=0; i<NHOLES; i++)
 			glCircle3f(HC[i][0],TABLE_PLANE_Y+1,HC[i][1],HC[i][2]);
+		
 		// Table area delimiter
-		/*glBegin(GL_LINE_LOOP);
+		glBegin(GL_LINE_LOOP);
 			glVertex3f(RIGHTBOUND, TABLE_PLANE_Y, TOPBOUND);
 			glVertex3f(RIGHTBOUND, TABLE_PLANE_Y, BOTBOUND);
 			glVertex3f(LEFTBOUND, TABLE_PLANE_Y, BOTBOUND);
 			glVertex3f(LEFTBOUND, TABLE_PLANE_Y, TOPBOUND);
-		glEnd();*/
-		// table area
+		glEnd();
+		
+		// Table area
 		((ObjectModel*)(*objects)["tableFrameBound"])->drawNormals();
-		// holes entrances
+		
+		// Holes entrances
 		for(int i=0; i<6; i++){  
 			glBegin(GL_LINES); 
 				glVertex3f(wallLimits[i][0][0], TABLE_PLANE_Y, wallLimits[i][0][1]);
 				glVertex3f(wallLimits[i][1][0], TABLE_PLANE_Y, wallLimits[i][1][1]);
 			glEnd();
 		}
+		
+		// Balls vectors
+		for(int i=0; i<balls.size(); i++)
+			balls[i].drawVectors();
+			
+		// Guide line
+		if( !stick.isHidden )
+			makeGuideLine( balls, stick.rot[1] );
+	glDisable(GL_BLEND);
 	glEnable(GL_LIGHTING);
+}
+
+void Level::drawObjects () {
+	//drawGuides();
 		
 	stick.draw();
 	
@@ -121,14 +141,15 @@ void Level::drawObjects () {
 		if( res<BALL_MIN_RES )	res=BALL_MIN_RES; 
 		else if( res>BALL_MAX_RES) res=BALL_MAX_RES;
 		balls[i].setResolution(res);
-		
 		balls[i].draw();
-		balls[i].drawVectors();
 	}
 	
 	glEnable (GL_LIGHT2);
 		(*objects)["crypt"]->draw();
 	glDisable (GL_LIGHT2);
+
+
+//	makeGuideLine( balls, stick.rot[1] );
 	
 	/*//DEBUG
 	for( int i=0; i<balls.size(); i++ )
@@ -146,7 +167,7 @@ void Level::drawObjects_partial ()
 {
 	stick.draw();
 	if( !stick.isHidden )
-		drawGuideLine( balls[0].getPosX(), balls[0].getPosY(), balls[0].getPosZ(), stick.rot[1] );
+		makeGuideLine( balls, stick.rot[1] );
 	
 	(*objects)["tableMiddle"]->draw();
 	(*objects)["tableBottom"]->draw();
@@ -333,9 +354,9 @@ void Level::testBallsCollision()
 						truey = y2 + sy*model->vertices[3*v + 1];
 						truez = z2 + sz*model->vertices[3*v + 2];
 			
-						if( getDistance(balls[i].pos[0],balls[i].pos[1],balls[i].pos[2], truex,truey,truez) < balls[i].getRadius() )
+						if( getDistance(balls[i].pos[0],balls[i].pos[1],balls[i].pos[2], truex,truey,truez) < BALL_RADIUS )
 						{
-							while( getDistance(balls[i].pos[0],balls[i].pos[1],balls[i].pos[2],truex,truey,truez) < balls[i].getRadius() )
+							while( getDistance(balls[i].pos[0],balls[i].pos[1],balls[i].pos[2],truex,truey,truez) < BALL_RADIUS )
 								balls[i].backTrack( balls[i].moveVector );
 							
 							balls[i].reflectAngle(x2+sx*model->normals[3*v+0], y2+sy*model->normals[3*v+1], z2+sz*model->normals[3*v+2]);
@@ -353,7 +374,7 @@ void Level::testBallsCollision()
 		
 			if(i!=j && !balls[i].hasFallen && !balls[j].hasFallen)
 		
-				if( getDistance(balls[i],balls[j]) < balls[i].getRadius() + balls[j].getRadius()) // is distance > sum of their radius
+				if( getDistance(balls[i],balls[j]) < 2*BALL_RADIUS ) // is distance > sum of their radius
 				{
 					double impactv[3] = { balls[i].pos[0] - balls[j].pos[0], //impactVector = balls[i] - balls[j]
 										 0,
@@ -361,8 +382,8 @@ void Level::testBallsCollision()
 													
 					// "backtracking"
 					int repetitions=0;
-					while( getDistance(balls[i],balls[j]) < balls[i].getRadius() + balls[j].getRadius() // lower limit
-						  && repetitions++ < MAX_BACKTRACK ) {											// upper limit
+					while( getDistance(balls[i],balls[j]) < 2*BALL_RADIUS // lower limit
+						  && repetitions++ < MAX_BACKTRACK ) {			  // upper limit
 						balls[i].backTrack( impactv, true );
 						balls[j].backTrack( impactv);
 					}

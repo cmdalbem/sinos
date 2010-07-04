@@ -42,6 +42,54 @@ void drawGuideLine( double xo, double yo, double zo, double stickAngle)
 	glDisable(GL_LINE_STIPPLE);	
 }
 
+void makeGuideLine( vector<ObjectBall> balls, double stickAngle)
+{
+	double x1 = balls[0].pos[0], 
+		   y1 = TABLE_PLANE_Y, 
+		   z1 = balls[0].pos[2];
+	double vecx = 0.5 *  cos(RAD(stickAngle+90)),
+		   vecz = 0.5 * -sin(RAD(stickAngle+90));
+	double x2 = x1 + 4*vecx,
+		   y2 = y1,
+		   z2 = z1 + 4*vecz;		   	
+	double x3, y3=y2, z3;
+	bool rebound = false;
+	
+	// Find rebound point, if any
+	for(int i=0; i<100 && !rebound; i++) {
+		x2 += vecx;
+		z2 += vecz;
+		for( int b=0; b<balls.size(); b++ ) {
+			if( getDistance(balls[b].pos[0],balls[b].pos[1],balls[b].pos[2], x2,y2,z2) < 2*BALL_RADIUS )
+			{
+				x3 = x2 + 10 * ( balls[b].pos[0]-x2 );
+				z3 = z2 + 10 * ( balls[b].pos[2]-z2 );
+				rebound = true;
+			}
+		}
+	}	
+	
+	// Draw	
+	glDisable(GL_LIGHTING);
+	glEnable(GL_LINE_STIPPLE);
+	//glEnable(GL_LINE_SMOOTH);
+		glLineStipple(2, 0xAAAA);
+		glBegin(GL_LINES);
+			glColor3f(1.,1.,1.); 
+			glVertex3f( x1, y1, z1);
+			glVertex3f( x2, y2, z2);
+		glEnd();
+		if( rebound ) {
+			glBegin(GL_LINES);
+				glVertex3f( x2, y2, z2);
+				glVertex3f( x3, y3, z3);
+			glEnd();	
+		}
+	glDisable(GL_LINE_STIPPLE);
+	glDisable(GL_LINE_SMOOTH);
+	glEnable(GL_LIGHTING);
+}
+
 double getRandBetween(int a, int b)
 {
 	static bool init=true;

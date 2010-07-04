@@ -1,4 +1,4 @@
-CC = g++ -g
+CC = g++
 
 CFLAGS = -Wall
 

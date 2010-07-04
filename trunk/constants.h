@@ -110,7 +110,7 @@ const float HC[6][3] ={{-48. ,-22.9, 2.7},
 // Keyboard keys
 enum{
 	K_ESC		= 27,
-	K_SPACE		= 32
+	K_SPACEBAR	= 32
 };
 	
 	

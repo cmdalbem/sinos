@@ -27,7 +27,6 @@
 // Objects
 map<string,Object*> objects;
 vector<LightInfo*> theLights;
-Camera camera, camera2(2);
 
 // Texture files
 Texture tigerTex, woodTex, tableTex, rockTex, starsTex, ballTex[BALL_TEXTURES_NUM], stickTex;
@@ -44,6 +43,7 @@ static bool heldCtrl = false;
 static bool heldShift = false;
 static int timeBase = 0;
 static int timeAct; 
+static bool bigview = false;
 						  
 
 
@@ -188,25 +188,29 @@ void perspectiveViewport( int width, int height ) {
 }	
 
 void orthoViewport( int width, int height ) {
-	glViewport ((3*width)/4, (3*height)/4, (GLsizei)width/4, (GLfloat)height/4);
-	glScissor((3*width)/4, (3*height)/4, width/4, height/4);
-	
-	glEnable(GL_SCISSOR_TEST);
+	if( bigview ) {
+		glViewport( 0.60*width, 0.48*height, width/2, height/2 );
+		glScissor(  0.60*width, 0.48*height, width/2, height/2 );
+	}
+	else {
+		glViewport( 0.75*width, 0.65*height, width/3, height/3 );
+		glScissor(  0.75*width, 0.65*height, width/3, height/3 );
+	}
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
     
-	glOrtho(-65, 65, -35, 35, 5, 500);
+	glOrtho(-75,75, -55, 55, 5, 500);
     					
     glMatrixMode (GL_MODELVIEW);
     glLoadIdentity();
+    
+    glRotatef(90, 0,0,1);
     
 	// IMPORTANT: don't change the order of these calls
 		game.level->camera2->apply();
 		game.level->lights();
 		game.level->drawObjects_partial();
-		
-	glDisable(GL_SCISSOR_TEST);
 }	
 
 void display () {
@@ -379,22 +383,26 @@ void init ()
 	glEnable (GL_LIGHT5); // extra spotlight3
     
     cout << "Initializing objects...";
-    static Level level(&objects, &theLights, &camera, &camera2, ballTex, &stickTex);
-	game.setLevel(&level);
-	initObjects();
+	    static Camera camera(1),  //main camera
+					  camera2(2); //viewport camera
+	    
+	    static Level level(&objects, &theLights, &camera, &camera2, ballTex, &stickTex);
+		game.setLevel(&level);
+		
+		initObjects();
 	cout << "Done.\n";
     
     cout << "Loading textures..."; 
-    loadTexture(&woodTex, "textures/wood.tga");
-    loadTexture(&tableTex, "textures/table.tga", true);//set true to use mipmapping
-    loadTexture(&rockTex, "textures/rock.tga");//set true to use mipmapping
-    loadTexture(&starsTex, "textures/stars3.tga");
-    loadTexture(&stickTex, "textures/stick.tga");
-    for(int i=0; i<BALL_TEXTURES_NUM; i++) {
-		char path[50];
-		sprintf(path,"textures/Ball%i.tga",i);
-		loadTexture(&ballTex[i], path);
-	}
+	    loadTexture(&woodTex, "textures/wood.tga");
+	    loadTexture(&tableTex, "textures/table.tga", true);
+	    loadTexture(&rockTex, "textures/rock.tga");
+	    loadTexture(&starsTex, "textures/stars3.tga");
+	    loadTexture(&stickTex, "textures/stick.tga");
+	    for(int i=0; i<BALL_TEXTURES_NUM; i++) {
+			char path[50];
+			sprintf(path,"textures/Ball%i.tga",i);
+			loadTexture(&ballTex[i], path);
+		}
     cout << "Done.\n"; 
     
     game.updateOsd();
@@ -403,45 +411,39 @@ void init ()
 //--------------------------- KEYBOARD ---------------------------//
 void keyboardFunc (unsigned char key, int x, int y) {
 			
-	if ( key==K_SPACE) {
-		game.attack( game.level->stick.getAttackStrenght() );
+	if ( key==K_SPACEBAR) {
+		//game.attack( game.level->stick.getAttackStrenght() );
+		bigview = !bigview;
 	}
-		
-    if( key=='c' ) {
+
+	if( key == '1' ) {
 		game.updateOsd();
-		game.level->camera->nextMode( &(game.level->balls[0]) );
+		game.level->camera->setMode( 0 );
+	}
+	if( key == '2' ) {
+		game.updateOsd();
+		game.level->camera->setCenter( &(game.level->balls[0]) );
+		game.level->camera->setRotX2( game.level->stick.rot[1] );
+		game.level->camera->setMode( 1 );
+	}
+	if( key == '3' ) {
+		game.updateOsd();
+		game.level->camera->setMode( 2 );
 	}
 		
-    if ( key==K_ESC )
-    {
+    if ( key==K_ESC ) {
 	    exit(0);
     }
 }
 
 void specialFunc(int key, int x, int y)
 {
-	if( key == GLUT_KEY_F1 ) {
-		game.updateOsd();
-		game.level->camera->setMode( 0 );
-	}
-	if( key == GLUT_KEY_F2 ) {
-		game.updateOsd();
-		game.level->camera->setCenter( &(game.level->balls[0]) );
-		game.level->camera->setRotX2( game.level->stick.rot[1] );
-		game.level->camera->setMode( 1 );
-	}
-	if( key == GLUT_KEY_F3 ) {
-		game.updateOsd();
-		game.level->camera->setMode( 2 );
-	}
-	
-	
-	if( key == GLUT_KEY_F11 ) {
+	/*if( key == GLUT_KEY_F11 ) {
 		static bool fullscreen = false;
 		if( !fullscreen ) glutEnterGameMode();
 		else 			  glutLeaveGameMode();
 		fullscreen = !fullscreen;
-	}
+	}*/
 	
 	int var=2;
 	
@@ -490,20 +492,26 @@ void mouseFunc(int button, int state, int x, int y) {
 
 void mouseMotionFunc(int x, int y) {
 	
+	double sf;
+	if(heldShift)
+		sf = 20.;
+	else
+		sf = 5.;
+		
 	if ( left_click == GLUT_DOWN ) {
-		game.level->stick.rotate( (x-xold)/5. );	
+		game.level->stick.rotate( (x-xold)/sf );	
 		if( game.level->camera->getMode() == 1 )
-			game.level->camera->action1( (x-xold)/5.,0);				
+			game.level->camera->action1( (x-xold)/sf,0);				
     }
 	
 	if ( right_click == GLUT_DOWN ) {
 		if( game.hasControl ) {
-			//game.level->camera->action1( (x-xold)/5.,0);  // hard mode ON!!
-			//game.level->stick.rotate( (x-xold)/5. );		//
+			//game.level->camera->action1( (x-xold)/sf,0);  // hard mode ON!!
+			//game.level->stick.rotate( (x-xold)/sf );		//
 			
-			game.level->stick.changePower( (y-yold)/6. );
+			game.level->stick.changePower( (y-yold)/sf );
 		    if( game.level->stick.getAttackStrenght() < game.level->balls[0].getRadius() ) {
-				game.attack( 6*(yold-y) );
+				game.attack( sf*(yold-y) );
 			}
 		}
 	}
@@ -511,11 +519,11 @@ void mouseMotionFunc(int x, int y) {
 	if ( middle_click ==GLUT_DOWN  ) {
 		if( game.hasControl )
 			if( game.level->camera->getMode() == 1 )
-				game.level->camera->action1( 0,(y-yold)/5.);
+				game.level->camera->action1( 0,(y-yold)/sf);
 			else
-				game.level->camera->action1((x-xold)/5., (y-yold)/5.);
+				game.level->camera->action1((x-xold)/sf, (y-yold)/sf);
 		else {
-			game.level->camera->action1( (x-xold)/5., (y-yold)/5.);	
+			game.level->camera->action1( (x-xold)/sf, (y-yold)/sf);	
 		}
 		
 	}

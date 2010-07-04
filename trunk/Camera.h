@@ -38,9 +38,9 @@ public:
 	
 	//---------------------------- GETTERS & SETTERS
 
-	void			setPosX(GLfloat newValue);
-	void			setPosY(GLfloat newValue);
-	void			setPosZ(GLfloat newValue);
+	void			setPosX1(GLfloat newValue);
+	void			setPosY1(GLfloat newValue);
+	void			setPosZ1(GLfloat newValue);
 	void			setCamera( int cameraMode = 0 );		// reset to the default camera values.
 	void			setRotX2(GLfloat newValue);
 	void			setRotY2(GLfloat newValue);
