@@ -98,6 +98,7 @@ public:
 	//---------------------------- POSITION DETECTION
 	// TO DO: Study about moving these functions to an dedicated class.
 	bool				hasSnooked();
-	bool 				canMoveHorizontal();
-	bool 				canMoveVertical();
+	bool				isInField();
+	bool 				collidedHWall();
+	bool 				collidedVWall();
 };

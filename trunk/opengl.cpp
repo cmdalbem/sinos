@@ -453,7 +453,7 @@ void specialFunc(int key, int x, int y)
 		fullscreen = !fullscreen;
 	}
 	
-	int var=1;
+	int var=2;
 	
 	if( key == GLUT_KEY_LEFT ) {
 		//game.level->balls[0].setPosX( game.level->balls[0].getPosX()-1 );

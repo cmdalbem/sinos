@@ -151,16 +151,18 @@ float ObjectBall::getPastZ() const
 void ObjectBall::backTrack( const double origv[3], bool invert /*default=false*/ )
 {
 	double v[3] = {origv[0],origv[1],origv[2]};
+	int xsign, zsign;
 		
-	normalizeVector(v);
+	xsign = 2*( v[0]>0 )-1;
+	zsign = 2*( v[2]>0 )-1;
 	
 	if(invert) {
-		setPosX( getPosX() + v[0]/50.);
-		setPosZ( getPosZ() + v[2]/50.); 
+		setPosX( getPosX() + xsign*BACKTRACK_STEP);
+		setPosZ( getPosZ() + zsign*BACKTRACK_STEP); 
 	}
 	else {
-		setPosX( getPosX() - v[0]/50.);
-		setPosZ( getPosZ() - v[2]/50.);
+		setPosX( getPosX() - xsign*BACKTRACK_STEP);
+		setPosZ( getPosZ() - zsign*BACKTRACK_STEP);
 	}
 }
 
@@ -221,43 +223,7 @@ pair<bool,bool> ObjectBall::updateState()
 			}
 			else {
 				
-				if( !canMoveHorizontal() ) { //invert x
-					
-					int rep=0;
-					while( !canMoveHorizontal() && rep++ < MAX_BACKTRACK ) {
-						backTrack(moveVector);
-						/*if(rep>10000){
-							trouble=1;
-							troublePos[0] = getPosX();
-							troublePos[1] = getPosY();
-							troublePos[2] = getPosZ();
-							glutPostRedisplay();							
-							getchar();
-							cout<<"horizontal trouble: "<<moveVector[0]<<" "<<moveVector[2]<<endl;
-						}*/
-					}
-					moveVector[0] = -moveVector[0];   //reflection
-					changeSpeed(BALL_DECELERATION_R); //absortion of energy by the wall
-				}
 				
-				if( !canMoveVertical() ) { //invert z
-					
-					int rep=0;
-					while( !canMoveVertical() && rep++ < MAX_BACKTRACK ) {
-						backTrack(moveVector);
-						/*if(rep>10000){
-							trouble=1;
-							troublePos[0] = getPosX();
-							troublePos[1] = getPosY();
-							troublePos[2] = getPosZ();
-							glutPostRedisplay();								
-							getchar();
-							cout<<"vertical trouble: "<<moveVector[0]<<" "<<moveVector[2]<<endl;
-						}*/
-					}
-					moveVector[2] = -moveVector[2];   //reflection
-					changeSpeed(BALL_DECELERATION_R); //absortion of energy by the wall
-				}
 			}
 		}
 		else
@@ -430,37 +396,47 @@ void ObjectBall::setQuad()
 
 bool ObjectBall::hasSnooked()
 {
-	//return false;	//temp
-	
-	float posx = getPosX(),
-		  posy = getPosY(),
-		  posz = getPosZ();
-
 	for(int i=0; i<NHOLES; i++)
-		if( abs(posx-HC[i][0]) + abs(posz-HC[i][1]) <= HC[i][2] )
+		if( abs(pos[0]-HC[i][0]) + abs(pos[2]-HC[i][1]) <= HC[i][2] )
 			return true;
 	return false;	
 }
 
-bool ObjectBall::canMoveHorizontal()
+bool ObjectBall::isInField()
 {
-	//return true; //temp
-	float posx = getPosX();
-	
-	if( posx > RIGHTBOUND  ||  posx < LEFTBOUND )
-		return false;
-	else
+	if( pos[0]>LEFTBOUND && pos[0]<RIGHTBOUND  &&  
+		pos[2]<TOPBOUND  && pos[2]>BOTBOUND )
 		return true;
+	else
+		return false;
 }
 
-bool ObjectBall::canMoveVertical()
+bool ObjectBall::collidedHWall()
 {
-	//return true; //temp
-	
-	float posz = getPosZ();
-	
-	if( posz > TOPBOUND  ||  posz < BOTBOUND )
-		return false;
-	else
+	if( (pos[2] < wallLimits[4][0][1]  &&  pos[2] > wallLimits[4][1][1] &&
+		pos[0] < LEFTBOUND)
+		||
+		(pos[2] < wallLimits[5][0][1]  &&  pos[2] > wallLimits[5][1][1] &&
+		pos[0] > RIGHTBOUND) )
 		return true;
+	else
+		return false;
+} 
+
+bool ObjectBall::collidedVWall()
+{
+	if( (pos[0] > wallLimits[0][0][0]  &&  pos[0] < wallLimits[0][1][0] &&
+		pos[2] > TOPBOUND)
+		||
+		(pos[0] > wallLimits[1][0][0]  &&  pos[0] < wallLimits[1][1][0] &&
+		pos[2] > TOPBOUND) 
+		||
+		(pos[0] > wallLimits[2][0][0]  &&  pos[0] < wallLimits[2][1][0] &&
+		pos[2] < BOTBOUND) 
+		||
+		(pos[0] > wallLimits[3][0][0]  &&  pos[0] < wallLimits[3][1][0] &&
+		pos[2] < BOTBOUND) )
+		return true;
+	else
+		return false;
 }

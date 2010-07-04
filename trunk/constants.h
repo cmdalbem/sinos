@@ -47,7 +47,7 @@ const float default_shininess = 0;
 #define STATEUPDATES_PER_SEC (4000.) /* the semantics of this constant is confuse without glutTimer
 									  * actually, it works like the game clock. Increase to make the game slower.
 									  */
-#define UPDATE_PRIORITY_FACTOR 100    /* game will re-render again after N updates
+#define UPDATE_PRIORITY_FACTOR 80    /* game will re-render again after N updates
 									  * increase and rendering will get laggy.
 									  */
 
@@ -59,10 +59,11 @@ const float default_shininess = 0;
 #define BALL_MAX_SPEED BALL_RADIUS*STATEUPDATES_PER_SEC
 #define STICK_MAX_STR 30
 #define MAX_BACKTRACK 1000
-#define NSTARS 1000
+#define BACKTRACK_STEP (0.01)
 #define LOD_FACTOR (1500.) // increase and will increase the medium quality of balls
 #define FULLSCREEN_ON 0
 #define SHOW_TABLE_FRAME 1 //comment to hide
+#define NSTARS 1000
 
 // Table boundaries
 #ifdef SHOW_TABLE_FRAME
@@ -79,18 +80,25 @@ const float default_shininess = 0;
 
 // Holes
 // holes entrances limits {x,y}
-const float B1P1[] = {-48.3, -19.9};
-const float B1P2[] = {-45  , -23.5};
-const float B2P1[] = {-2.4 , -23.5};
-const float B2P2[] = { 2.1 , -23.5};
-const float B3P1[] = { 44.7, -23.5};
-const float B3P2[] = { 48  , -19.9};
-const float B4P1[] = {-48.3,  24.8};
-const float B4P2[] = {-45  ,  28.1};
-const float B5P1[] = {-2.4 ,  28.1};
-const float B5P2[] = { 1.8 ,  28.1};
-const float B6P1[] = { 48  ,  24.5};
-const float B6P2[] = { 44.4,  28.1};
+/*const float holeLimits[6][2][2] = { { { -46.219299,  -17.317400}, {-42.490299  , -21.024101} },
+								  { {2.509700 , -21.044802}, {-2.990300, -21.044802} },
+								  { { 42.009701 , -21.024101}, { 45.716301 ,  -17.317400} },
+								  { {-46.227501  ,  22.011297}, {-42.490299  ,  25.889198} },
+								  { {-2.990300,  25.909998}, { 2.509700, 25.909998} },
+								  { { 42.009701  ,  25.889198}, {45.743099 ,   22.011297} }
+								 };*/
+//cordinates between holes
+const float wallLimits[6][2][2] = {   { {-42.490299  , -21.024101}, {-2.990300, -21.044802} }, 	 //1-2
+									  { {2.509700 , -21.044802}, { 42.009701 , -21.024101} },	 //2-3
+									  
+									  { {-42.490299  ,  25.889198}, {-2.990300,  25.909998} },   //4-5
+									  { { 2.509700, 25.909998}, { 42.009701  ,  25.889198} },    //5-6
+									  
+									  { {-46.227501  ,  22.011297}, { -46.219299,  -17.317400} }, //1-4
+									  { {45.743099 ,   22.011297}, { 45.716301 ,  -17.317400} },  //3-6
+								  };
+								  
+								  
 // holes centers {x,z,radius}
 const float HC[6][3] ={{-48. ,-22.9, 2.7},
 				       {-0.3 ,-24.4, 2.4},

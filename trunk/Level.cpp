@@ -17,7 +17,7 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	camera2 = _camera2;
 	
 	// Balls
-	int nballs = 16 ;
+	int nballs = 16 ; 
 	//int nballs = 29 ;
 	Material ballMaterial;
 	ballMaterial.setShininess(128); 
@@ -86,6 +86,7 @@ void Level::drawObjects () {
     // drawing of not-lit objects
     glDisable(GL_LIGHTING);
 		glColor3f(1.0f, 1.0f, 1.0f);
+		/*
 		// Holes delimiters
 		for(int i=0; i<NHOLES; i++)
 			glCircle3f(HC[i][0],TABLE_PLANE_Y+1,HC[i][1],HC[i][2]);
@@ -96,7 +97,18 @@ void Level::drawObjects () {
 			glVertex3f(LEFTBOUND, TABLE_PLANE_Y, BOTBOUND);
 			glVertex3f(LEFTBOUND, TABLE_PLANE_Y, TOPBOUND);
 		glEnd();
+		// table area
 		((ObjectModel*)(*objects)["tableFrameBound"])->drawNormals();
+		// holes entrances
+		static int what=0;
+		what++;
+		int i = (what/100)%6;
+		//for(int i=0; i<6; i++){  
+			glBegin(GL_LINES); 
+				glVertex3f(wallLimits[i][0][0], TABLE_PLANE_Y, wallLimits[i][0][1]);
+				glVertex3f(wallLimits[i][1][0], TABLE_PLANE_Y, wallLimits[i][1][1]);
+			glEnd();
+		// }*/
 	glEnable(GL_LIGHTING);
 		
 	stick.draw();
@@ -283,8 +295,7 @@ void Level::testBallsCollision()
 	 * Collision tests with table's frame (obj's based detection
 	 * 
 	 */
-	
-	/*GLMmodel* model = ((ObjectModel*)(*objects)["tableFrameBound"])->getModelPointer();
+	GLMmodel* model = ((ObjectModel*)(*objects)["tableFrameBound"])->getModelPointer();
 	double x2 = (*objects)["tableFrameBound"]->pos[0],
 		   y2 = (*objects)["tableFrameBound"]->pos[1],
 		   z2 = (*objects)["tableFrameBound"]->pos[2];
@@ -293,36 +304,58 @@ void Level::testBallsCollision()
 		   sz = (*objects)["tableFrameBound"]->size[2];
 	double truex, truey, truez;
 	
-	for(int i=0; i<balls.size(); i++)
-	{
-		double x = balls[i].pos[0],
-			   y = balls[i].pos[1],
-		       z = balls[i].pos[2];
-		double total=0;
-		for(int v=0; v<model->numvertices; v++)
+	
+	for(int i=0; i<balls.size(); i++) {
+		
+		/* 
+		 * Collisions with walls
+		 * 
+		 */
+		if( !balls[i].isInField() )
 		{
-			truex = x2 + sx*model->vertices[3*v + 0];
-			truey = y2 + sy*model->vertices[3*v + 1];
-			truez = z2 + sz*model->vertices[3*v + 2];
-
-			if( getDistance(x,y,z, truex,truey,truez) < balls[i].getRadius() )
-			{
-				while( getDistance(balls[i].pos[0],balls[i].pos[1],balls[i].pos[2],truex,truey,truez) < balls[i].getRadius() )
-					balls[i].backTrack( balls[i].moveVector );
-				
-				balls[i].reflectAngle(x2+sx*model->normals[3*v+0], y2+sy*model->normals[3*v+1], z2+sz*model->normals[3*v+2]);
+			/* Horizontal wall collision */
+			if( balls[i].collidedHWall() ) {
+				int rep=0;
+				while( !balls[i].isInField() && rep++ < MAX_BACKTRACK )
+					balls[i].backTrack(balls[i].moveVector);
+							
+				balls[i].moveVector[0] = -balls[i].moveVector[0];   //reflection
+				balls[i].changeSpeed(BALL_DECELERATION_R); //absortion of energy by the wall
 			}
+			else
+				/* Verticall wall collision */
+				if( balls[i].collidedVWall() ) {
+					int rep=0;
+					while( !balls[i].isInField() && rep++ < MAX_BACKTRACK )
+						balls[i].backTrack(balls[i].moveVector);					
+				
+					balls[i].moveVector[2] = -balls[i].moveVector[2];   //reflection
+					balls[i].changeSpeed(BALL_DECELERATION_R); //absortion of energy by the wall
+				}
+				else
+					/* Corner wall collision */
+					for(int v=0; v<model->numvertices; v++)
+					{
+						truex = x2 + sx*model->vertices[3*v + 0];
+						truey = y2 + sy*model->vertices[3*v + 1];
+						truez = z2 + sz*model->vertices[3*v + 2];
+			
+						if( getDistance(balls[i].pos[0],balls[i].pos[1],balls[i].pos[2], truex,truey,truez) < balls[i].getRadius() )
+						{
+							while( getDistance(balls[i].pos[0],balls[i].pos[1],balls[i].pos[2],truex,truey,truez) < balls[i].getRadius() )
+								balls[i].backTrack( balls[i].moveVector );
+							
+							balls[i].reflectAngle(x2+sx*model->normals[3*v+0], y2+sy*model->normals[3*v+1], z2+sz*model->normals[3*v+2]);
+						}
+					}			
+		
 		}
-	}*/
-	
-	
-	/* 
-	 * Collisions between balls
-	 * 
-	 */
 		
-	for(int i=0; i<balls.size(); i++)
 		
+		/* 
+		 * Collisions between balls
+		 * 
+		 */
 		for(int j=0; j<balls.size(); j++)
 		
 			if(i!=j && !balls[i].hasFallen && !balls[j].hasFallen)
@@ -332,12 +365,7 @@ void Level::testBallsCollision()
 					double impactv[3] = { balls[i].pos[0] - balls[j].pos[0], //impactVector = balls[i] - balls[j]
 										 0,
 										 balls[i].pos[2] - balls[j].pos[2]};
-					
-					// consistency for backtracking
-					if(impactv[0]==0 && impactv[2]==0) {
-						impactv[0]=1;
-						impactv[2]=1;
-					}										
+													
 					// "backtracking"
 					int repetitions=0;
 					while( getDistance(balls[i],balls[j]) < balls[i].getRadius() + balls[j].getRadius() // lower limit
@@ -371,4 +399,5 @@ void Level::testBallsCollision()
 					balls[i].applyForce( sin(angle)*initForce, getVectorAngle(impactv) );
 					balls[j].applyForce( cos(angle)*initForce, getVectorAngle(impactv)+90 );*/
 				}
+	}
 }
