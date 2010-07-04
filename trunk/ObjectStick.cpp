@@ -18,6 +18,7 @@ ObjectStick::ObjectStick()
 	
 	setAttackStrenght(1);
 }
+
 ObjectStick::ObjectStick(string filename, ObjectBall* objectCenter)
 :	ObjectModel(filename)
 {
@@ -53,7 +54,7 @@ void ObjectStick::setAngleInXZ(float newAngle)
 	angleInXZ = newAngle;
 	
 	if(angleInXZ>360)
-		angleInXZ = (int)angleInXZ % 360;
+		angleInXZ = angleInXZ - 360;
 }
 
 float ObjectStick::getAttackStrenght() const
@@ -94,9 +95,11 @@ void ObjectStick::calculatePos()
 	double degrees = RAD(getAngleInXZ());
 	
 	setPosX(center->getPosX() + sin(degrees)*(getAttackStrenght()/2.));
-	setPosY(center->getPosY() + cos(20)		*(getAttackStrenght()/2.));
+	setPosY(center->getPosY() + sin(RAD(25))*(getAttackStrenght()/2.));
 	setPosZ(center->getPosZ() + cos(degrees)*(getAttackStrenght()/2.));
 }
+
+
 
 void ObjectStick::attack()
 {

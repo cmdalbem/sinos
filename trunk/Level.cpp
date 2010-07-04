@@ -292,7 +292,7 @@ pair<int,bool> Level::updateState()
 void Level::testBallsCollision()
 {
 	/* 
-	 * Collision tests with table's frame (obj's based detection
+	 * Collision tests with table's frame (obj's based detection)
 	 * 
 	 */
 	GLMmodel* model = ((ObjectModel*)(*objects)["tableFrameBound"])->getModelPointer();

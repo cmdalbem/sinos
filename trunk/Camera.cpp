@@ -83,7 +83,7 @@ const char* Camera::getModeName ( int mode ) const
 
 void Camera::setMode (int mode, Object* object)
 {
-	if( cameraMode < NCAMERAMODES )
+	if ( cameraMode < NCAMERAMODES )
 	{		
 		cameraMode = mode;
 		if ( mode = 1 )

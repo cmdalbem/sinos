@@ -33,6 +33,7 @@ class Level
 	public:
 		ObjectStick stick;
 		vector<ObjectBall> balls;
+		
 		Camera *camera, *camera2;
 		
 	//---------------------------- CONSTRUCTORS
