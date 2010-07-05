@@ -57,7 +57,7 @@ class Level
 		void 			lights();
 		void 			castShadows();
 		
-		pair<int,bool>  updateState();
-		void 			testBallsCollision();
+		vector<int>		updateState(int whichPlayer);
+		int 			testBallsCollision(int whichPlayer);
 				
 };

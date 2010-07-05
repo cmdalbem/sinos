@@ -20,6 +20,9 @@ class Game
 		Level	*level;
 		bool 	hasControl;
 		
+		bool	wrongBallFlag;
+		bool	inSinucaMode;
+		
 		long int 	frameCounter, fps;	//frames per second counter and register
 	
 		//----------------------------------------------- CONSTRUCTORS
@@ -30,6 +33,7 @@ class Game
 		~Game();
 		
 		//----------------------------------------------- GETTERS & SETTERS
+		void	setSinucaMode(bool _sinuca);
 		void	setLevel(Level *newLevel);
 		void	resetPoints();
 		void	giveControl();
@@ -38,6 +42,7 @@ class Game
 		void	attack( int yvar );
 		void	updateState();
 		void	nextPlayer();
+		
 		/* drawOsd()
 		 * Draws On-Screen Display
 		 * 	Adapted from http://www.opengl.org/resources/code/samples/glut_examples/examples/bitfont.c

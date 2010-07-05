@@ -11,6 +11,8 @@ Game::Game()
 	resetPoints();
 	hasControl = true;
 	
+	wrongBallFlag = true;
+	
 	level = NULL;
 }
 
@@ -21,6 +23,8 @@ Game::Game(Level *_level)
 	resetPoints();
 	hasControl = true;
 	
+	wrongBallFlag = true;
+	
 	level = _level;
 }
 
@@ -28,6 +32,12 @@ Game::Game(Level *_level)
 Game::~Game() {   }
 
 //--------------------------------------------------- GETTERS & SETTERS
+void Game::setSinucaMode(bool _sinuca)
+{
+	inSinucaMode = _sinuca;
+	resetPoints();	
+}
+
 void Game::setLevel(Level *newLevel)
 {
 	level = newLevel;
@@ -63,24 +73,46 @@ void Game::attack( int yvar )
 
 void Game::updateState()
 {
-	pair<int, bool> returnValue = level->updateState();
+	if(currentPlayer == 3)	// POG to fix a really strange problem D=
+		currentPlayer = 2;
 	
-	if( returnValue.first ) {//if player has scored
-		points[currentPlayer-1] += returnValue.first;
-		updateOsd();
-	}
+	vector<int> updatingValues = level->updateState(currentPlayer);
 	
-	if( !returnValue.second ) //if nothing moved
+	if( !updatingValues[0] ) 		//if nothing moved
 	{
 		giveControl();
+	}
+	
+	if( (updatingValues[1] > 0) && wrongBallFlag)	// if player hit the wrong ball
+	{
+		wrongBallFlag = false;
+		if (updatingValues[1] == 2)
+		{
+			cout << "player: " << currentPlayer << endl;
+			points[(currentPlayer) % NPLAYERS]++;
+		}
+	}
+	
+	if( (updatingValues[2] > 0) || (updatingValues[3] > 0))
+	{
+		if( updatingValues[2] > 0 )		// if player's ball were snooked
+			points[currentPlayer-1] += updatingValues[2];
+		
+		if( updatingValues[3] > 0 )		// if enemy's ball were snooked
+			points[currentPlayer % NPLAYERS] += updatingValues[3];
+			
+		updateOsd();
 	}
 }
 
 void Game::nextPlayer()
 {
+	wrongBallFlag = true;
+	//cout << "wrongBallFlag : " << wrongBallFlag << endl;
 	currentPlayer++;
-	if(currentPlayer>NPLAYERS) currentPlayer=1;
-	//cout << "Vez do jogador " << currentPlayer << endl;
+	if(currentPlayer > NPLAYERS)
+		currentPlayer=1;
+	cout << "Vez do jogador " << currentPlayer << endl;
 }
 
 void Game::drawOsd()

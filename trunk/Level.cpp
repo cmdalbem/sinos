@@ -21,10 +21,11 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	//int nballs = 29 ;
 	Material ballMaterial;
 	ballMaterial.setShininess(128); 
-	ballMaterial.setAmbient(0.7,0.7,0.7); 
-	ballMaterial.setEmission(0.1,0.1,0.1); 
+	ballMaterial.setAmbient(0.7, 0.7, 0.7); 
+	ballMaterial.setEmission(0.1, 0.1, 0.1); 
 	ballMaterial.setDiffuse(0.5, 0.5, 0.5);
 	ballMaterial.setSpecular(0.9, 0.9, 0.9);
+	
 	balls.resize(nballs);
 	
 	balls[0].setRadius(BALL_RADIUS);
@@ -49,6 +50,7 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 		}
 		line++;
 	}
+
 	/*// Linear disposition
 	for( int i=1; i<nballs; i++ )
 	{
@@ -279,32 +281,64 @@ void Level::lights()
 	glLightfv(GL_LIGHT2, GL_POSITION, direction);
 }
 
-pair<int,bool> Level::updateState()
+vector<int> Level::updateState(int whichPlayer)
 /* returns points the player has done */
 {
+	int ballSet = (whichPlayer - 1) % NPLAYERS; // 0: 1 - 7
+												// 1: 9 - 16
+	
 	pair<bool,bool> retValue;
+	int  enemyBall = 0, playerBall = 0;
 	bool hasChanged = false;
+	
+	int otherPlayerFirstBall = 0;
+	
 	int points=0;
 	
-	for( int i=0; i<balls.size(); i++ ) {
+	for( int i=0; i<balls.size(); i++ )
+	{
 		retValue = balls[i].updateState();
 	
 		hasChanged = retValue.first || hasChanged;	
 		if(retValue.second)
-			points++;
+			if (ballSet == 0)
+				if( i < 8 )
+					playerBall++;
+				else
+					enemyBall++;
+			else
+				if( i < 8 )
+					enemyBall++;
+				else
+					playerBall++;
 	}
 
-	if( hasChanged ) {
-		testBallsCollision();
-		
+	if( hasChanged )
+	{
+		otherPlayerFirstBall = testBallsCollision(ballSet);
+
 		camera->setCenter(&balls[0]);
 	}
+	
+	vector<int> returnValue;
+	
+	returnValue.push_back(hasChanged);
+	returnValue.push_back(otherPlayerFirstBall);
+	returnValue.push_back(playerBall);
+	returnValue.push_back(enemyBall);
+	
+	if(otherPlayerFirstBall > 0)
+		cout << "otherPlayerFirstBall : " << otherPlayerFirstBall << endl;
 		
-	return pair<int,bool>::pair(points,hasChanged);
+	return returnValue;
 }
 
-void Level::testBallsCollision()
+int Level::testBallsCollision(int ballSet)
 {
+	int otherPlayerFirstBall = 0;		// 0: no collisions with the main ball;
+										// 1: main ball hit a "friendly" ball;
+										// 2: main ball hit an enemy ball
+																			
 	/* 
 	 * Collision tests with table's frame (obj's based detection)
 	 * 
@@ -379,6 +413,22 @@ void Level::testBallsCollision()
 					double impactv[3] = { balls[i].pos[0] - balls[j].pos[0], //impactVector = balls[i] - balls[j]
 										 0,
 										 balls[i].pos[2] - balls[j].pos[2]};
+							
+							
+					// If the first ball a player's ball hit is an enemy's ball,
+					// then the enemy "lose" a ball.			 
+					if ( i == 0 )
+						if (ballSet == 0)		// if it's the player1's turn
+							if (j < 8)
+								otherPlayerFirstBall = 1;
+							else
+								otherPlayerFirstBall = 2;
+						else
+							if (j > 8)			// if it's the player2's turn
+								otherPlayerFirstBall = 1;
+							else
+								otherPlayerFirstBall = 2;
+									
 													
 					// "backtracking"
 					int repetitions=0;
@@ -394,24 +444,9 @@ void Level::testBallsCollision()
 					
 					balls[i].applyForce( impactForce, impactAngle );
 					balls[j].applyForce( impactForce, impactAngle, true );
-					
-					
-					// prototype for realistic elastic collision
-					/*double angle = getVectorAngle(impactv);
-					if(angle>270)
-						angle=360-angle;
-					else if(angle>180)
-							angle=270-angle;
-					else if(angle>90)
-							angle=angle;
-						 else
-							angle=angle;
-					double initForce = balls[i].getSpeed();
-					
-					balls[i].resetSpeed();
-					balls[j].resetSpeed();
-					balls[i].applyForce( sin(angle)*initForce, getVectorAngle(impactv) );
-					balls[j].applyForce( cos(angle)*initForce, getVectorAngle(impactv)+90 );*/
 				}
 	}
+	if (otherPlayerFirstBall > 0)
+		cout << "otherPlayerFirstBall: " << otherPlayerFirstBall << endl;
+	return otherPlayerFirstBall;
 }

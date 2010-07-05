@@ -559,7 +559,7 @@ int main (int argc, char **argv) {
     glutInitDisplayMode ( GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL ); //set the display to Double buffer, with depth and stencil buffers
     
     if( FULLSCREEN_ON ) {
-		glutGameModeString("1920x1080:16@60");			//Full Screen Mode (adjust resolution for your full resolution values)
+		glutGameModeString("1920x1080:16@60");	//Full Screen Mode (adjust resolution for your full resolution values)
 		glutEnterGameMode();
 	}
 	else {
