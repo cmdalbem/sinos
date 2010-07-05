@@ -88,14 +88,14 @@ const float default_shininess = 0;
 								  { { 42.009701  ,  25.889198}, {45.743099 ,   22.011297} }
 								 };*/
 //cordinates between holes
-const float wallLimits[6][2][2] = {   { {-42.490299+BALL_RADIUS  , BOTBOUND}, {-2.990300+BALL_RADIUS, BOTBOUND} }, 	 //1-2
-									  { {2.509700-BALL_RADIUS , BOTBOUND}, { 42.009701-BALL_RADIUS , BOTBOUND} },	 //2-3
+const float wallLimits[6][2][2] = {   { {-43.25+BALL_RADIUS  , BOTBOUND}, {-3.8+BALL_RADIUS, BOTBOUND} }, 	 //1-2
+									  { {3.6-BALL_RADIUS , BOTBOUND}, { 42.9-BALL_RADIUS , BOTBOUND} },	 //2-3
 									  
-									  { {-42.490299+BALL_RADIUS,  TOPBOUND}, {-2.990300+BALL_RADIUS,  TOPBOUND} },   //4-5
-									  { { 2.509700-BALL_RADIUS, TOPBOUND}, { 42.009701-BALL_RADIUS  ,TOPBOUND} },    //5-6
+									  { {-43.25+BALL_RADIUS,  TOPBOUND}, {-3.8+BALL_RADIUS,  TOPBOUND} },   //4-5
+									  { {3.6-BALL_RADIUS, TOPBOUND}, { 42.9-BALL_RADIUS  ,TOPBOUND} },    //5-6
 									  
-									  { {LEFTBOUND , 22.011297-BALL_RADIUS}, { LEFTBOUND, -17.317400+BALL_RADIUS} }, //1-4
-									  { {RIGHTBOUND, 22.011297-BALL_RADIUS}, { RIGHTBOUND,-17.317400+BALL_RADIUS} },  //3-6
+									  { {LEFTBOUND , 23.0-BALL_RADIUS}, { LEFTBOUND, -18.0+BALL_RADIUS} }, //1-4
+									  { {RIGHTBOUND, 23.0-BALL_RADIUS}, { RIGHTBOUND,-18.0+BALL_RADIUS} },  //3-6
 								  };
 								  
 								  

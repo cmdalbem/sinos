@@ -416,6 +416,17 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		//game.attack( game.level->stick.getAttackStrenght() );
 		bigview = !bigview;
 	}
+	
+	if(key=='y' && game.hasEnded)
+	{
+		game.hasEnded = false;
+		game.restartGame();
+	}
+	
+	if(key=='n' && game.hasEnded)
+	{
+		exit(0);
+	}
 
 	if( key == '1' ) {
 		game.updateOsd();
@@ -531,7 +542,10 @@ void mouseMotionFunc(int x, int y) {
 		
 		else {
 			if( game.level->camera->getMode() == 1 )
+			{
+				game.level->camera->action1( (x-xold)/sf, (y-yold)/sf);	
 				game.level->stick.rotate( (x-xold)/sf );	
+			}
 			else
 				game.level->camera->action1( (x-xold)/sf, (y-yold)/sf);	
 			

@@ -14,6 +14,8 @@ Game::Game()
 	wrongBallFlag = true;
 	wrongBallFallenFlag = false;
 	
+	hasEnded = false;
+	
 	level = NULL;
 }
 
@@ -26,6 +28,8 @@ Game::Game(Level *_level)
 	
 	wrongBallFlag = true;
 	wrongBallFallenFlag = false;
+	
+	hasEnded = false;
 	
 	level = _level;
 }
@@ -91,11 +95,7 @@ void Game::updateState()
 		//cout << "FallenFlag: " << wrongBallFallenFlag << endl;
 		cout << "updatingValues: " << updatingValues[1] << endl;
 		if (updatingValues[1] == 2)
-		{
 			wrongBallFallenFlag = true;
-			
-			points[(currentPlayer) % NPLAYERS]++;
-		}
 	}
 	
 	if( (updatingValues[2] > 0) || (updatingValues[3] > 0))
@@ -145,18 +145,31 @@ void Game::nextPlayer()
 		level->balls[0].setPos(-20, TABLE_PLANE_Y+level->balls[0].getRadius(), 0);
 	}
 	
-	if ( level->balls[8].hasFallen == true )
+	// If the eighty ball has been snooked, the game is over
+	if ( level->balls[8].pos[1] <= 1 )
 	{
-		// END THE GAME =D
+		hasEnded = true;
 	}
 	
 	wrongBallFlag 		= true;
 	wrongBallFallenFlag = false;
-	//cout << "wrongBallFlag : " << wrongBallFlag << endl;
 	currentPlayer++;
 	if(currentPlayer > NPLAYERS)
 		currentPlayer=1;
 	cout << "Vez do jogador " << currentPlayer << endl;
+}
+
+void Game::restartGame()
+{	
+	currentPlayer = 0;
+	fps=0;
+	resetPoints();
+	hasControl = true;
+	
+	wrongBallFlag = true;
+	wrongBallFallenFlag = false;
+	
+	level->EndTheGame();
 }
 
 void Game::knockTheEnemysBall()
@@ -167,8 +180,8 @@ void Game::knockTheEnemysBall()
 			if (level->balls[i].hasFallen == false)
 			{
 				level->balls[i].hasFallen = true;
-				level->balls[i].moveVector[1]=-30;
-				points[(currentPlayer+1) % NPLAYERS]++;
+				level->balls[i].moveVector[1] = -1;
+				points[(currentPlayer) % NPLAYERS]++;
 				break;			// get out of the "for".
 			}
 	}
@@ -179,15 +192,15 @@ void Game::knockTheEnemysBall()
 			if (level->balls[i].hasFallen == false)
 			{
 				level->balls[i].hasFallen = true;
-				level->balls[i].moveVector[1] = -30;
-				points[(currentPlayer+1) % NPLAYERS]++;
+				level->balls[i].moveVector[1] = -1;
+				points[(currentPlayer) % NPLAYERS]++;
 				found = true;
 				break;
 			}
 		if (found == false)
 		{
 			level->balls[8].hasFallen = true;
-			level->balls[8].moveVector[1] = -30;
+			level->balls[8].moveVector[1] = -1;
 		}
 	}
 }
@@ -214,24 +227,33 @@ void Game::drawOsd()
 
 void Game::updateOsd()
 {
-	char stripes[] = "Stripes",
-		 solids [] = "Solids";
-	// OSD setup
-	sprintf(osd[0],"FPS: %li ",fps);
-	for( int i=0; i<NCAMERAMODES; i++ )
-		if( level->camera->getMode() == i )
-			sprintf(osd[0],"%s - [%s]",osd[0],level->camera->getModeName(i));
-		else
-			sprintf(osd[0],"%s -  %s ",osd[0],level->camera->getModeName(i));
-		
-	for( int i=0; i<NPLAYERS; i++)
+	if( hasEnded )
 	{
-		if( i == currentPlayer-1 )
-			sprintf(osd[i+1],"->");
-		else
-			sprintf(osd[i+1],"     ");
-		
-		sprintf(osd[i+1],"%s Player %i: %i -- %s",osd[i+1],i+1,points[i],
-												  i == 0? solids : stripes);
+			char restartGame[] = "Thanks for playing SiNoS\n Would you like to play again?\n (Y / N)";
+			
+			sprintf(osd[0], "%s", restartGame);
+	}
+	else
+	{
+		char stripes[] = "Stripes",
+			 solids [] = "Solids";
+		// OSD setup
+		sprintf(osd[0],"FPS: %li ",fps);
+		for( int i=0; i<NCAMERAMODES; i++ )
+			if( level->camera->getMode() == i )
+				sprintf(osd[0],"%s - [%s]",osd[0],level->camera->getModeName(i));
+			else
+				sprintf(osd[0],"%s -  %s ",osd[0],level->camera->getModeName(i));
+			
+		for( int i=0; i<NPLAYERS; i++)
+		{
+			if( i == currentPlayer-1 )
+				sprintf(osd[i+1],"->");
+			else
+				sprintf(osd[i+1],"     ");
+			
+			sprintf(osd[i+1],"%s Player %i: %i -- %s",osd[i+1],i+1,points[i],
+													  i == 0? solids : stripes);
+		}
 	}
 }

@@ -19,6 +19,7 @@ class Game
 		void knockTheEnemysBall();
 		
 	public:
+		bool	hasEnded;
 		int		points[NPLAYERS];
 		int		currentPlayer;
 		Level	*level;
@@ -57,5 +58,5 @@ class Game
 		void 	drawOsd();
 		void 	updateOsd();
 		
-		void 	endTheGame(int value);
+		void 	restartGame();
 };
