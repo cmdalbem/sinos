@@ -17,7 +17,7 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	camera2 = _camera2;
 	
 	// Balls
-	int nballs = 16 ; 
+	int nballs = 16; 
 	//int nballs = 29 ;
 	Material ballMaterial;
 	ballMaterial.setShininess(128); 
@@ -368,7 +368,7 @@ int Level::testBallsCollision(int ballSet)
 					balls[i].backTrack(balls[i].moveVector);
 							
 				balls[i].moveVector[0] = -balls[i].moveVector[0];   //reflection
-				balls[i].changeSpeed(BALL_DECELERATION_R); //absortion of energy by the wall
+				balls[i].moveVector[0] *= BALL_DECELERATION_R; //absortion of energy by the wall will be a percentage of horizontal movement
 			}
 			else
 				/* Verticall wall collision */
@@ -376,9 +376,9 @@ int Level::testBallsCollision(int ballSet)
 					int rep=0;
 					while( !balls[i].isInField() && rep++ < MAX_BACKTRACK )
 						balls[i].backTrack(balls[i].moveVector);					
-				
+				  
 					balls[i].moveVector[2] = -balls[i].moveVector[2];   //reflection
-					balls[i].changeSpeed(BALL_DECELERATION_R); //absortion of energy by the wall
+					balls[i].moveVector[2] *= BALL_DECELERATION_R; //absortion of energy by the wall will be a percentage of vertical movement 
 				}
 				else
 					/* Corner wall collision */
@@ -440,7 +440,7 @@ int Level::testBallsCollision(int ballSet)
 					
 					float impactAngle = getVectorAngle(impactv);
 					
-					float impactForce = 0.9*(balls[i].getSpeed() + balls[j].getSpeed())/2.;
+					float impactForce = (balls[i].getSpeed() + balls[j].getSpeed())/2;
 					
 					balls[i].applyForce( impactForce, impactAngle );
 					balls[j].applyForce( impactForce, impactAngle, true );

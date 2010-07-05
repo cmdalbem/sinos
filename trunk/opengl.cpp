@@ -44,6 +44,7 @@ static bool heldShift = false;
 static int timeBase = 0;
 static int timeAct; 
 static bool bigview = false;
+static bool hardMode = false;
 						  
 
 
@@ -445,6 +446,9 @@ void specialFunc(int key, int x, int y)
 		fullscreen = !fullscreen;
 	}*/
 	
+	if( key == GLUT_KEY_F12 )
+		hardMode = !hardMode;
+		
 	int var=2;
 	
 	if( key == GLUT_KEY_LEFT ) {
@@ -506,8 +510,10 @@ void mouseMotionFunc(int x, int y) {
 	
 	if ( right_click == GLUT_DOWN ) {
 		if( game.hasControl ) {
-			//game.level->camera->action1( (x-xold)/sf,0);  // hard mode ON!!
-			//game.level->stick.rotate( (x-xold)/sf );		//
+			if( hardMode ) {
+				game.level->camera->action1( (x-xold)/(sf*2),0);
+				game.level->stick.rotate( (x-xold)/(sf*2) );
+			}
 			
 			game.level->stick.changePower( (y-yold)/sf );
 		    if( game.level->stick.getAttackStrenght() < game.level->balls[0].getRadius() ) {
@@ -522,8 +528,13 @@ void mouseMotionFunc(int x, int y) {
 				game.level->camera->action1( 0,(y-yold)/sf);
 			else
 				game.level->camera->action1((x-xold)/sf, (y-yold)/sf);
+		
 		else {
-			game.level->camera->action1( (x-xold)/sf, (y-yold)/sf);	
+			if( game.level->camera->getMode() == 1 )
+				game.level->stick.rotate( (x-xold)/sf );	
+			else
+				game.level->camera->action1( (x-xold)/sf, (y-yold)/sf);	
+			
 		}
 		
 	}
@@ -565,7 +576,7 @@ int main (int argc, char **argv) {
 	else {
 		glutInitWindowSize (1280, 720);
 		glutInitWindowPosition (400, 0);              					 //set the position of the window
-		glutCreateWindow ("SiNoS - middleButton/c: camera  mouse: stick  spacebar: attack!");
+		glutCreateWindow ("SiNoS := SiNoS is Not Sinuca");
 	}
 	
     init();

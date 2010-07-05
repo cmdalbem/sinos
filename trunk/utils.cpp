@@ -47,16 +47,16 @@ void makeGuideLine( vector<ObjectBall> balls, double stickAngle)
 	double x1 = balls[0].pos[0], 
 		   y1 = TABLE_PLANE_Y, 
 		   z1 = balls[0].pos[2];
-	double vecx = 0.5 *  cos(RAD(stickAngle+90)),
-		   vecz = 0.5 * -sin(RAD(stickAngle+90));
-	double x2 = x1 + 4*vecx,
+	double vecx = 0.1 *  cos(RAD(stickAngle+90)),
+		   vecz = 0.1 * -sin(RAD(stickAngle+90));
+	double x2 = x1 + 20*vecx,
 		   y2 = y1,
-		   z2 = z1 + 4*vecz;		   	
+		   z2 = z1 + 20*vecz;		   	
 	double x3, y3=y2, z3;
 	bool rebound = false;
 	
 	// Find rebound point, if any
-	for(int i=0; i<100 && !rebound; i++) {
+	for(int i=0; i<400 && !rebound; i++) {
 		x2 += vecx;
 		z2 += vecz;
 		for( int b=0; b<balls.size(); b++ ) {
