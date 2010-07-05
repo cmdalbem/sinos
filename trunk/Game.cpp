@@ -12,6 +12,7 @@ Game::Game()
 	hasControl = true;
 	
 	wrongBallFlag = true;
+	wrongBallFallenFlag = false;
 	
 	level = NULL;
 }
@@ -24,6 +25,7 @@ Game::Game(Level *_level)
 	hasControl = true;
 	
 	wrongBallFlag = true;
+	wrongBallFallenFlag = false;
 	
 	level = _level;
 }
@@ -86,9 +88,12 @@ void Game::updateState()
 	if( (updatingValues[1] > 0) && wrongBallFlag)	// if player hit the wrong ball
 	{
 		wrongBallFlag = false;
+		//cout << "FallenFlag: " << wrongBallFallenFlag << endl;
+		cout << "updatingValues: " << updatingValues[1] << endl;
 		if (updatingValues[1] == 2)
 		{
-			cout << "player: " << currentPlayer << endl;
+			wrongBallFallenFlag = true;
+			
 			points[(currentPlayer) % NPLAYERS]++;
 		}
 	}
@@ -107,12 +112,84 @@ void Game::updateState()
 
 void Game::nextPlayer()
 {
-	wrongBallFlag = true;
+	bool hasAlreadyDroppedABall = false;
+	
+	/* Testing if the player hasn't hit any ball
+	 * during his turn (if so, the enemy "gains"
+	 * a ball, i.e, gains one point.
+	 */
+	if(wrongBallFlag == true)
+	{
+		knockTheEnemysBall();
+		hasAlreadyDroppedABall = true;
+	}
+	
+	/* Test if the player hit an enemy's ball. If he did,
+	 * the enemy "gains" (actually, lose) a ball.
+	 */
+	if( wrongBallFallenFlag == true )
+	{
+		knockTheEnemysBall();
+		hasAlreadyDroppedABall = true;
+	}
+	
+	/* Test if the current player snooked the main ball.
+	 * If he did, his enemy "gains" (or lose, actually),
+	 * a ball, i.e, gains one point.
+	 */
+	if ( level->balls[0].hasFallen == true )
+	{
+		if ( hasAlreadyDroppedABall == false )
+			knockTheEnemysBall();
+		level->balls[0].hasFallen = false;
+		level->balls[0].setPos(-20, TABLE_PLANE_Y+level->balls[0].getRadius(), 0);
+	}
+	
+	if ( level->balls[8].hasFallen == true )
+	{
+		// END THE GAME =D
+	}
+	
+	wrongBallFlag 		= true;
+	wrongBallFallenFlag = false;
 	//cout << "wrongBallFlag : " << wrongBallFlag << endl;
 	currentPlayer++;
 	if(currentPlayer > NPLAYERS)
 		currentPlayer=1;
 	cout << "Vez do jogador " << currentPlayer << endl;
+}
+
+void Game::knockTheEnemysBall()
+{
+	if (currentPlayer % NPLAYERS == 0)
+	{
+		for(int i = 1; i <= 8; i++)
+			if (level->balls[i].hasFallen == false)
+			{
+				level->balls[i].hasFallen = true;
+				level->balls[i].moveVector[1]=-30;
+				points[(currentPlayer+1) % NPLAYERS]++;
+				break;			// get out of the "for".
+			}
+	}
+	else if ( (currentPlayer % NPLAYERS) == 1 )
+	{
+		bool found = false;
+		for(int i = 9; i < 16; i++)
+			if (level->balls[i].hasFallen == false)
+			{
+				level->balls[i].hasFallen = true;
+				level->balls[i].moveVector[1] = -30;
+				points[(currentPlayer+1) % NPLAYERS]++;
+				found = true;
+				break;
+			}
+		if (found == false)
+		{
+			level->balls[8].hasFallen = true;
+			level->balls[8].moveVector[1] = -30;
+		}
+	}
 }
 
 void Game::drawOsd()
@@ -137,6 +214,8 @@ void Game::drawOsd()
 
 void Game::updateOsd()
 {
+	char stripes[] = "Stripes",
+		 solids [] = "Solids";
 	// OSD setup
 	sprintf(osd[0],"FPS: %li ",fps);
 	for( int i=0; i<NCAMERAMODES; i++ )
@@ -152,6 +231,7 @@ void Game::updateOsd()
 		else
 			sprintf(osd[i+1],"     ");
 		
-		sprintf(osd[i+1],"%s Player %i: %i",osd[i+1],i+1,points[i]);
+		sprintf(osd[i+1],"%s Player %i: %i -- %s",osd[i+1],i+1,points[i],
+												  i == 0? solids : stripes);
 	}
 }

@@ -5,6 +5,10 @@
 
 #include "Level.h"
 
+
+// Balls
+int nballs = 16; 
+
 //------------------------------------------------------------ CONSTRUCTORS
 Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 				Camera *_camera, Camera *_camera2,
@@ -16,8 +20,6 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	camera  = _camera;
 	camera2 = _camera2;
 	
-	// Balls
-	int nballs = 16; 
 	//int nballs = 29 ;
 	Material ballMaterial;
 	ballMaterial.setShininess(128); 
@@ -302,14 +304,14 @@ vector<int> Level::updateState(int whichPlayer)
 		hasChanged = retValue.first || hasChanged;	
 		if(retValue.second)
 			if (ballSet == 0)
-				if( i < 8 )
+				if( i < 8 && i > 0)
 					playerBall++;
-				else
+				else if ( i > 8 )
 					enemyBall++;
 			else
-				if( i < 8 )
+				if( i < 8 && i > 0)
 					enemyBall++;
-				else
+				else if ( i > 8 )
 					playerBall++;
 	}
 
@@ -327,8 +329,8 @@ vector<int> Level::updateState(int whichPlayer)
 	returnValue.push_back(playerBall);
 	returnValue.push_back(enemyBall);
 	
-	if(otherPlayerFirstBall > 0)
-		cout << "otherPlayerFirstBall : " << otherPlayerFirstBall << endl;
+	//if(otherPlayerFirstBall > 0)
+	//	cout << "otherPlayerFirstBall : " << otherPlayerFirstBall << endl;
 		
 	return returnValue;
 }
@@ -446,7 +448,25 @@ int Level::testBallsCollision(int ballSet)
 					balls[j].applyForce( impactForce, impactAngle, true );
 				}
 	}
-	if (otherPlayerFirstBall > 0)
-		cout << "otherPlayerFirstBall: " << otherPlayerFirstBall << endl;
+	//if (otherPlayerFirstBall > 0)
+	//	cout << "otherPlayerFirstBall: " << otherPlayerFirstBall << endl;
 	return otherPlayerFirstBall;
+}
+
+void Level::EndTheGame()
+{
+	balls[0].setPos(-20, TABLE_PLANE_Y+balls[0].getRadius(), 0);
+	
+	for( int line=1, i=1; i<nballs; )
+	{
+		for( int j=0; j<line && i<nballs; j++, i++ )
+		{
+			balls[i].setPos((BALL_RADIUS*2.1)*line +20, TABLE_PLANE_Y+balls[i].getRadius(), (BALL_RADIUS*2.1)*j - (line-1) );
+		}
+		line++;
+	}
+	
+	stick.setCenter(&balls[0]);
+	stick.calculatePos();	// This is needed to put the Stick on the right place
+							// since only now the ball is put its place.
 }

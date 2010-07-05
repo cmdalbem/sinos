@@ -59,5 +59,6 @@ class Level
 		
 		vector<int>		updateState(int whichPlayer);
 		int 			testBallsCollision(int whichPlayer);
-				
+		
+		void 			EndTheGame();
 };

@@ -5,6 +5,8 @@
 #include <iostream>
 using namespace std;
 
+#include <string>
+
 #include "Level.h"
 #include "constants.h"
 
@@ -14,6 +16,8 @@ class Game
 	private:
 		char osd[OSD_LINES][1024];
 		
+		void knockTheEnemysBall();
+		
 	public:
 		int		points[NPLAYERS];
 		int		currentPlayer;
@@ -21,6 +25,9 @@ class Game
 		bool 	hasControl;
 		
 		bool	wrongBallFlag;
+		bool	wrongBallFallenFlag;
+		
+		
 		bool	inSinucaMode;
 		
 		long int 	frameCounter, fps;	//frames per second counter and register
@@ -49,4 +56,6 @@ class Game
 		 */
 		void 	drawOsd();
 		void 	updateOsd();
+		
+		void 	endTheGame(int value);
 };

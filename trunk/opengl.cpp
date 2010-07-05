@@ -561,7 +561,14 @@ void displayCaller(int value) {
 	glutTimerFunc(1000/STATEUPDATES_PER_SEC, displayCaller, 0);
 }
 
-
+void endTheGame(int value)
+{
+	game.currentPlayer = 0;
+	game.resetPoints();
+	game.hasControl = true;
+	
+	game.level->EndTheGame();
+}
 
 
 int main (int argc, char **argv) {
