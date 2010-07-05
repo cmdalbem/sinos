@@ -179,8 +179,10 @@ void Level::drawObjects_partial ()
 
 	// draw balls
 	for( int i=0; i<balls.size(); i++ ) {
-		balls[i].setResolution(20);
-		balls[i].draw();
+		if( !balls[i].hasFallen ) {
+			balls[i].setResolution(20);
+			balls[i].draw();
+		}
 	}
 
 	#ifdef SHOW_TABLE_FRAME

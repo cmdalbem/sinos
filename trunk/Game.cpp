@@ -93,7 +93,7 @@ void Game::updateState()
 	{
 		wrongBallFlag = false;
 		//cout << "FallenFlag: " << wrongBallFallenFlag << endl;
-		cout << "updatingValues: " << updatingValues[1] << endl;
+		//cout << "updatingValues: " << updatingValues[1] << endl;
 		if (updatingValues[1] == 2)
 			wrongBallFallenFlag = true;
 	}
@@ -156,7 +156,7 @@ void Game::nextPlayer()
 	currentPlayer++;
 	if(currentPlayer > NPLAYERS)
 		currentPlayer=1;
-	cout << "Vez do jogador " << currentPlayer << endl;
+	//cout << "Vez do jogador " << currentPlayer << endl;
 }
 
 void Game::restartGame()

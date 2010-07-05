@@ -65,12 +65,12 @@ void initObjects ()
 	static ObjectModel scenario("obj/crypt.obj");
 	static ObjectModel globe("obj/globe.obj");
 	static ObjectModel light("obj/light1.obj");
-	static ObjectModel tableStruct2("obj/pooltable_struct.obj");
+	/*static ObjectModel tableStruct2("obj/pooltable_struct.obj");
 	static ObjectModel tableTop2("obj/pooltable_table.obj");
 	static ObjectModel tableStruct3("obj/pooltable_struct.obj");
 	static ObjectModel tableTop3("obj/pooltable_table.obj");
 	static ObjectModel tableStruct4("obj/pooltable_struct.obj");
-	static ObjectModel tableTop4("obj/pooltable_table.obj");
+	static ObjectModel tableTop4("obj/pooltable_table.obj");*/
 	
 	// crypt scenario
 	scenario.setPos(0,-30,0);
@@ -116,7 +116,7 @@ void initObjects ()
 	#endif
 
 	// table2
-	tableStructMat.setDiffuse(0.25,0.09,0.07);
+	/*tableStructMat.setDiffuse(0.25,0.09,0.07);
 	tableStructMat.setSpecular(0,0,0);
 	tableTopMat.setDiffuse(0.078 *0.5, 0.66 *0.5, 0.078 *0.5);	
 	tableStruct2.setMaterial(tableStructMat);
@@ -139,7 +139,7 @@ void initObjects ()
 	tableTop4.setSize(100,100,100);
 	tableStruct4.setPos(0,0,600);
 	tableTop4.setPos(0,0,600);
-		/*objects["tableStruct2"] = &tableStruct2;
+		objects["tableStruct2"] = &tableStruct2;
 		objects["tableTop2"] = &tableTop2;
 		objects["tableStruct3"] = &tableStruct3;
 		objects["tableTop3"] = &tableTop3;
