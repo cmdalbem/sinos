@@ -18,10 +18,8 @@ ObjectBall::ObjectBall()
 {
 	radius = 0;
 	res = 0;	
-	hasFallen = false;
-	resetSpeed();
-	resetRotateMatrix();
-	setQuad();
+	
+    reset();
 }
 
 ObjectBall::ObjectBall( GLdouble _radius, int newRes )
@@ -29,10 +27,8 @@ ObjectBall::ObjectBall( GLdouble _radius, int newRes )
 {
 	radius = _radius;
 	res = newRes;
-	hasFallen = false;
-	resetSpeed();
-	resetRotateMatrix();
-	setQuad();
+	
+    reset();
 }
 
 ObjectBall::ObjectBall(string filename)
@@ -40,10 +36,8 @@ ObjectBall::ObjectBall(string filename)
 {
 	radius = 0;
 	res = 0;
-	hasFallen = false;
-	resetSpeed();	
-	resetRotateMatrix();
-	setQuad();
+	
+    reset();
 }
 
 
@@ -52,13 +46,6 @@ ObjectBall::ObjectBall(string filename)
 ObjectBall::~ObjectBall() { }
 
 //------------------------------------------------------------ GETTERS & SETTERS
-
-/*void ObjectBall::setSize (GLfloat x, GLfloat y, GLfloat z)
-{
-	Object::setSize(x,y,z);
-	if(x==z && z==y)
-		radius = x;
-}*/
 
 GLdouble ObjectBall::getRadius() const
 {
@@ -69,6 +56,23 @@ float ObjectBall::getPerimeter() const
 {
 	return 2*M_PI*getRadius();
 }
+
+void ObjectBall::setRandColor()
+{
+    double r = getRandBetween(0,60),
+		   g = getRandBetween(0,60),
+		   b = getRandBetween(0,60);
+	
+    material.setDiffuse(r/100.,g/100.,b/100.);    
+}
+
+void ObjectBall::reset()
+{
+	hasFallen = false;
+	resetSpeed();	
+	resetRotateMatrix();
+	setQuad();
+}    
 
 void ObjectBall::setProps( GLdouble newRadius, int newRes )
 {
@@ -176,19 +180,15 @@ void ObjectBall::reflectAngle( double axisx, double axisy, double axisz )
 	double final[3] = {axisx, axisy, axisz};
 	
 	final[0] *= 2;
-	//final[1] *= 2; //lets ignore the y reflection
 	final[2] *= 2;
 	
 	final[0] *= dot;
-	//final[1] *= dot;
 	final[2] *= dot;
 	
 	final[0] -= moveVector[0];
-	//final[1] -= moveVector[1];
 	final[2] -= moveVector[2];
 	
 	moveVector[0] = -final[0];
-	//moveVector[1] = -final[1];
 	moveVector[2] = -final[2];
 }
 
@@ -397,7 +397,7 @@ void ObjectBall::setQuad()
 bool ObjectBall::hasSnooked()
 {
 	for(int i=0; i<NHOLES; i++)
-		if( abs(pos[0]-HC[i][0]) + abs(pos[2]-HC[i][1]) < HC[i][2] )
+		if( abs((int)(pos[0]-HC[i][0])) + abs((int)(pos[2]-HC[i][1])) < HC[i][2])
 			return true;
 	return false;	
 }

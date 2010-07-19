@@ -1,81 +1,35 @@
-// Level.cpp
-//
-// Function implementation of Level.h (and some POG, on a first time).
-//
-
 #include "Level.h"
 
 
 // Balls
-int nballs = 16; 
+
 
 //------------------------------------------------------------ CONSTRUCTORS
 Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 				Camera *_camera, Camera *_camera2,
-				Texture ballTex[], Texture *stickTex)
+				Texture _ballTex[], Texture *_stickTex)
 {	
 	objects   = _objects;
-	theLights = _theLights;
+	theLights = _theLights; 
 
 	camera  = _camera;
 	camera2 = _camera2;
 	
-	//int nballs = 29 ;
-	Material ballMaterial;
-	ballMaterial.setShininess(128); 
-	ballMaterial.setAmbient(0.7, 0.7, 0.7); 
-	ballMaterial.setEmission(0.1, 0.1, 0.1); 
-	ballMaterial.setDiffuse(0.5, 0.5, 0.5);
-	ballMaterial.setSpecular(0.9, 0.9, 0.9);
-	
-	balls.resize(nballs);
-	
-	balls[0].setRadius(BALL_RADIUS);
-	balls[0].setTexture(&ballTex[0]);
-	balls[0].setMaterial(ballMaterial);
-	balls[0].setPos(-20, TABLE_PLANE_Y+balls[0].getRadius(), 0);
+    initBalls( TRIANGULAR );
+    
+    for(int i=0; i<N_BALL_TEX; i++)
+        ballTex[i] = _ballTex[i];
+    stickTex = *_stickTex;
+
 	camera->setCenter( &balls[0] );
 	camera->setRotX2( stick.rot[1] );
-	// Triangular disposition
-	for( int line=1, i=1; i<nballs; )
-	{
-		for( int j=0; j<line && i<nballs; j++, i++ )
-		{
-			//double r = getRandBetween(0,60),
-			//	   g = getRandBetween(0,60),
-			//	   b = getRandBetween(0,60);
-			balls[i].setRadius(BALL_RADIUS);
-			balls[i].setTexture(&ballTex[i]);
-			balls[i].setMaterial(ballMaterial);
-			//balls[i].material.setDiffuse(r/100.,g/100.,b/100.);
-			balls[i].setPos((BALL_RADIUS*2.1)*line +20, TABLE_PLANE_Y+balls[i].getRadius(), (BALL_RADIUS*2.1)*j - (line-1) );
-		}
-		line++;
-	}
-
-	/*// Linear disposition
-	for( int i=1; i<nballs; i++ )
-	{
-		double r = getRandBetween(0,60),
-			   g = getRandBetween(0,60),
-			   b = getRandBetween(0,60);
-		balls[i].setRadius(BALL_RADIUS);
-		balls[i].setTexture(ballTex);
-		balls[i].setMaterial(ballMaterial);
-		balls[i].material.setDiffuse(r/100.,g/100.,b/100.);
-		balls[i].setPos((BALL_RADIUS*2.1)*i +20, TABLE_PLANE_Y+balls[i].getRadius(), 30 );
-	}*/
-
-	// the stick
+	
 	stick.setCenter(&balls[0]);
 	stick.loadFromFile("obj/taco.obj");	
-	stick.calculatePos();	// This is needed to put the Stick on the right place
-							// since only now the ball is put its place.
-	
 	stick.material.setDiffuse(RGB(238),RGB(221),RGB(195));
 	stick.material.setSpecular(0.3,0.3,0.3);
 	stick.material.setShininess(80);
-	stick.setTexture(stickTex);
+	stick.setTexture(&stickTex);
 	stick.setSize(7,7,8);
 }
 
@@ -85,6 +39,62 @@ Level::~Level()	{ }
 //------------------------------------------------------------ GETTERS & SETTERS
 
 //------------------------------------------------------------ OTHER METHODS
+
+void Level::initBalls( int mode )
+{
+    #define nballs 16
+	
+    // common balls material
+    Material ballMaterial;
+	ballMaterial.setShininess(128); 
+	ballMaterial.setAmbient(0.7, 0.7, 0.7); 
+	ballMaterial.setEmission(0.1, 0.1, 0.1); 
+	ballMaterial.setDiffuse(0.5, 0.5, 0.5);
+	ballMaterial.setSpecular(0.9, 0.9, 0.9);
+	
+	// set balls vector size
+	balls.resize(nballs);
+	
+	// initializes white ball
+	balls[0].setRadius(BALL_RADIUS);
+	balls[0].setTexture(&ballTex[0]);
+	balls[0].setMaterial(ballMaterial);
+	balls[0].setPos(-20, TABLE_PLANE_Y+balls[0].getRadius(), 0);
+	
+    switch( mode )
+    {
+        case TRIANGULAR:
+            // triangular disposition
+        	for( int line=1, i=1; i<nballs; )
+        	{
+        		for( int j=0; j<line && i<nballs; j++, i++ )
+        		{
+        			balls[i].setRadius(BALL_RADIUS);
+        			balls[i].setTexture(&ballTex[i]);
+        			balls[i].setMaterial(ballMaterial);
+        			balls[i].setPos((BALL_RADIUS*2.1)*line +20, TABLE_PLANE_Y+balls[i].getRadius(), (BALL_RADIUS*2.1)*j - (line-1) );
+        		}
+        		line++;
+        	}
+            break;
+    
+    	case LINEAR:
+            // Linear disposition
+        	for( int i=1; i<nballs; i++ )
+        	{
+        		double r = getRandBetween(0,60),
+        			   g = getRandBetween(0,60),
+        			   b = getRandBetween(0,60);
+        		balls[i].setRadius(BALL_RADIUS);
+        		balls[i].setTexture(ballTex);
+        		balls[i].setMaterial(ballMaterial);
+        		balls[i].material.setDiffuse(r/100.,g/100.,b/100.);
+        		balls[i].setPos((BALL_RADIUS*2.1)*i +20, TABLE_PLANE_Y+balls[i].getRadius(), 30 );
+        	}
+        	break;
+    }    
+    
+}
 
 void Level::drawGuides()
 {
@@ -118,10 +128,6 @@ void Level::drawGuides()
 		// Balls vectors
 		for(int i=0; i<balls.size(); i++)
 			balls[i].drawVectors();
-			
-		// Guide line
-		if( !stick.isHidden )
-			makeGuideLine( balls, stick.rot[1] );
 	glDisable(GL_BLEND);
 	glEnable(GL_LIGHTING);
 }
@@ -144,7 +150,7 @@ void Level::drawObjects () {
 											  balls[i].getPosX(), balls[i].getPosY(), balls[i].getPosZ());
 		if( res<BALL_MIN_RES )	res=BALL_MIN_RES; 
 		else if( res>BALL_MAX_RES) res=BALL_MAX_RES;
-		balls[i].setResolution(res);
+		balls[i].setResolution( (int)res );
 		balls[i].draw();
 	}
 	
@@ -153,25 +159,15 @@ void Level::drawObjects () {
 	glDisable (GL_LIGHT2);
 
 
-//	makeGuideLine( balls, stick.rot[1] );
-	
-	/*//DEBUG
-	for( int i=0; i<balls.size(); i++ )
-		if(balls[i].trouble)
-		{
-			glCircle3f(balls[i].troublePos[0],balls[i].troublePos[1],balls[i].troublePos[2], 1);
-			glCircle3f(balls[i].troublePos[0],balls[i].troublePos[1],balls[i].troublePos[2], 2);
-			glCircle3f(balls[i].troublePos[0],balls[i].troublePos[1],balls[i].troublePos[2], 3);
-			balls[i].trouble = 0;
-			glutPostRedisplay();
-		}*/
+	if( !stick.isHidden )
+		makeGuideLine( &balls, stick.rot[1] );
 }
 
 void Level::drawObjects_partial ()
 {
 	stick.draw();
 	if( !stick.isHidden )
-		makeGuideLine( balls, stick.rot[1] );
+		makeGuideLine( &balls, stick.rot[1] );
 	
 	(*objects)["tableMiddle"]->draw();
 	(*objects)["tableBottom"]->draw();
@@ -372,7 +368,7 @@ int Level::testBallsCollision(int ballSet)
 					balls[i].backTrack(balls[i].moveVector);
 							
 				balls[i].moveVector[0] = -balls[i].moveVector[0];   //reflection
-				balls[i].moveVector[0] *= BALL_DECELERATION_R; //absortion of energy by the wall will be a percentage of horizontal movement
+				balls[i].moveVector[0] *= BALL_DECELERATION_R;      //absortion of energy by the wall will be a percentage of horizontal movement
 			}
 			else
 				/* Verticall wall collision */
@@ -382,7 +378,7 @@ int Level::testBallsCollision(int ballSet)
 						balls[i].backTrack(balls[i].moveVector);					
 				  
 					balls[i].moveVector[2] = -balls[i].moveVector[2];   //reflection
-					balls[i].moveVector[2] *= BALL_DECELERATION_R; //absortion of energy by the wall will be a percentage of vertical movement 
+					balls[i].moveVector[2] *= BALL_DECELERATION_R;      //absortion of energy by the wall will be a percentage of vertical movement 
 				}
 				else
 					/* Corner wall collision */
@@ -455,20 +451,12 @@ int Level::testBallsCollision(int ballSet)
 	return otherPlayerFirstBall;
 }
 
-void Level::EndTheGame()
+void Level::endGame()
 {
-	balls[0].setPos(-20, TABLE_PLANE_Y+balls[0].getRadius(), 0);
-	
-	for( int line=1, i=1; i<nballs; )
-	{
-		for( int j=0; j<line && i<nballs; j++, i++ )
-		{
-			balls[i].setPos((BALL_RADIUS*2.1)*line +20, TABLE_PLANE_Y+balls[i].getRadius(), (BALL_RADIUS*2.1)*j - (line-1) );
-		}
-		line++;
-	}
+    for(int i=0; i<balls.size(); i++)
+        balls[i].reset();
+        
+	initBalls( TRIANGULAR );
 	
 	stick.setCenter(&balls[0]);
-	stick.calculatePos();	// This is needed to put the Stick on the right place
-							// since only now the ball is put its place.
 }

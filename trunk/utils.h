@@ -29,8 +29,7 @@ double getDistance( Object &object1, Object &object2 );
  * Draws a stipped line which represents the trajectory of the ball if
  * the player attacks with the present configuration.
  */
-void drawGuideLine( double posx, double posy, double posz, double stickAngle);
-void makeGuideLine( vector<ObjectBall> balls, double stickAngle);
+void makeGuideLine( vector<ObjectBall> *balls, double stickAngle);
 
 /* getRandBetween()
  * Returns a random number in the closed interval.

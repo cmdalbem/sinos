@@ -24,9 +24,6 @@ public:
 	double moveVector[3]; //direction of movement
 	bool hasFallen;
 	
-	// DEBUG
-	int trouble;
-	double troublePos[3];
 	
 	//---------------------------- CONSTRUCTORS
 	ObjectBall();
@@ -43,11 +40,13 @@ public:
 	GLdouble			getRadius() const;
 	float				getPerimeter() const;
 
+    void                setRandColor();
 	void				setProps( GLdouble newRadius, int newRes );
 	void				setResolution( int newRes );
 	void				setRadius(GLdouble newRadius);
 	void				setDirection( double angle );
 	void 				resetSpeed();
+	void                reset();
 	
 	// BEHAVIOUR
 	double				getDirection() const;

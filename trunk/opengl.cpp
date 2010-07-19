@@ -26,25 +26,25 @@
 
 // Objects
 map<string,Object*> objects;
-vector<LightInfo*> theLights;
+vector<LightInfo*>  theLights;
 
 // Texture files
-Texture tigerTex, woodTex, tableTex, rockTex, starsTex, ballTex[BALL_TEXTURES_NUM], stickTex;
+static Texture tigerTex, woodTex, tableTex, rockTex, starsTex, ballTex[N_BALL_TEX], stickTex;
 
 // Mother class
 Game game;
 
 // mouse-keyboard
-static int	xold, yold;		
-static int	left_click = GLUT_UP;
-static int	right_click = GLUT_UP;
-static int	middle_click = GLUT_UP;
-static bool heldCtrl = false;
-static bool heldShift = false;
-static int timeBase = 0;
-static int timeAct; 
-static bool bigview = false;
-static bool hardMode = false;
+static int      xold, yold;		
+static int	    left_click = GLUT_UP;
+static int	    right_click = GLUT_UP;
+static int	    middle_click = GLUT_UP;
+static bool     heldCtrl = false;
+static bool     heldShift = false;
+static int      timeBase = 0;
+static int      timeAct; 
+static bool     bigview = false;
+static bool     hardMode = false;
 						  
 
 
@@ -64,7 +64,7 @@ void initObjects ()
 						glmVertexNormals(tableFrameBound.getModelPointer(), -90.0);
 	static ObjectModel scenario("obj/crypt.obj");
 	static ObjectModel globe("obj/globe.obj");
-	static ObjectModel light("obj/light1.obj");
+	//static ObjectModel light("obj/light1.obj");
 	/*static ObjectModel tableStruct2("obj/pooltable_struct.obj");
 	static ObjectModel tableTop2("obj/pooltable_table.obj");
 	static ObjectModel tableStruct3("obj/pooltable_struct.obj");
@@ -147,13 +147,13 @@ void initObjects ()
 		objects["tableTop4"] = &tableTop4;*/
 	
 	// ceiling lamp
-	light.setPos(0,120,0);
+	/*light.setPos(0,120,0);
 	light.setSize(50,50,50);
 	light.material.setDiffuse(0.5,0.5,0.5);
 	light.material.setSpecular(1,1,1);
 	light.material.setShininess(120);
 	//light.material.setEmission(RGB(252) *0.4, RGB(234) *0.4, RGB(186) *0.4);
-		//objects["lamp"] = &light;
+		objects["lamp"] = &light;*/
 
 	
 	// infinite scenario globe
@@ -371,9 +371,7 @@ void init ()
     glEnable(GL_LIGHTING);
     glShadeModel (GL_SMOOTH);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
-	//for(int i=0; i<level.balls.size(); i++)
-		//level.balls[i].setQuad(); //these calls depends on the previous OPENGL initializations
+
 	
 	initLights();
 	glEnable (GL_LIGHT0); 	// sun
@@ -399,7 +397,7 @@ void init ()
 	    loadTexture(&rockTex, "textures/rock.tga");
 	    loadTexture(&starsTex, "textures/stars3.tga");
 	    loadTexture(&stickTex, "textures/stick.tga");
-	    for(int i=0; i<BALL_TEXTURES_NUM; i++) {
+	    for(int i=0; i<N_BALL_TEX; i++) {
 			char path[50];
 			sprintf(path,"textures/Ball%i.tga",i);
 			loadTexture(&ballTex[i], path);
@@ -413,20 +411,19 @@ void init ()
 void keyboardFunc (unsigned char key, int x, int y) {
 			
 	if ( key==K_SPACEBAR) {
-		//game.attack( game.level->stick.getAttackStrenght() );
 		bigview = !bigview;
 	}
 	
-	if(key=='y' && game.hasEnded)
-	{
-		game.hasEnded = false;
-		game.restartGame();
-	}
-	
-	if(key=='n' && game.hasEnded)
-	{
-		exit(0);
-	}
+	if( game.hasEnded ) {
+    	if( key=='y' ) {
+    		game.hasEnded = false;
+    		game.restartGame();
+    	}
+    	
+    	if( key=='n' ) {
+    		exit(0);
+    	}
+    }
 
 	if( key == '1' ) {
 		game.updateOsd();
@@ -581,7 +578,7 @@ void endTheGame(int value)
 	game.resetPoints();
 	game.hasControl = true;
 	
-	game.level->EndTheGame();
+	game.level->endGame();
 }
 
 
@@ -596,13 +593,13 @@ int main (int argc, char **argv) {
 	}
 	else {
 		glutInitWindowSize (1280, 720);
-		glutInitWindowPosition (400, 0);              					 //set the position of the window
+		glutInitWindowPosition (0, 100);              					 //set the position of the window
 		glutCreateWindow ("SiNoS := SiNoS is Not Sinuca");
 	}
 	
     init();
     
-    //glutDisplayFunc (display);
+    glutDisplayFunc (display);
     glutIdleFunc (display);
     
     glutKeyboardFunc(keyboardFunc);

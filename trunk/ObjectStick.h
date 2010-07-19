@@ -20,6 +20,7 @@ class ObjectStick : public ObjectModel
 		ObjectBall*	center;
 		float 		attackStrenght;
 		
+		void		calculatePos();
 	public:
 		bool		isHidden;
 	
@@ -51,7 +52,6 @@ class ObjectStick : public ObjectModel
 		 * After the movement, the new position of the Stick is calculated
 		 * and put in the position variables called pos ([0], [1] and [2]).
 		 */
-		void			calculatePos();
 		void 			attack();
 		void  			drawBegin() const;
 		virtual void	draw() const;

@@ -22,13 +22,23 @@ using namespace std;
 #include "LightInfo.h"
 #include "constants.h"
 #include "utils.h"
+#include "lib/Texture.h"
 
+enum
+{
+    TRIANGULAR  = 0,
+    LINEAR
+};
 
 class Level
 {
 	private:
 		map<string,Object*> *objects;
 		vector<LightInfo*> *theLights;
+		
+		Texture stickTex, ballTex[N_BALL_TEX];
+		
+		void  initBalls( int mode );
 		
 	public:
 		ObjectStick stick;
@@ -60,5 +70,5 @@ class Level
 		vector<int>		updateState(int whichPlayer);
 		int 			testBallsCollision(int whichPlayer);
 		
-		void 			EndTheGame();
+		void 			endGame();
 };

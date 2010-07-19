@@ -169,7 +169,7 @@ void Game::restartGame()
 	wrongBallFlag = true;
 	wrongBallFallenFlag = false;
 	
-	level->EndTheGame();
+	level->endGame();
 }
 
 void Game::knockTheEnemysBall()

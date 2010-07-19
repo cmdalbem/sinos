@@ -25,14 +25,6 @@ struct point
 #define RAD(x) ((x)*(M_PI))/(180.)
 #define DEGREES(x) ((x)*(180.))/(M_PI)
 
-// Default values for Materials Attributes
-const float default_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-const float default_diffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-const float default_specular[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-const float default_emission[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-const float default_shininess = 0;
-
-
 // Global constants
 #define TABLE_PLANE_Y 28.5
 #define NHOLES 6
@@ -42,7 +34,7 @@ const float default_shininess = 0;
 #define BALL_MAX_RES 80
 #define BALL_MIN_RES 5
 #define NPLAYERS 2
-#define BALL_TEXTURES_NUM 16
+#define N_BALL_TEX 16
 
 // Global variables
 #define STATEUPDATES_PER_SEC (4000.) /* the semantics of this constant is confuse without glutTimer
@@ -54,14 +46,14 @@ const float default_shininess = 0;
 
 #define TIME_STEP (1000.)/STATEUPDATES_PER_SEC
 #define BALL_DECELERATION_R (0.7)   // table wall friction
-#define BALL_DECELERATION_N (0.5)    // table plane friction
-#define BALL_ACCELERATION_G (1.005)  // gravitational acceleration
+#define BALL_DECELERATION_N (0.5)   // table plane friction
+#define BALL_ACCELERATION_G (1.005) // gravitational acceleration
 #define BALL_MIN_SPEED (0.5)
 #define BALL_MAX_SPEED BALL_RADIUS*STATEUPDATES_PER_SEC
 #define STICK_MAX_STR 30
 #define MAX_BACKTRACK 100
 #define BACKTRACK_STEP (0.001)
-#define LOD_FACTOR (1500.) // increase and will increase the medium quality of balls
+#define LOD_FACTOR (1500.) // increase value -> increase medium quality of balls
 #define FULLSCREEN_ON 0
 #define SHOW_TABLE_FRAME 1 //comment to hide
 
@@ -79,14 +71,6 @@ const float default_shininess = 0;
 #endif
 
 // Holes
-// holes entrances limits {x,y}
-/*const float holeLimits[6][2][2] = { { { -46.219299,  -17.317400}, {-42.490299  , -21.024101} },
-								  { {2.509700 , -21.044802}, {-2.990300, -21.044802} },
-								  { { 42.009701 , -21.024101}, { 45.716301 ,  -17.317400} },
-								  { {-46.227501  ,  22.011297}, {-42.490299  ,  25.889198} },
-								  { {-2.990300,  25.909998}, { 2.509700, 25.909998} },
-								  { { 42.009701  ,  25.889198}, {45.743099 ,   22.011297} }
-								 };*/
 //cordinates between holes
 const float wallLimits[6][2][2] = {   { {-43.25+BALL_RADIUS  , BOTBOUND}, {-3.8+BALL_RADIUS, BOTBOUND} }, 	 //1-2
 									  { {3.6-BALL_RADIUS , BOTBOUND}, { 42.9-BALL_RADIUS , BOTBOUND} },	 //2-3
@@ -96,8 +80,7 @@ const float wallLimits[6][2][2] = {   { {-43.25+BALL_RADIUS  , BOTBOUND}, {-3.8+
 									  
 									  { {LEFTBOUND , 23.0-BALL_RADIUS}, { LEFTBOUND, -18.0+BALL_RADIUS} }, //1-4
 									  { {RIGHTBOUND, 23.0-BALL_RADIUS}, { RIGHTBOUND,-18.0+BALL_RADIUS} },  //3-6
-								  };
-								  
+								  };  
 								  
 // holes centers {x,z,radius}
 const float HC[6][3] ={{-48. ,-22.9, 2.7},

@@ -15,7 +15,6 @@ using namespace std;
  * 
  * ((x-x0)² + (y-y0)² + (z-z0)²)^1/2,
  */
-
 double getDistance( double x1, double y1, double z1, double x2, double y2, double z2 )
 {
 	return sqrt(  pow(x1-x2, 2)
@@ -30,41 +29,37 @@ double getDistance( Object &object1, Object &object2 )
 				+ pow(object1.getPosZ() - object2.getPosZ(), 2));
 }
 
-void drawGuideLine( double xo, double yo, double zo, double stickAngle)
+void makeGuideLine( vector<ObjectBall> *balls, double stickAngle)
 {
-	//glColor4f(1.,1.,1.,1); 
-	glLineStipple(2, 0xAAAA);
-	glEnable(GL_LINE_STIPPLE);
-	glBegin(GL_LINES);
-		glVertex3f( xo, yo, zo);
-		glVertex3f( xo+100*cos(RAD(stickAngle+90)), yo, zo+100*sin(RAD(-(stickAngle+90))) );
-	glEnd();
-	glDisable(GL_LINE_STIPPLE);	
-}
-
-void makeGuideLine( vector<ObjectBall> balls, double stickAngle)
-{
-	double x1 = balls[0].pos[0], 
+    #define LINESIZE 400
+    #define STEPSIZE 0.1
+    
+    bool foundRebound = false;
+    //line origin
+	double x1 = (*balls)[0].pos[0], 
 		   y1 = TABLE_PLANE_Y, 
-		   z1 = balls[0].pos[2];
-	double vecx = 0.1 *  cos(RAD(stickAngle+90)),
-		   vecz = 0.1 * -sin(RAD(stickAngle+90));
-	double x2 = x1 + 20*vecx,
+		   z1 = (*balls)[0].pos[2];
+	//line growing direction
+    double vecx = STEPSIZE *  cos(RAD(stickAngle+90)),
+		   vecz = STEPSIZE * -sin(RAD(stickAngle+90));
+	//rebound point origin
+    double x2 = x1 + 20*vecx,
 		   y2 = y1,
 		   z2 = z1 + 20*vecz;		   	
-	double x3, y3=y2, z3;
-	bool rebound = false;
+	//rebound ending point
+    double x3, y3=y2, z3;
 	
 	// Find rebound point, if any
-	for(int i=0; i<400 && !rebound; i++) {
+	for(int i=0; i<LINESIZE && !foundRebound; i++) {
 		x2 += vecx;
 		z2 += vecz;
-		for( int b=0; b<balls.size(); b++ ) {
-			if( getDistance(balls[b].pos[0],balls[b].pos[1],balls[b].pos[2], x2,y2,z2) < 2*BALL_RADIUS )
+		for( int b=0; b<balls->size(); b++ ) {
+			if( getDistance( (*balls)[b].pos[0],(*balls)[b].pos[1],(*balls)[b].pos[2], x2,y2,z2 ) < 2*BALL_RADIUS )
 			{
-				x3 = x2 + 10 * ( balls[b].pos[0]-x2 );
-				z3 = z2 + 10 * ( balls[b].pos[2]-z2 );
-				rebound = true;
+                cout<<LINESIZE-i<<endl;
+				x3 = x2 + (LINESIZE-i)*STEPSIZE * ( (*balls)[b].pos[0]-x2 );
+				z3 = z2 + (LINESIZE-i)*STEPSIZE * ( (*balls)[b].pos[2]-z2 );
+				foundRebound = true;
 			}
 		}
 	}	
@@ -79,7 +74,7 @@ void makeGuideLine( vector<ObjectBall> balls, double stickAngle)
 			glVertex3f( x1, y1, z1);
 			glVertex3f( x2, y2, z2);
 		glEnd();
-		if( rebound ) {
+		if( foundRebound ) {
 			glBegin(GL_LINES);
 				glVertex3f( x2, y2, z2);
 				glVertex3f( x3, y3, z3);
