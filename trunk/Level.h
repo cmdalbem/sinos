@@ -49,7 +49,7 @@ class Level
 	//---------------------------- CONSTRUCTORS
 		Level(map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 			  Camera *_camera, Camera *_camera2,
-			  Texture ballTex[], Texture *stickTex);
+			  Texture ballTex[], Texture stickTex);
 		
 	//---------------------------- DESTRUCTORS
 		~Level();

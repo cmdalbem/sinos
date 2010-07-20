@@ -36,11 +36,12 @@ void makeGuideLine( vector<ObjectBall> *balls, double stickAngle);
  */
 double getRandBetween(int a, int b);
 
+
 double normalizeVector( double v[3] );
 
+double getAngleBetween( const double v[3], const double u[3] );
 double getVectorNorma( const double v[3] );
 double getVectorNorma( const double x, const double z );
-
 double getVectorAngle( const double v[3] );
 double getVectorAngle( double x, double z );
 

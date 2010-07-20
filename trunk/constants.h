@@ -47,7 +47,7 @@ struct point
 #define TIME_STEP (1000.)/STATEUPDATES_PER_SEC
 #define BALL_DECELERATION_R (0.7)   // table wall friction
 #define BALL_DECELERATION_N (0.5)   // table plane friction
-#define BALL_ACCELERATION_G (1.005) // gravitational acceleration
+#define BALL_G_VEC (0.1) // gravitational acceleration
 #define BALL_MIN_SPEED (0.5)
 #define BALL_MAX_SPEED BALL_RADIUS*STATEUPDATES_PER_SEC
 #define STICK_MAX_STR 30

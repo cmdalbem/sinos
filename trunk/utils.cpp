@@ -31,23 +31,26 @@ double getDistance( Object &object1, Object &object2 )
 
 void makeGuideLine( vector<ObjectBall> *balls, double stickAngle)
 {
-    #define LINESIZE 400
+    #define LINESIZE 800
     #define STEPSIZE 0.1
     
     bool foundRebound = false;
     //line origin
 	double x1 = (*balls)[0].pos[0], 
-		   y1 = TABLE_PLANE_Y, 
+		   y1 = (*balls)[0].pos[1], 
 		   z1 = (*balls)[0].pos[2];
 	//line growing direction
     double vecx = STEPSIZE *  cos(RAD(stickAngle+90)),
 		   vecz = STEPSIZE * -sin(RAD(stickAngle+90));
 	//rebound point origin
-    double x2 = x1 + 20*vecx,
+    double x2 = x1 + 20 * vecx,
 		   y2 = y1,
-		   z2 = z1 + 20*vecz;		   	
-	//rebound ending point
+		   z2 = z1 + 20 * vecz;
+	//rebound ending point 1
     double x3, y3=y2, z3;
+	//rebound ending point 2
+    double x4, y4=y1, z4;    
+	
 	
 	// Find rebound point, if any
 	for(int i=0; i<LINESIZE && !foundRebound; i++) {
@@ -56,13 +59,25 @@ void makeGuideLine( vector<ObjectBall> *balls, double stickAngle)
 		for( int b=0; b<balls->size(); b++ ) {
 			if( getDistance( (*balls)[b].pos[0],(*balls)[b].pos[1],(*balls)[b].pos[2], x2,y2,z2 ) < 2*BALL_RADIUS )
 			{
-                cout<<LINESIZE-i<<endl;
-				x3 = x2 + (LINESIZE-i)*STEPSIZE * ( (*balls)[b].pos[0]-x2 );
+                foundRebound = true;
+                
+                x3 = x2 + (LINESIZE-i)*STEPSIZE * ( (*balls)[b].pos[0]-x2 );
 				z3 = z2 + (LINESIZE-i)*STEPSIZE * ( (*balls)[b].pos[2]-z2 );
-				foundRebound = true;
+
+        		/*double v1[3] = { x3-x2, 0, z3-z2 },
+                       v2[3] = { x2-x1, 0, z2-z1 };
+                if( getVectorAngle(v1) - getVectorAngle(v2) < 0 ) {
+           			x4 = x2 + (LINESIZE-i)*STEPSIZE *  1 * ( (*balls)[b].pos[2]-z2 );
+    				z4 = z2 + (LINESIZE-i)*STEPSIZE * -1 * ( (*balls)[b].pos[0]-x2 );
+                }
+                else {
+           			x4 = x2 + (LINESIZE-i)*STEPSIZE * -1 * ( (*balls)[b].pos[2]-z2 );
+    				z4 = z2 + (LINESIZE-i)*STEPSIZE *  1 * ( (*balls)[b].pos[0]-x2 );
+                }*/                 
 			}
 		}
 	}	
+	
 	
 	// Draw	
 	glDisable(GL_LIGHTING);
@@ -75,10 +90,16 @@ void makeGuideLine( vector<ObjectBall> *balls, double stickAngle)
 			glVertex3f( x2, y2, z2);
 		glEnd();
 		if( foundRebound ) {
+            glColor3f(1.,0.2,0.2); 
 			glBegin(GL_LINES);
 				glVertex3f( x2, y2, z2);
 				glVertex3f( x3, y3, z3);
 			glEnd();	
+			/*glColor3f(1.,1.,1.); 
+			glBegin(GL_LINES);
+				glVertex3f( x2, y2, z2);
+				glVertex3f( x4, y4, z4);
+			glEnd();*/
 		}
 	glDisable(GL_LINE_STIPPLE);
 	glDisable(GL_LINE_SMOOTH);
@@ -104,6 +125,11 @@ double normalizeVector( double v[3] )
 	v[0] = v[0] / norma;
 	v[1] = v[1] / norma;
 	v[2] = v[2] / norma;
+}
+
+double getAngleBetween( const double v[3], const double u[3] )
+{
+    return DEGREES(acos( dotProduct(v,u) / (getVectorNorma(v)*getVectorNorma(u)) ));
 }
 
 double getVectorNorma( const double v[3] )

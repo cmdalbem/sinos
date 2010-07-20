@@ -1,5 +1,6 @@
 #include "Level.h"
 
+#define DRAW_GUIDELINES 0
 
 // Balls
 
@@ -7,7 +8,7 @@
 //------------------------------------------------------------ CONSTRUCTORS
 Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 				Camera *_camera, Camera *_camera2,
-				Texture _ballTex[], Texture *_stickTex)
+				Texture _ballTex[], Texture _stickTex)
 {	
 	objects   = _objects;
 	theLights = _theLights; 
@@ -15,11 +16,11 @@ Level::Level(	map<string,Object*> *_objects, vector<LightInfo*> *_theLights,
 	camera  = _camera;
 	camera2 = _camera2;
 	
-    initBalls( TRIANGULAR );
-    
     for(int i=0; i<N_BALL_TEX; i++)
         ballTex[i] = _ballTex[i];
-    stickTex = *_stickTex;
+    stickTex = _stickTex;
+
+    initBalls( TRIANGULAR );
 
 	camera->setCenter( &balls[0] );
 	camera->setRotX2( stick.rot[1] );
@@ -86,7 +87,7 @@ void Level::initBalls( int mode )
         			   g = getRandBetween(0,60),
         			   b = getRandBetween(0,60);
         		balls[i].setRadius(BALL_RADIUS);
-        		balls[i].setTexture(ballTex);
+        		balls[i].setTexture(&ballTex[i]);
         		balls[i].setMaterial(ballMaterial);
         		balls[i].material.setDiffuse(r/100.,g/100.,b/100.);
         		balls[i].setPos((BALL_RADIUS*2.1)*i +20, TABLE_PLANE_Y+balls[i].getRadius(), 30 );
@@ -105,15 +106,7 @@ void Level::drawGuides()
 		// Holes delimiters
 		for(int i=0; i<NHOLES; i++)
 			glCircle3f(HC[i][0],TABLE_PLANE_Y+1,HC[i][1],HC[i][2]);
-		
-		// Table area delimiter
-		glBegin(GL_LINE_LOOP);
-			glVertex3f(RIGHTBOUND, TABLE_PLANE_Y, TOPBOUND);
-			glVertex3f(RIGHTBOUND, TABLE_PLANE_Y, BOTBOUND);
-			glVertex3f(LEFTBOUND, TABLE_PLANE_Y, BOTBOUND);
-			glVertex3f(LEFTBOUND, TABLE_PLANE_Y, TOPBOUND);
-		glEnd();
-		
+				
 		// Table area
 		((ObjectModel*)(*objects)["tableFrameBound"])->drawNormals();
 		
@@ -133,7 +126,7 @@ void Level::drawGuides()
 }
 
 void Level::drawObjects () {
-	//drawGuides();
+	if(DRAW_GUIDELINES) drawGuides();
 		
 	stick.draw();
 	
@@ -159,8 +152,8 @@ void Level::drawObjects () {
 	glDisable (GL_LIGHT2);
 
 
-	if( !stick.isHidden )
-		makeGuideLine( &balls, stick.rot[1] );
+	/*if( !stick.isHidden )
+		makeGuideLine( &balls, stick.rot[1] );*/
 }
 
 void Level::drawObjects_partial ()
@@ -359,7 +352,7 @@ int Level::testBallsCollision(int ballSet)
 		 * Collisions with walls
 		 * 
 		 */
-		if( !balls[i].isInField() )
+		if( !balls[i].hasFallen && !balls[i].isInField() )
 		{
 			/* Horizontal wall collision */
 			if( balls[i].collidedHWall() ) {

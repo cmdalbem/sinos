@@ -82,7 +82,7 @@ void ObjectBall::setProps( GLdouble newRadius, int newRes )
 
 void ObjectBall::setResolution( int newRes )
 {
-	res = newRes;;
+	res = newRes;
 }
 
 void ObjectBall::setRadius(GLdouble newRadius)
@@ -214,29 +214,22 @@ pair<bool,bool> ObjectBall::updateState()
 		setPos( getFutureX(), getFutureY(), getFutureZ() );
 		
 		// test if ball is falling
-		if( !hasFallen ) { 
-			if( hasSnooked() )
-			{
-				moveVector[1]=-30;
-				hasFallen = true;
-				hasSnookedBool = true;
-			}
-			else {
-				
-				
-			}
-		}
-		else
-			if( getPosY() > 1 ) { //until is over the ground
-				moveVector[1] *= BALL_ACCELERATION_G;
-				moveVector[0] *= BALL_DECELERATION_N;
-				moveVector[2] *= BALL_DECELERATION_N;
+		if( hasFallen ) { 
+			if( getPosY() > 1 ) { //while is over the ground
+				moveVector[1] -= BALL_G_VEC;
 			}
 			else {
 				//hasFallen = false;
 				//setPos(getRandBetween(-10,10),TABLE_PLANE_Y+getRadius(),getRandBetween(-10,10));
 				resetSpeed();
 			}
+		}
+		else
+			if( hasSnooked() ) {
+				moveVector[1]=-30;
+				hasFallen = true;
+				hasSnookedBool = true;
+			}			
 	}
 	
 	return pair<bool,bool>::pair(hasMoved,hasSnookedBool);
@@ -259,14 +252,12 @@ void ObjectBall::changeSpeed( double factor )
 	factor = pow(factor,1./STATEUPDATES_PER_SEC); 
 	
 	moveVector[0] *= factor;
-	moveVector[1] *= factor;
 	moveVector[2] *= factor;
 	
 	if( getSpeed() > BALL_MAX_SPEED) {
 		factor = (BALL_MAX_SPEED-1)/getSpeed();
 		
 		moveVector[0] *= factor;
-		moveVector[1] *= factor;
 		moveVector[2] *= factor;
 	}
 		
@@ -341,7 +332,12 @@ void ObjectBall::drawVectors() const
 					   pos[1],
 					   pos[2]+ moveVector[2] );
 		glEnd();
-		
+		glBegin(GL_LINES);
+			glVertex3f(pos[0],pos[1],pos[2]);
+			glVertex3f(pos[0],
+					   pos[1]+ moveVector[1],
+					   pos[2]);
+		glEnd();		
 
 		glBegin(GL_LINES);
 			glVertex3f(pos[0],pos[1],pos[2]);

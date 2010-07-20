@@ -43,7 +43,7 @@ static bool     heldCtrl = false;
 static bool     heldShift = false;
 static int      timeBase = 0;
 static int      timeAct; 
-static bool     bigview = false;
+static bool     biggerViewport = false;
 static bool     hardMode = false;
 						  
 
@@ -76,12 +76,12 @@ void initObjects ()
 	scenario.setPos(0,-30,0);
 	scenario.setSize(250,350,250);
 	scenario.setTexture(&rockTex);
-	scenario.material.setDiffuse(0.4,0.4,0.4);
+	scenario.material.setDiffuse( RGB(265)*0.4, RGB(234)*0.4, RGB(186)*0.4 );
 		objects["crypt"] = &scenario;
 	
 	// tables material setup
 	Material tableStructMat;
-	tableStructMat.setDiffuse(0.5 *1.5, 0.18 *1.5, 0.14 *1.5);
+	tableStructMat.setDiffuse(0.6 *1.5, 0.18 *1.5, 0.14 *1.5);
 	tableStructMat.setSpecular(0.3,0.3,0.3);
 	tableStructMat.setShininess(120);
 	Material tableTopMat;
@@ -189,24 +189,33 @@ void perspectiveViewport( int width, int height ) {
 }	
 
 void orthoViewport( int width, int height ) {
-	if( bigview ) {
+	/*if( biggerViewport ) {
 		glViewport( 0.60*width, 0.48*height, width/2, height/2 );
 		glScissor(  0.60*width, 0.48*height, width/2, height/2 );
 	}
 	else {
 		glViewport( 0.75*width, 0.65*height, width/3, height/3 );
 		glScissor(  0.75*width, 0.65*height, width/3, height/3 );
+	}*/
+	if( biggerViewport ) {
+		glViewport( 0.70*width, 0.70*height, width/3, height/3 );
+		glScissor(  0.70*width, 0.70*height, width/3, height/3 );
+	}
+	else {
+		glViewport( 0.75*width, 0.75*height, width/4, height/4 );
+		glScissor(  0.75*width, 0.75*height, width/4, height/4 );
 	}
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
     
-	glOrtho(-75,75, -55, 55, 5, 500);
+    //glOrtho(-75,75, -55, 55, 5, 500);
+    glOrtho(-65, 65, -35, 35, 5, 500);
     					
     glMatrixMode (GL_MODELVIEW);
     glLoadIdentity();
     
-    glRotatef(90, 0,0,1);
+    //glRotatef(90, 0,0,1);
     
 	// IMPORTANT: don't change the order of these calls
 		game.level->camera2->apply();
@@ -250,7 +259,7 @@ void initLights () {
 	
 	// position light (sun)
 	GLfloat ambientLight[] = { 0.0, 0.0, 0.0, 1.0f };
-	GLfloat diffuseLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	GLfloat diffuseLight[] = { 0.6f, 0.5f, 0.5f, 1.0f };
 	GLfloat specularLight[] = { 1.0f, 0.6f, 0.6f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
@@ -290,8 +299,8 @@ void initLights () {
 	glLightf(GL_LIGHT5, GL_SPOT_EXPONENT, 15.0);	
 	
 	// directional light
-	GLfloat lampColor2[] = {RGB(252), RGB(234), RGB(186), 1.0f};
-	glLightfv(GL_LIGHT2, GL_DIFFUSE, lampColor2);
+	GLfloat dirColor[] = {0.5, 0.5, 0.5, 1.0f};
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, dirColor);
 	
 	
 	/*
@@ -381,16 +390,6 @@ void init ()
 	glEnable (GL_LIGHT4); // extra spotlight2
 	glEnable (GL_LIGHT5); // extra spotlight3
     
-    cout << "Initializing objects...";
-	    static Camera camera(1),  //main camera
-					  camera2(2); //viewport camera
-	    
-	    static Level level(&objects, &theLights, &camera, &camera2, ballTex, &stickTex);
-		game.setLevel(&level);
-		
-		initObjects();
-	cout << "Done.\n";
-    
     cout << "Loading textures..."; 
 	    loadTexture(&woodTex, "textures/wood.tga");
 	    loadTexture(&tableTex, "textures/table.tga", true);
@@ -404,6 +403,16 @@ void init ()
 		}
     cout << "Done.\n"; 
     
+    cout << "Initializing objects...";
+	    static Camera camera(1),  //main camera
+					  camera2(2); //viewport camera
+	    
+	    static Level level(&objects, &theLights, &camera, &camera2, ballTex, stickTex);
+		game.setLevel(&level);
+		
+		initObjects();
+	cout << "Done.\n";    
+    
     game.updateOsd();
 }
 
@@ -411,7 +420,7 @@ void init ()
 void keyboardFunc (unsigned char key, int x, int y) {
 			
 	if ( key==K_SPACEBAR) {
-		bigview = !bigview;
+		biggerViewport = !biggerViewport;
 	}
 	
 	if( game.hasEnded ) {
@@ -458,7 +467,7 @@ void specialFunc(int key, int x, int y)
 		hardMode = !hardMode;
 		
 	int var=2;
-	
+	/*
 	if( key == GLUT_KEY_LEFT ) {
 		//game.level->balls[0].setPosX( game.level->balls[0].getPosX()-1 );
 		game.level->balls[0].moveVector[0] += -var;
@@ -477,7 +486,7 @@ void specialFunc(int key, int x, int y)
 	if( key == GLUT_KEY_UP ) {
 		//game.level->balls[0].setPosZ( game.level->balls[0].getPosZ()-1 );
 		game.level->balls[0].moveVector[2] += -var;
-	}
+	}*/
 }
 
 //--------------------------- MOUSE ---------------------------//
@@ -509,14 +518,15 @@ void mouseMotionFunc(int x, int y) {
 		sf = 20.;
 	else
 		sf = 5.;
-		
-	if ( left_click == GLUT_DOWN ) {
+	
+	if( left_click == GLUT_DOWN && right_click == GLUT_DOWN )
+    	game.level->camera->action2(0,(y-yold)/sf);
+    else if ( left_click == GLUT_DOWN ) {
 		game.level->stick.rotate( (x-xold)/sf );	
 		if( game.level->camera->getMode() == 1 )
 			game.level->camera->action1( (x-xold)/sf,0);				
     }
-	
-	if ( right_click == GLUT_DOWN ) {
+    else if ( right_click == GLUT_DOWN ) {
 		if( game.hasControl ) {
 			if( hardMode ) {
 				game.level->camera->action1( (x-xold)/(sf*2),0);

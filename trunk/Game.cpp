@@ -180,7 +180,9 @@ void Game::knockTheEnemysBall()
 			if (level->balls[i].hasFallen == false)
 			{
 				level->balls[i].hasFallen = true;
-				level->balls[i].moveVector[1] = -1;
+				level->balls[i].moveVector[1] = 200;
+				level->balls[i].moveVector[0] = getRandBetween(-200,200);
+				level->balls[i].moveVector[2] = getRandBetween(-200,200);
 				points[(currentPlayer) % NPLAYERS]++;
 				break;			// get out of the "for".
 			}
@@ -192,7 +194,9 @@ void Game::knockTheEnemysBall()
 			if (level->balls[i].hasFallen == false)
 			{
 				level->balls[i].hasFallen = true;
-				level->balls[i].moveVector[1] = -1;
+				level->balls[i].moveVector[1] = 200;
+				level->balls[i].moveVector[0] = getRandBetween(-200,200);
+				level->balls[i].moveVector[2] = getRandBetween(-200,200);
 				points[(currentPlayer) % NPLAYERS]++;
 				found = true;
 				break;
@@ -200,7 +204,9 @@ void Game::knockTheEnemysBall()
 		if (found == false)
 		{
 			level->balls[8].hasFallen = true;
-			level->balls[8].moveVector[1] = -1;
+			level->balls[8].moveVector[1] = 200;
+			level->balls[8].moveVector[0] = getRandBetween(-200,200);
+			level->balls[8].moveVector[2] = getRandBetween(-200,200);
 		}
 	}
 }
