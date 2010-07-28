@@ -1,7 +1,7 @@
  * sound effects and music (for both, suggestion: irrKlang lib)
 
- * more realistic way to calculate collision vectors (theres a prototype based on http://en.wikipedia.org/wiki/File:Elastischer_sto%C3%9F_2D.gif)
+ * integrate with physics simulation library (libbox2d)
 
- * more game styles and more levels
+ * more game styles
 
- * test, test and test (suggestion: include more balls)
+ * more levels
