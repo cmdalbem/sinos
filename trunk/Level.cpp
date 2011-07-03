@@ -151,7 +151,7 @@ void Level::drawObjects () {
 		(*objects)["crypt"]->draw();
 	glDisable (GL_LIGHT2);
 
-
+	// draw guideline on Main Viewport
 	/*if( !stick.isHidden )
 		makeGuideLine( &balls, stick.rot[1] );*/
 }

@@ -54,7 +54,6 @@ struct point
 #define MAX_BACKTRACK 100
 #define BACKTRACK_STEP (0.001)
 #define LOD_FACTOR (1500.) // increase value -> increase medium quality of balls
-#define FULLSCREEN_ON 0
 #define SHOW_TABLE_FRAME 1 //comment to hide
 
 // Table boundaries

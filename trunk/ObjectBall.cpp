@@ -231,8 +231,8 @@ pair<bool,bool> ObjectBall::updateState()
 				hasSnookedBool = true;
 			}			
 	}
-	
-	return pair<bool,bool>::pair(hasMoved,hasSnookedBool);
+
+	return pair<bool,bool>(hasMoved,hasSnookedBool);
 }
 
 void ObjectBall::applyForce( float magnitude, float direction, bool reflectAngle )

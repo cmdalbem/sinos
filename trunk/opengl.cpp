@@ -45,6 +45,10 @@ static int      timeBase = 0;
 static int      timeAct; 
 static bool     biggerViewport = false;
 static bool     hardMode = false;
+
+// Window
+int width, height;
+bool isFullscreen=false;
 						  
 
 
@@ -170,7 +174,7 @@ void perspectiveViewport( int width, int height ) {
     glViewport (0, 0, (GLsizei)width, (GLfloat)height);
     glScissor(0, 0, width, height);
     
-	gluPerspective (60, (GLfloat)width / (GLfloat)height, 0.1, 10000.0);
+	gluPerspective (60, (GLfloat)width / (GLfloat)height, 1, 10000.0);
 	//glOrtho(-65, 65, -35, 35, 5, 500);    					
 	
     glMatrixMode(GL_MODELVIEW);
@@ -223,30 +227,44 @@ void orthoViewport( int width, int height ) {
 		game.level->drawObjects_partial();
 }	
 
+void reshape(int w, int h) {
+	
+	width = w;
+	height = h;
+}
+
+#define ACCUM_FRAMES 1
+
 void display () {
+	
+	static int draws=0;
+	static int displayController=0; // POG to reduce display rate and priorize variables updating
 	
 	game.updateState();
 	
-	// POG to reduce display rate and priorize variables updating
-	static int displayController=0;
-	++displayController;
+	displayController += 1;
 	if( displayController==UPDATE_PRIORITY_FACTOR )
 	{
 		displayController=0;
-	
-		int width = glutGet(GLUT_WINDOW_WIDTH);
-		int height = glutGet(GLUT_WINDOW_HEIGHT);
 
-		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_SCISSOR_TEST);
+		glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-			orthoViewport(width,height);
-			perspectiveViewport(width,height);
-					
+				orthoViewport(width,height);
+				perspectiveViewport(width,height);
+
+				glAccum(GL_ACCUM, 1./ACCUM_FRAMES);
+
+		draws += 1;
+		if(draws%ACCUM_FRAMES == 0) {
+
+			//glAccum(GL_RETURN, 1.0);
+			glutSwapBuffers();
+			glClear(GL_ACCUM_BUFFER_BIT);
+			game.frameCounter++;
+		}
+
 		glDisable(GL_SCISSOR_TEST);
-			
-		glutSwapBuffers();
-		game.frameCounter++;
 	}
 }
 
@@ -369,7 +387,7 @@ void initLights () {
 	*/
 }
 
-void init ()
+void initGL()
 {
     glClearColor(0, 0, 0, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -389,7 +407,10 @@ void init ()
 	glEnable (GL_LIGHT3); // extra spotlight1
 	glEnable (GL_LIGHT4); // extra spotlight2
 	glEnable (GL_LIGHT5); // extra spotlight3
-    
+}
+
+void initWorld()
+{    
     cout << "Loading textures..."; 
 	    loadTexture(&woodTex, "textures/wood.tga");
 	    loadTexture(&tableTex, "textures/table.tga", true);
@@ -591,14 +612,37 @@ void endTheGame(int value)
 	game.level->endGame();
 }
 
+void parseOptions(int argc, char **argv)
+{
+	char ch;
+
+	while((ch = getopt(argc, argv, "fh")) != EOF) {
+		
+		switch(ch) {
+			case 'h':
+				// Be sure that this print is updated with all options from this 'switch'.
+				printf("Command line options:\n");
+				printf(" -f\t\t 1920x1080 Full Screen.\n");
+				break;
+			
+			case 'f':
+				isFullscreen = true;
+				break;
+		}
+	}
+
+}
 
 int main (int argc, char **argv) {
     cout << "Initializing...\n";
+    
+    parseOptions(argc, argv);
+    
     glutInit (&argc, argv);
     glutInitDisplayMode ( GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL ); //set the display to Double buffer, with depth and stencil buffers
     
-    if( FULLSCREEN_ON ) {
-		glutGameModeString("1920x1080:16@60");	//Full Screen Mode (adjust resolution for your full resolution values)
+    if( isFullscreen ) {
+		glutGameModeString("1920x1080:16@60");	//Full Screen Mode (adjust resolution for your full resolution value)
 		glutEnterGameMode();
 	}
 	else {
@@ -607,7 +651,8 @@ int main (int argc, char **argv) {
 		glutCreateWindow ("SiNoS := SiNoS is Not Sinuca");
 	}
 	
-    init();
+    initGL();
+    initWorld();
     
     glutDisplayFunc (display);
     glutIdleFunc (display);
@@ -617,6 +662,7 @@ int main (int argc, char **argv) {
     glutMouseFunc(mouseFunc);
 	glutMotionFunc(mouseMotionFunc);
 	glutTimerFunc(0, updateFPS, 0);    
+	glutReshapeFunc(reshape);
 	//glutTimerFunc(0, updateState, 0);
 	//glutTimerFunc(0, displayCaller, 0);
 	
